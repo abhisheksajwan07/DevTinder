@@ -12,9 +12,9 @@ const envSchema = z.object({
 
   REDIS_URL: z.string().min(1),
 
-  ACCESS_TOKEN_SECRET: z.string().min(32),
+  JWT_ACCESS_SECRET: z.string().min(32),
 
-  REFRESH_TOKEN_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
 
   CSRF_TOKEN_SECRET: z.string().min(32),
 });
