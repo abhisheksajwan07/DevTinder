@@ -22,6 +22,20 @@
       "when": 1781981940742,
       "tag": "0002_boring_butterfly",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782106811908,
+      "tag": "0003_yummy_quasar",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782486634830,
+      "tag": "0004_old_dust",
+      "breakpoints": true
     }
   ]
 }
