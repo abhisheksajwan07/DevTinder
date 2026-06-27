@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
-import { z } from "zod";
-
 dotenv.config();
+
+import { z } from "zod";
+import { StringValue } from "ms";
+
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
@@ -13,13 +15,13 @@ const envSchema = z.object({
 
   REDIS_URL: z.string().min(1),
 
-  JWT_ACCESS_SECRET: z.string().min(32),
+  ACCESS_TOKEN_SECRET: z.string().min(32),
 
-  JWT_REFRESH_SECRET: z.string().min(32),
+  REFRESH_TOKEN_SECRET: z.string().min(32),
 
   CSRF_TOKEN_SECRET: z.string().min(32),
-  ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
-  REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
+  ACCESS_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
+  REFRESH_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
