@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/AppError.js";
-import { env } from "../config/env.js";
 import { AccessTokenPayload } from "../types/jwt.types.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 
