@@ -28,7 +28,7 @@ export const emailCredentials = pgTable(
       .unique(),
 
     passwordHash: varchar("password_hash", {
-      length: 200,
+      length: 255,
     }),
 
     isVerified: boolean("is_verified").notNull().default(false),

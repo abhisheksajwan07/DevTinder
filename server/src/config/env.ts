@@ -3,7 +3,7 @@ dotenv.config();
 
 import { z } from "zod";
 import { StringValue } from "ms";
-
+import { logger } from "./logger.js";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
@@ -12,6 +12,8 @@ const envSchema = z.object({
   FRONTEND_URL: z.url(),
   DATABASE_URL: z.string().min(1),
   SALT_ROUNDS: z.coerce.number(),
+
+  RESEND_API_KEY: z.string().min(1),
 
   REDIS_URL: z.string().min(1),
 
