@@ -1,8 +1,8 @@
-import { rateLimit } from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
 import { redis } from "../../config/redis.js";
 
-export const signupRateLimiter = rateLimit({
+export const verifyEmailLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   standardHeaders: true,
@@ -12,7 +12,7 @@ export const signupRateLimiter = rateLimit({
       const [command, ...rest] = args;
       return redis.call(command!, ...rest) as Promise<any>;
     },
-    prefix: "rl:signup",
+    prefix: "rl:verify",
   }),
   handler: (_, res) => {
     res.status(429).json({

@@ -1,28 +1,57 @@
-import crypto from "crypto";
+import crypto, { timingSafeEqual } from "crypto";
 
-import { SignUpDto } from "./auth.validator.js";
+import { SignUpDto, VerifyEmailDto } from "./auth.validator.js";
 import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { redis } from "../../config/redis.js";
 import { AppError } from "../../utils/AppError.js";
 import { emailQueue } from "../../queues/email.queue.js";
 import { hashPassword } from "../../utils/password.js";
+import { ISessionService } from "../session/session.types.js";
 // import { emailQueue } from "../../queues/email.queue.js";
 
 export class AuthService {
-  private authRepository: IAuthRepository;
+  // private authRepository: IAuthRepository;
 
-  constructor(repository: IAuthRepository) {
-    this.authRepository = repository;
+  // constructor(repository: IAuthRepository) {
+  //   this.authRepository = repository;
+  // }
+  constructor(
+    private authRepository: IAuthRepository,
+    private sessionService: ISessionService,
+  ) {}
+
+  private async sendVerificationOtp(email: string) {
+    const otpKey = `otp:${email}`;
+    const attemptsKey = `otp_attempts:${email}`;
+    const otp = crypto.randomInt(100000, 999999).toString();
+    await redis.set(otpKey, otp, "EX", 300);
+    await redis.set(attemptsKey, 0, "EX", 300);
+
+    await emailQueue.add("send-welcome-otp", {
+      email,
+      otp,
+    });
   }
-  // constructor(private authRepository: IAuthRepository) {}
-  
+
   async runSignupPipeline(dto: SignUpDto) {
     const normalisedEmail = dto.email;
 
     const existingUser =
       await this.authRepository.findUserByEmail(normalisedEmail);
+
     if (existingUser) {
-      throw new AppError("Registration failed. please check your inputs.", 409);
+      if (existingUser.isVerified) {
+        throw new AppError(
+          "Registration failed. Please check your inputs.",
+          409,
+        );
+      }
+
+      throw new AppError(
+        "Your account already exists but isn't verified.",
+        409,
+        "EMAIL_NOT_VERIFIED",
+      );
     }
 
     const passwordHash = await hashPassword(dto.password);
@@ -30,9 +59,9 @@ export class AuthService {
       email: normalisedEmail,
       passwordHash,
     };
-    let newUser;
+
     try {
-      newUser = await this.authRepository.createUser(repoPayload);
+      const newUser = await this.authRepository.createUser(repoPayload);
     } catch (error: any) {
       if (error?.code === "23505") {
         throw new AppError(
@@ -43,16 +72,68 @@ export class AuthService {
       throw error;
     }
 
-    const otp = crypto.randomInt(100000, 999999).toString();
-    await redis.set(`otp:${normalisedEmail}`, otp, "EX", 300);
-    await redis.set(`otp_attempts:${normalisedEmail}`, 0, "EX", 300);
-
-    await emailQueue.add("send-welcome-otp", {
-      email: normalisedEmail,
-      otp,
-    });
+    await this.sendVerificationOtp(normalisedEmail);
     return {
       message: "SignUp completed ! Check your email for verification",
+    };
+  }
+
+  async verifyEmail(
+    dto: VerifyEmailDto,
+    meta: { userAgent?: string; ipAddress?: string },
+  ) {
+    // abstract Redis OTP operations into OtpRepository for cleaner architecture
+    const otpKey = `otp:${dto.email}`;
+    const attemptsKey = `otp_attempts:${dto.email}`;
+
+    const attempts = Number(await redis.get(attemptsKey)) || 0;
+
+    if (attempts >= 5) {
+      throw new AppError(
+        "Too many attemtps !! try again later",
+        429,
+        "OTP_RATE_LIMITED",
+      );
+    }
+
+    const storedOtp = await redis.get(otpKey);
+    if (!storedOtp)
+      throw new AppError("OTP expired or invalid.", 400, "INVALID_OTP");
+
+    if (storedOtp.length !== dto.otp.length) {
+      await redis.incr(attemptsKey);
+      throw new AppError("Invalid OTP.", 400);
+    }
+    const isMatch = timingSafeEqual(
+      Buffer.from(storedOtp),
+      Buffer.from(dto.otp),
+    );
+    if (!isMatch) {
+      await redis.incr(attemptsKey);
+      throw new AppError("Invalid OTP.", 400);
+    }
+    const user = await this.authRepository.findUserByEmail(dto.email);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+    if (user.isVerified) {
+      throw new AppError("Email already verified.", 400);
+    }
+
+    await this.authRepository.markEmailVerified(user.id);
+
+    await redis.del(otpKey, attemptsKey);
+
+    const { accessToken, rawRefreshToken } =
+      await this.sessionService.issueTokenPair(user.id, meta);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+      accessToken,
+      rawRefreshToken,
     };
   }
 }

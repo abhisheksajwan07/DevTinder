@@ -6,11 +6,25 @@ import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { AppError } from "../../utils/AppError.js";
 
 export class AuthRepository implements IAuthRepository {
-  async findUserByEmail(
-    email: string,
-  ): Promise<typeof users.$inferSelect | null> {
-    const result = await db.select().from(users).where(eq(users.email, email));
-    return result[0] || null;
+  async findUserByEmail(email: string): Promise<{
+    id: string;
+    email: string;
+    isVerified: boolean | null;
+    passwordHash: string | null;
+  } | null> {
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        isVerified: emailCredentials.isVerified,
+        passwordHash: emailCredentials.passwordHash,
+      })
+      .from(users)
+      .leftJoin(emailCredentials, eq(emailCredentials.userId, users.id))
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return result[0] ?? null;
   }
 
   async createUser(
@@ -36,5 +50,12 @@ export class AuthRepository implements IAuthRepository {
       });
       return insertedUser;
     });
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await db
+      .update(emailCredentials)
+      .set({ isVerified: true })
+      .where(eq(emailCredentials.userId, userId));
   }
 }

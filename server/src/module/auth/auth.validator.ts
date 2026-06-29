@@ -8,4 +8,10 @@ export const signUpSchema = z.object({
     .max(70, "Password can't be more than 70 characters "),
 });
 
+export const verifyEmailSchema = z.object({
+  email: z.email().trim().toLowerCase(),
+  otp: z.string().length(6).regex(/^\d+$/, "OTP must be numeric"),
+});
+
 export type SignUpDto = z.infer<typeof signUpSchema>;
+export type VerifyEmailDto = z.infer<typeof verifyEmailSchema>;

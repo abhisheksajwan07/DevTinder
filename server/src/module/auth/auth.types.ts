@@ -6,8 +6,14 @@ export type CreateUserRepoDTO = {
 };
 
 export interface IAuthRepository {
-  findUserByEmail(email: string): Promise<typeof users.$inferSelect | null>;
-  createUser(
-    data: CreateUserRepoDTO,
-  ): Promise<typeof users.$inferSelect>;
+  findUserByEmail(email: string): Promise<{
+    id: string;
+    email: string;
+    isVerified: boolean | null;
+    passwordHash: string | null;
+  } | null>;
+
+  createUser(data: CreateUserRepoDTO): Promise<typeof users.$inferSelect>;
+
+  markEmailVerified(userId: string): Promise<void>;
 }
