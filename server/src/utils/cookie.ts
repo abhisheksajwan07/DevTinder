@@ -31,7 +31,7 @@ export const setCsrfCookie = (res: Response) => {
     httpOnly: false,
     secure: isProd,
     sameSite: "lax" as const,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hour
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 24 hour
   });
 };
 

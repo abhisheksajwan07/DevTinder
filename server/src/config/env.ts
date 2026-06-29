@@ -3,7 +3,7 @@ dotenv.config();
 
 import { z } from "zod";
 import { StringValue } from "ms";
-import { logger } from "./logger.js";
+
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
@@ -19,7 +19,7 @@ const envSchema = z.object({
 
   ACCESS_TOKEN_SECRET: z.string().min(32),
 
-  REFRESH_TOKEN_SECRET: z.string().min(32),
+
 
   CSRF_TOKEN_SECRET: z.string().min(32),
   ACCESS_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),

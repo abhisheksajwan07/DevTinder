@@ -6,6 +6,3 @@ export interface AccessTokenPayload extends JwtPayload {
   sessionId: string;
 }
 
-export interface RefreshTokenPayload extends JwtPayload {
-  sessionId: string;
-}
