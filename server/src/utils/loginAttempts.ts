@@ -9,7 +9,7 @@ export const getNextLoginAttemptData = (currentAttempts: number) => {
   const next = currentAttempts + 1;
   if (next >= LOGIN_MAX) {
     return {
-      loginAttempts: 0,
+      loginAttempts:next,
       lockedUntil: new Date(Date.now() + LOCK_DURATION_MS),
     };
   }

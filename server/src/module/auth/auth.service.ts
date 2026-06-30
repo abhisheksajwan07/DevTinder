@@ -1,12 +1,23 @@
 import crypto, { timingSafeEqual } from "crypto";
-
-import { ResendOtpDto, SignUpDto, VerifyEmailDto } from "./auth.validator.js";
+import bcrypt from "bcrypt";
+import {
+  ResendOtpDto,
+  SignInDto,
+  SignUpDto,
+  VerifyEmailDto,
+} from "./auth.validator.js";
 import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { redis } from "../../config/redis.js";
 import { AppError } from "../../utils/AppError.js";
 import { emailQueue } from "../../queues/email.queue.js";
-import { hashPassword } from "../../utils/password.js";
+import { comparePassword, hashPassword } from "../../utils/password.js";
 import { ISessionService } from "../session/session.types.js";
+import { env } from "../../config/env.js";
+import {
+  getClearedAttemptData,
+  getNextLoginAttemptData,
+  isAccountLocked,
+} from "../../utils/loginAttempts.js";
 // import { emailQueue } from "../../queues/email.queue.js";
 
 export class AuthService {
@@ -73,7 +84,7 @@ export class AuthService {
     }
 
     await this.sendVerificationOtp(normalisedEmail);
-    return 
+    return;
   }
 
   async verifyEmail(
@@ -170,5 +181,57 @@ export class AuthService {
     await redis.set(cooldownKey, "1", "EX", 60);
 
     return;
+  }
+
+  async login(
+    data: SignInDto,
+    meta: {
+      userAgent?: string;
+      ipAddress?: string;
+    },
+  ) {
+    const user = await this.authRepository.findUserByEmail(data.email);
+
+    if (!user || !user.passwordHash) {
+      await comparePassword(data.password, env.DUMMY_HASH);
+      throw new AppError("invalid credentials", 401, "INVALID_CREDENTIALS");
+    }
+
+    if (isAccountLocked(user.lockedUntil)) {
+      throw new AppError(
+        "Account locked. Try again later.",
+        423,
+        " ACCOUNT_LOCKED",
+      );
+    }
+    const isValid = await comparePassword(data.password, user.passwordHash);
+
+    if (!isValid) {
+      const attemptData = getNextLoginAttemptData(user.loginAttempts ?? 0);
+      await this.authRepository.updateLoginAttempts(user.id, attemptData);
+      throw new AppError("invalid credentials", 401, "INVALID_CREDENTIALS");
+    }
+    if (!user.isVerified) {
+      throw new AppError(
+        "Please verify your email.",
+        403,
+        "EMAIL_NOT_VERIFIED",
+      );
+    }
+    await this.authRepository.updateLoginAttempts(
+      user.id,
+      getClearedAttemptData(),
+    );
+    const { accessToken, rawRefreshToken } =
+      await this.sessionService.issueTokenPair(user.id, meta);
+    return {
+      accessToken,
+      rawRefreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        onBoardingComplete: user.onBoardingComplete,
+      },
+    };
   }
 }

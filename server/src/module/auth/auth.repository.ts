@@ -9,15 +9,21 @@ export class AuthRepository implements IAuthRepository {
   async findUserByEmail(email: string): Promise<{
     id: string;
     email: string;
+    onBoardingComplete: boolean;
     isVerified: boolean | null;
     passwordHash: string | null;
+    loginAttempts: number | null;
+    lockedUntil: Date | null;
   } | null> {
     const result = await db
       .select({
         id: users.id,
         email: users.email,
+        onBoardingComplete: users.onBoardingComplete,
         isVerified: emailCredentials.isVerified,
         passwordHash: emailCredentials.passwordHash,
+        loginAttempts: emailCredentials.loginAttempts,
+        lockedUntil: emailCredentials.lockedUntil,
       })
       .from(users)
       .leftJoin(emailCredentials, eq(emailCredentials.userId, users.id))
@@ -56,6 +62,16 @@ export class AuthRepository implements IAuthRepository {
     await db
       .update(emailCredentials)
       .set({ isVerified: true })
+      .where(eq(emailCredentials.userId, userId));
+  }
+
+  async updateLoginAttempts(
+    userId: string,
+    data: { loginAttempts: number; lockedUntil: Date | null },
+  ): Promise<void> {
+    await db
+      .update(emailCredentials)
+      .set(data)
       .where(eq(emailCredentials.userId, userId));
   }
 }

@@ -1,6 +1,11 @@
 // auth.controller.ts
 import { Request, Response } from "express";
-import { ResendOtpDto, SignUpDto, VerifyEmailDto } from "./auth.validator.js";
+import {
+  ResendOtpDto,
+  SignInDto,
+  SignUpDto,
+  VerifyEmailDto,
+} from "./auth.validator.js";
 import { authService } from "./auth.dependencies.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import {
@@ -47,4 +52,19 @@ export const resendVerificationController = async (
   const result = await authService.resendVerificationOtp(req.body);
 
   return sendResponse(res, 200, "Verification OTP sent successfully.");
+};
+
+export const signInController = async (
+  req: Request<{}, {}, SignInDto>,
+  res: Response,
+) => {
+  const result = await authService.login(req.body, {
+    userAgent: req.headers["user-agent"],
+    ipAddress: req.ip,
+  });
+
+  setAccessTokenCookie(res, result.accessToken);
+  setRefreshTokenCookie(res, result.rawRefreshToken);
+  setCsrfCookie(res);
+  sendResponse(res, 201, "SignIn successful", { user: result.user });
 };

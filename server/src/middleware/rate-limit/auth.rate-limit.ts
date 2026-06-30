@@ -44,3 +44,19 @@ export const resendOtpLimiter = rateLimit({
     });
   },
 });
+
+
+
+export const signInLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: createRedisStore("rl:signin"),
+  handler: (_, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many signin attempts. Please try again later.",
+    });
+  },
+});

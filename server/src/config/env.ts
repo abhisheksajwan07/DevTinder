@@ -4,7 +4,6 @@ dotenv.config();
 import { z } from "zod";
 import { StringValue } from "ms";
 
-
 const envSchema = z.object({
   NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
 
@@ -19,8 +18,7 @@ const envSchema = z.object({
 
   ACCESS_TOKEN_SECRET: z.string().min(32),
 
-
-
+  DUMMY_HASH: z.string().min(1),
   CSRF_TOKEN_SECRET: z.string().min(32),
   ACCESS_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
   REFRESH_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
