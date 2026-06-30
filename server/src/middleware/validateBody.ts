@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodObject } from "zod";
 import { AppError } from "../utils/AppError.js";
-import { error } from "node:console";
 
 type validateTarget = "body" | "params" | "query";
 
