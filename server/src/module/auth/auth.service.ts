@@ -1,6 +1,6 @@
 import crypto, { timingSafeEqual } from "crypto";
 
-import { SignUpDto, VerifyEmailDto } from "./auth.validator.js";
+import { ResendOtpDto, SignUpDto, VerifyEmailDto } from "./auth.validator.js";
 import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { redis } from "../../config/redis.js";
 import { AppError } from "../../utils/AppError.js";
@@ -73,9 +73,7 @@ export class AuthService {
     }
 
     await this.sendVerificationOtp(normalisedEmail);
-    return {
-      message: "SignUp completed ! Check your email for verification",
-    };
+    return 
   }
 
   async verifyEmail(
@@ -97,6 +95,7 @@ export class AuthService {
     }
 
     const storedOtp = await redis.get(otpKey);
+
     if (!storedOtp)
       throw new AppError("OTP expired or invalid.", 400, "INVALID_OTP");
 
@@ -104,6 +103,7 @@ export class AuthService {
       await redis.incr(attemptsKey);
       throw new AppError("Invalid OTP.", 400);
     }
+
     const isMatch = timingSafeEqual(
       Buffer.from(storedOtp),
       Buffer.from(dto.otp),
@@ -113,9 +113,11 @@ export class AuthService {
       throw new AppError("Invalid OTP.", 400);
     }
     const user = await this.authRepository.findUserByEmail(dto.email);
+
     if (!user) {
       throw new AppError("User not found", 404);
     }
+
     if (user.isVerified) {
       throw new AppError("Email already verified.", 400);
     }
@@ -135,5 +137,38 @@ export class AuthService {
       accessToken,
       rawRefreshToken,
     };
+  }
+
+  async resendVerificationOtp(dto: ResendOtpDto) {
+    const user = await this.authRepository.findUserByEmail(dto.email);
+
+    if (!user) {
+      throw new AppError("User not found.", 404, "USER_NOT_FOUND");
+    }
+
+    if (user.isVerified) {
+      throw new AppError(
+        "Email already verified.",
+        400,
+        "EMAIL_ALREADY_VERIFIED",
+      );
+    }
+    const cooldownKey = `otp_resend_cooldown:${dto.email}`;
+
+    const isCoolingDown = await redis.exists(cooldownKey);
+
+    if (isCoolingDown) {
+      throw new AppError(
+        "Please wait before requesting another OTP.",
+        429,
+        "OTP_RESEND_RATE_LIMITED",
+      );
+    }
+
+    await this.sendVerificationOtp(dto.email);
+
+    await redis.set(cooldownKey, "1", "EX", 60);
+
+    return;
   }
 }

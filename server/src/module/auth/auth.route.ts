@@ -1,16 +1,24 @@
 import { Router } from "express";
 
-import { signUpController, verifyEmailController } from "./auth.controller.js";
-import { signUpSchema, verifyEmailSchema } from "./auth.validator.js";
+import {
+  resendVerificationController,
+  signUpController,
+  verifyEmailController,
+} from "./auth.controller.js";
+import {
+  resendOtpSchema,
+  signUpSchema,
+  verifyEmailSchema,
+} from "./auth.validator.js";
 import { validate } from "../../middleware/validateBody.js";
-import { signupRateLimiter } from "../../middleware/rate-limit/signup.ratelimit.js";
-import { verifyEmailLimiter } from "../../middleware/rate-limit/verify.ratelimit.js";
+
+import { resendOtpLimiter, signupLimiter, verifyEmailLimiter } from "../../middleware/rate-limit/auth.rate-limit.js";
 
 const router = Router();
 
 router.post(
   "/signup",
-  signupRateLimiter,
+  signupLimiter,
   validate(signUpSchema),
   signUpController,
 );
@@ -21,4 +29,12 @@ router.post(
   validate(verifyEmailSchema),
   verifyEmailController,
 );
+
+router.post(
+  "/resend-verification-otp",
+  resendOtpLimiter,
+  validate(resendOtpSchema),
+  resendVerificationController,
+);
+
 export default router;
