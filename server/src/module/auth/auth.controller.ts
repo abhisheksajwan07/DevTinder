@@ -1,7 +1,7 @@
 // auth.controller.ts
 import { Request, Response } from "express";
 import {
-  ResendOtpDto,
+  
   SignInDto,
   SignUpDto,
   VerifyEmailDto,
@@ -46,10 +46,10 @@ export const verifyEmailController = async (
 };
 
 export const resendVerificationController = async (
-  req: Request<{}, {}, ResendOtpDto>,
+  req: Request,
   res: Response,
 ) => {
-  const result = await authService.resendVerificationOtp(req.body);
+  const result = await authService.resendVerificationOtp(req.body.email);
 
   return sendResponse(res, 200, "Verification OTP sent successfully.");
 };
@@ -68,3 +68,5 @@ export const signInController = async (
   setCsrfCookie(res);
   sendResponse(res, 201, "SignIn successful", { user: result.user });
 };
+
+

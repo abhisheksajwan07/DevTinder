@@ -1,7 +1,6 @@
 import crypto, { timingSafeEqual } from "crypto";
-import bcrypt from "bcrypt";
 import {
-  ResendOtpDto,
+
   SignInDto,
   SignUpDto,
   VerifyEmailDto,
@@ -150,8 +149,8 @@ export class AuthService {
     };
   }
 
-  async resendVerificationOtp(dto: ResendOtpDto) {
-    const user = await this.authRepository.findUserByEmail(dto.email);
+  async resendVerificationOtp(email: string) {
+    const user = await this.authRepository.findUserByEmail(email);
 
     if (!user) {
       throw new AppError("User not found.", 404, "USER_NOT_FOUND");
@@ -164,7 +163,7 @@ export class AuthService {
         "EMAIL_ALREADY_VERIFIED",
       );
     }
-    const cooldownKey = `otp_resend_cooldown:${dto.email}`;
+    const cooldownKey = `otp_resend_cooldown:${email}`;
 
     const isCoolingDown = await redis.exists(cooldownKey);
 
@@ -176,7 +175,7 @@ export class AuthService {
       );
     }
 
-    await this.sendVerificationOtp(dto.email);
+    await this.sendVerificationOtp(email);
 
     await redis.set(cooldownKey, "1", "EX", 60);
 
@@ -224,6 +223,7 @@ export class AuthService {
     );
     const { accessToken, rawRefreshToken } =
       await this.sessionService.issueTokenPair(user.id, meta);
+
     return {
       accessToken,
       rawRefreshToken,
@@ -234,4 +234,6 @@ export class AuthService {
       },
     };
   }
+
+ 
 }
