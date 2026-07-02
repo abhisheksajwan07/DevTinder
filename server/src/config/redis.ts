@@ -4,6 +4,12 @@ import { logger } from "./logger.js";
 
 export const redis = new Redis(env.REDIS_URL);
 
+
+export const bullMQConnection = {
+  host: "localhost",
+  port: 6379,
+  maxRetriesPerRequest: null,
+};
 redis.on("connect", () => {
   logger.info("Redis Connected successfully");
 });

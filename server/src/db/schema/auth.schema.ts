@@ -28,7 +28,7 @@ export const emailCredentials = pgTable(
       .unique(),
 
     passwordHash: varchar("password_hash", {
-      length: 200,
+      length: 255,
     }),
 
     isVerified: boolean("is_verified").notNull().default(false),
@@ -39,11 +39,13 @@ export const emailCredentials = pgTable(
       withTimezone: true,
     }),
 
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-    })
+    createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [index("idx_email_credentials_user_id").on(table.userId)],
 );
@@ -65,7 +67,9 @@ export const authAccounts = pgTable(
 
     createdAt: timestamp("created_at", {
       withTimezone: true,
-    }).defaultNow().notNull(),
+    })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("provider_account_unique").on(

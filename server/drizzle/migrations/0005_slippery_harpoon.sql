@@ -1,0 +1,2 @@
+ALTER TABLE "email_credentials" ALTER COLUMN "password_hash" SET DATA TYPE varchar(255);--> statement-breakpoint
+ALTER TABLE "email_credentials" ADD COLUMN "created_at" timestamp with time zone DEFAULT now() NOT NULL;
