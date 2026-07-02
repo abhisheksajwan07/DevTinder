@@ -27,8 +27,8 @@ export const requireAccessAuth = (
     if (error instanceof jwt.TokenExpiredError) {
       return next(new AppError("Access token expired", 401));
     }
-    if (error instanceof jwt.TokenExpiredError) {
-      return next(new AppError("Invalid or expired token", 401));
+    if (error instanceof jwt.JsonWebTokenError) {
+      return next(new AppError("Invalid token", 401));
     }
     return next(error);
   }
