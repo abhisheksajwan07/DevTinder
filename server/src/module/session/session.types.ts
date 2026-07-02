@@ -23,6 +23,7 @@ export interface ISessionRepository {
   createSession(dto: CreateSessionDto): Promise<{ id: string }>;
   findSessionById(sessionId: string): Promise<Session | null>;
   revokeSession(sessionId: string): Promise<void>;
+  revokeAllSessionsByUserId(userId: string): Promise<void>;
 }
 
 export interface ISessionService {

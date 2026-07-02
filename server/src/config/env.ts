@@ -8,7 +8,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
 
   PORT: z.coerce.number().default(3000),
-  FRONTEND_URL: z.url(),
+  CLIENT_URL: z.url(),
   DATABASE_URL: z.string().min(1),
   SALT_ROUNDS: z.coerce.number(),
 

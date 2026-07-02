@@ -19,6 +19,17 @@ const getOtpTemplate = (otp: string) => `
   </div>
 `;
 
+const getResetPasswordTemplate = (resetUrl: string) => `
+  <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; max-width: 500px; border-radius: 10px;">
+    <h2 style="color: #E94057;">Reset your DevTinder Password 🔐</h2>
+    <p>Click the button below to reset your password. This link is valid for 15 minutes.</p>
+    <a href="${resetUrl}" style="display: inline-block; background: #E94057; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+      Reset Password
+    </a>
+    <p style="font-size: 12px; color: #777; margin-top: 20px;">If you didn't request this, you can safely ignore this email.</p>
+  </div>
+`;
+
 export const emailWorker = new Worker(
   QUEUE_NAME,
   async (job) => {
@@ -35,8 +46,26 @@ export const emailWorker = new Worker(
         `[Email Worker]: successfully delivered validation code to ${email}`,
       );
     }
+
+    if (job.name === "send-reset-password") {
+      const { email, resetUrl } = job.data;
+      await resend.emails.send({
+        from: "DevTinder <onboarding@resend.dev>",
+        to: email,
+        subject: "Reset your DevTinder Password",
+        html: getResetPasswordTemplate(resetUrl),
+      });
+      logger.info(`[Email Worker]: reset password email delivered to ${email}`);
+    }
   },
-  { connection: bullMQConnection, concurrency: 4 },
+  {
+    connection: bullMQConnection,
+    concurrency: 4,
+    limiter: {
+      max: 8,
+      duration: 1000,
+    },
+  },
 );
 
 emailWorker.on("failed", (job, err) => {

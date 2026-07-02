@@ -1,13 +1,17 @@
 import { Router } from "express";
 
 import {
+  forgotPasswordController,
   resendVerificationController,
+  resetPasswordController,
   signInController,
   signUpController,
   verifyEmailController,
 } from "./auth.controller.js";
 import {
+  forgotPasswordSchema,
   resendOtpSchema,
+  resetPasswordSchema,
   signInSchema,
   signUpSchema,
   verifyEmailSchema,
@@ -15,6 +19,7 @@ import {
 import { validate } from "../../middleware/validateBody.js";
 
 import {
+  forgotPasswordLimiter,
   resendOtpLimiter,
   signInLimiter,
   signupLimiter,
@@ -40,4 +45,16 @@ router.post(
 );
 
 router.post("/signin", signInLimiter, validate(signInSchema), signInController);
+
+router.post(
+  "/forgot-password",
+  forgotPasswordLimiter,
+  validate(forgotPasswordSchema),
+  forgotPasswordController,
+);
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  resetPasswordController,
+);
 export default router;

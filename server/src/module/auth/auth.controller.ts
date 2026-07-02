@@ -1,7 +1,7 @@
 // auth.controller.ts
 import { Request, Response } from "express";
 import {
-  
+  ResetPasswordDto,
   SignInDto,
   SignUpDto,
   VerifyEmailDto,
@@ -69,4 +69,16 @@ export const signInController = async (
   sendResponse(res, 201, "SignIn successful", { user: result.user });
 };
 
+export const forgotPasswordController = async (req: Request, res: Response) => {
+  await authService.forgotPassword(req.body.email);
+  sendResponse(res, 201, "If this email exists, you will receive a reset link");
+};
+export const resetPasswordController = async (
+  req: Request<{}, {}, ResetPasswordDto>,
+  res: Response,
+) => {
+  const { token, newPassword } = req.body;
 
+  await authService.resetPassword({ token, newPassword });
+  sendResponse(res, 201, "Password reset successful ! please login again !");
+};

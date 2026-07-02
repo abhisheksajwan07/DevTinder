@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "../../db/drizzle.js";
+import { db, sessions } from "../../db/drizzle.js";
 import { users, emailCredentials } from "../../db/drizzle.js";
 import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { AppError } from "../../utils/AppError.js";
@@ -74,4 +74,16 @@ export class AuthRepository implements IAuthRepository {
       .set(data)
       .where(eq(emailCredentials.userId, userId));
   }
+
+  async updatePasswordHash(
+    userId: string,
+    passwordHash: string,
+  ): Promise<void> {
+    await db
+      .update(emailCredentials)
+      .set({ passwordHash, updatedAt: new Date() })
+      .where(eq(emailCredentials.userId, userId));
+  }
+
+
 }

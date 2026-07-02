@@ -60,3 +60,16 @@ export const signInLimiter = rateLimit({
     });
   },
 });
+export const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: createRedisStore("rl:forgot-password"),
+  handler: (_, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many forgot password attempts. Please try again later.",
+    });
+  },
+});

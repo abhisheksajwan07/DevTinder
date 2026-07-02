@@ -1,6 +1,6 @@
 import crypto, { timingSafeEqual } from "crypto";
 import {
-
+  ResetPasswordDto,
   SignInDto,
   SignUpDto,
   VerifyEmailDto,
@@ -10,14 +10,24 @@ import { redis } from "../../config/redis.js";
 import { AppError } from "../../utils/AppError.js";
 import { emailQueue } from "../../queues/email.queue.js";
 import { comparePassword, hashPassword } from "../../utils/password.js";
-import { ISessionService } from "../session/session.types.js";
+import {
+  ISessionRepository,
+  ISessionService,
+} from "../session/session.types.js";
 import { env } from "../../config/env.js";
 import {
   getClearedAttemptData,
   getNextLoginAttemptData,
   isAccountLocked,
 } from "../../utils/loginAttempts.js";
-// import { emailQueue } from "../../queues/email.queue.js";
+import {
+  deleteResetToken,
+  generateResetToken,
+  getResetTokenUserId,
+  hashResetToken,
+  storeResetToken,
+} from "./auth.utils.js";
+
 
 export class AuthService {
   // private authRepository: IAuthRepository;
@@ -28,6 +38,7 @@ export class AuthService {
   constructor(
     private authRepository: IAuthRepository,
     private sessionService: ISessionService,
+    private sessionRepository: ISessionRepository,
   ) {}
 
   private async sendVerificationOtp(email: string) {
@@ -234,6 +245,54 @@ export class AuthService {
       },
     };
   }
+  async forgotPassword(email: string) {
+    const cooldownKey = `reset_cooldown:${email}`;
+    const isCoolingDown = await redis.exists(cooldownKey);
+    if (isCoolingDown) {
+      return;
+    }
+    const user = await this.authRepository.findUserByEmail(email);
 
- 
+    if (!user) {
+      return;
+    }
+    const rawToken = generateResetToken();
+    const hashToken = hashResetToken(rawToken);
+
+    await storeResetToken(hashToken, user.id);
+    const resetUrl =`${env.CLIENT_URL}/reset-password?token=${rawToken}`;
+   
+    await emailQueue.add(
+      "send-reset-password",
+      {
+        email,
+        resetUrl,
+      },
+      {
+        priority: 1,
+      },
+    );
+
+    await redis.set(cooldownKey, "1", "EX", 120);
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const tokenHash = hashResetToken(dto.token);
+    const userId = await getResetTokenUserId(tokenHash);
+
+    if (!userId) {
+      throw new AppError(
+        "invalid or expired reset token",
+        400,
+        "INVALID_OR_EXPIRED_TOKEN",
+      );
+    }
+    const passwordHash = await hashPassword(dto.newPassword);
+
+    await this.authRepository.updatePasswordHash(userId, passwordHash);
+    await deleteResetToken(tokenHash);
+
+    // revoke all on-going sessions
+    await this.sessionRepository.revokeAllSessionsByUserId(userId);
+  }
 }

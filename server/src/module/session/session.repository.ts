@@ -40,4 +40,13 @@ export class SessionRepository implements ISessionRepository {
       })
       .where(eq(sessions.id, sessionId));
   }
+  async revokeAllSessionsByUserId(userId: string): Promise<void> {
+    await db
+      .update(sessions)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(eq(sessions.userId, userId));
+  }
 }

@@ -26,5 +26,8 @@ export interface IAuthRepository {
       loginAttempts: number;
       lockedUntil: Date | null;
     },
-  ):Promise<void>;
+  ): Promise<void>;
+
+  updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
+  
 }
