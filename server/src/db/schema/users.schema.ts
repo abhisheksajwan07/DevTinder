@@ -28,5 +28,6 @@ export const users = pgTable("users", {
     withTimezone: true,
   })
     .notNull()
-    .defaultNow(),
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });

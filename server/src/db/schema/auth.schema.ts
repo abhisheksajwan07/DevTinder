@@ -44,7 +44,8 @@ export const emailCredentials = pgTable(
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
-      .defaultNow(),
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [index("idx_email_credentials_user_id").on(table.userId)],
 );
@@ -69,7 +70,6 @@ export const authAccounts = pgTable(
     })
       .defaultNow()
       .notNull(),
-   
   },
   (table) => [
     uniqueIndex("provider_account_unique").on(
