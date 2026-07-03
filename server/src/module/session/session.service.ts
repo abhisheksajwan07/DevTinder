@@ -7,6 +7,8 @@ import {
 import { signAccessToken } from "../../utils/jwt.js";
 import { parseUserAgent } from "../../utils/parseUserAgent.js";
 import { parseIp } from "../../utils/parseIp.js";
+import { AppError } from "../../utils/AppError.js";
+import { SESSION_EXPIRY_DAYS } from "../../utils/constants.js";
 
 export class SessionService implements ISessionService {
   constructor(private sessionRepository: ISessionRepository) {}
@@ -70,5 +72,49 @@ export class SessionService implements ISessionService {
         isCurrent: session.id === currentSessionId,
       };
     });
+  }
+
+  async refreshSession(
+    rawRefreshToken: string,
+  ): Promise<{ accessToken: string; rawRefreshToken: string }> {
+    const refreshTokenHash = crypto
+      .createHash("sha256")
+      .update(rawRefreshToken)
+      .digest("hex");
+    const session =
+      await this.sessionRepository.findSessionByTokenHash(refreshTokenHash);
+
+    if (!session) {
+      throw new AppError("invalid refresh token", 401);
+    }
+    if (session.isRevoked) {
+      throw new AppError("Session revoked", 401);
+    }
+    if (session.expiresAt < new Date()) {
+      throw new AppError("Refresh token expired", 401);
+    }
+
+    const newRawRefreshToken = crypto.randomBytes(64).toString("hex");
+
+    const newRefreshTokenHash = crypto
+      .createHash("sha256")
+      .update(newRawRefreshToken)
+      .digest("hex");
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + SESSION_EXPIRY_DAYS);
+    await this.sessionRepository.updateSession(session.id, {
+      refreshTokenHash: newRefreshTokenHash,
+      expiresAt,
+    });
+
+    const accessToken = signAccessToken({
+      sub: session.userId,
+      sessionId: session.id,
+    });
+    return {
+      accessToken,
+      rawRefreshToken: newRawRefreshToken,
+    };
   }
 }

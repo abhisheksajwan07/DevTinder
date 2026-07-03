@@ -1,0 +1,1 @@
+export const SESSION_EXPIRY_DAYS = 7;

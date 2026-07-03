@@ -1,6 +1,6 @@
 import { db } from "../../db/drizzle.js";
 import { sessions } from "../../db/schema/sessions.schema.js";
-import { eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import {
   CreateSessionDto,
   ISessionRepository,
@@ -60,5 +60,27 @@ export class SessionRepository implements ISessionRepository {
         ),
       orderBy: (table, { desc }) => [desc(table.lastUsedAt)],
     });
+  }
+
+  async findSessionByTokenHash(hash: string): Promise<Session | null> {
+    const session = await db.query.sessions.findFirst({
+      where: (table, { eq }) => eq(table.refreshTokenHash, hash),
+    });
+
+    return session ?? null;
+  }
+
+  async updateSession(
+    sessionId: string,
+    dto: { refreshTokenHash: string; expiresAt: Date },
+  ): Promise<void> {
+    await db
+      .update(sessions)
+      .set({
+        refreshTokenHash: dto.refreshTokenHash,
+        expiresAt: dto.expiresAt,
+        lastUsedAt: new Date(),
+      })
+      .where(eq(sessions.id, sessionId));
   }
 }

@@ -26,7 +26,7 @@ export type SessionResponse = {
   deviceType: string | null;
   city: string | null;
   country: string | null;
- 
+
   lastUsedAt: Date | null;
   createdAt: Date;
   isCurrent: boolean;
@@ -35,7 +35,16 @@ export type SessionResponse = {
 export interface ISessionRepository {
   createSession(dto: CreateSessionDto): Promise<{ id: string }>;
   findSessionById(sessionId: string): Promise<Session | null>;
-  
+
+  findSessionByTokenHash(hash: string): Promise<Session | null>;
+
+  updateSession(
+    sessionId: string,
+    dto: {
+      refreshTokenHash: string;
+      expiresAt: Date;
+    },
+  ): Promise<void>;
   revokeSession(sessionId: string): Promise<void>;
   revokeAllSessionsByUserId(userId: string): Promise<void>;
   getActiveSessionsByUserId(userId: string): Promise<Session[]>;
@@ -51,4 +60,9 @@ export interface ISessionService {
     userId: string,
     currentSessionId: string,
   ): Promise<SessionResponse[]>;
+
+  refreshSession(rawRefreshToken:string):Promise<{
+    accessToken: string;
+  rawRefreshToken: string
+  }>
 }
