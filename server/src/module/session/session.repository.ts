@@ -38,7 +38,8 @@ export class SessionRepository implements ISessionRepository {
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(eq(sessions.id, sessionId));
+      .where(and(
+        eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
   }
   async revokeAllSessionsByUserId(userId: string): Promise<void> {
     await db
@@ -47,7 +48,7 @@ export class SessionRepository implements ISessionRepository {
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(eq(sessions.userId, userId));
+      .where(and(eq(sessions.userId, userId), eq(sessions.isRevoked, false)));
   }
 
   async getActiveSessionsByUserId(userId: string): Promise<Session[]> {

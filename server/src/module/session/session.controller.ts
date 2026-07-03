@@ -4,6 +4,8 @@ import { sessionService } from "./session.dependencies.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import { AppError } from "../../utils/AppError.js";
 import {
+  clearAuthCookies,
+  clearCsrfCookie,
   setAccessTokenCookie,
   setCsrfCookie,
   setRefreshTokenCookie,
@@ -33,6 +35,27 @@ export const refreshController = async (req: Request, res: Response) => {
   setAccessTokenCookie(res, accessToken);
   setRefreshTokenCookie(res, newRawRefreshToken);
   setCsrfCookie(res);
-  
+
   sendResponse(res, 200, "token refreshed");
+};
+
+export const logoutController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError("Unauthorized", 401);
+  }
+  await sessionService.revokeSession(req.user.sessionId);
+  clearAuthCookies(res);
+  clearCsrfCookie(res);
+  sendResponse(res, 200, "logout successfully");
+};
+
+export const logoutAllController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  await sessionService.revokeAllSessionsByUserId(req.user.userId);
+  clearAuthCookies(res);
+  clearCsrfCookie(res);
+  sendResponse(res, 200, "logout from all the devices");
 };

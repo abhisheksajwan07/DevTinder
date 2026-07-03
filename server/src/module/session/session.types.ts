@@ -61,8 +61,12 @@ export interface ISessionService {
     currentSessionId: string,
   ): Promise<SessionResponse[]>;
 
-  refreshSession(rawRefreshToken:string):Promise<{
+  refreshSession(rawRefreshToken: string): Promise<{
     accessToken: string;
-  rawRefreshToken: string
-  }>
+    rawRefreshToken: string;
+  }>;
+
+  revokeSession(sessionId: string): Promise<void>;
+
+  revokeAllSessionsByUserId(userId: string): Promise<void>;
 }

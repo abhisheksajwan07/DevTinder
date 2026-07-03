@@ -117,4 +117,13 @@ export class SessionService implements ISessionService {
       rawRefreshToken: newRawRefreshToken,
     };
   }
+
+  async revokeSession(sessionId: string): Promise<void> {
+    await this.sessionRepository.revokeSession(sessionId);
+  }
+
+
+  async revokeAllSessionsByUserId(userId: string): Promise<void> {
+      await this.sessionRepository.revokeAllSessionsByUserId(userId)
+  }
 }
