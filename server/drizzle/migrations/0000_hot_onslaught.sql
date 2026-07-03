@@ -10,26 +10,13 @@ CREATE TABLE "auth_accounts" (
 CREATE TABLE "email_credentials" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
-	"password_hash" varchar(200),
+	"password_hash" varchar(255),
 	"is_verified" boolean DEFAULT false NOT NULL,
 	"login_attempts" integer DEFAULT 0 NOT NULL,
 	"locked_until" timestamp with time zone,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "email_credentials_user_id_unique" UNIQUE("user_id")
-);
---> statement-breakpoint
-CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"first_name" varchar(100) NOT NULL,
-	"last_name" varchar(100),
-	"email" varchar(255) NOT NULL,
-	"username" varchar(50),
-	"bio" text,
-	"avatar_url" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "users_email_unique" UNIQUE("email"),
-	CONSTRAINT "users_username_unique" UNIQUE("username")
+	CONSTRAINT "email_credentials_user_id_unique" UNIQUE("user_id")
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
@@ -43,6 +30,15 @@ CREATE TABLE "sessions" (
 	"last_used_at" timestamp with time zone DEFAULT now(),
 	"is_revoked" boolean DEFAULT false NOT NULL,
 	"revoked_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"on_boarding_complete" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 ALTER TABLE "auth_accounts" ADD CONSTRAINT "auth_accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

@@ -1,8 +1,14 @@
 import * as crypto from "crypto";
-import { ISessionRepository } from "./session.types.js";
+import {
+  ISessionRepository,
+  ISessionService,
+  SessionResponse,
+} from "./session.types.js";
 import { signAccessToken } from "../../utils/jwt.js";
+import { parseUserAgent } from "../../utils/parseUserAgent.js";
+import { parseIp } from "../../utils/parseIp.js";
 
-export class SessionService {
+export class SessionService implements ISessionService {
   constructor(private sessionRepository: ISessionRepository) {}
 
   async issueTokenPair(
@@ -37,5 +43,32 @@ export class SessionService {
       accessToken,
       rawRefreshToken,
     };
+  }
+
+  async getActiveSessions(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<SessionResponse[]> {
+    const sessions =
+      await this.sessionRepository.getActiveSessionsByUserId(userId);
+
+    return sessions.map((session) => {
+      const userAgent = parseUserAgent(session.userAgent ?? undefined);
+      const location = parseIp(session.ipAddress ?? undefined);
+
+      return {
+        id: session.id,
+        browser: userAgent?.browser ?? null,
+        os: userAgent?.os ?? null,
+        deviceType: userAgent?.deviceType ?? null,
+
+        city: location?.city ?? null,
+        country: location?.country ?? null,
+
+        createdAt: session.createdAt,
+        lastUsedAt: session.lastUsedAt,
+        isCurrent: session.id === currentSessionId,
+      };
+    });
   }
 }

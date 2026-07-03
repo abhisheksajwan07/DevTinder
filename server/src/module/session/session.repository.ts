@@ -49,4 +49,16 @@ export class SessionRepository implements ISessionRepository {
       })
       .where(eq(sessions.userId, userId));
   }
+
+  async getActiveSessionsByUserId(userId: string): Promise<Session[]> {
+    return db.query.sessions.findMany({
+      where: (table, { and, eq, gt }) =>
+        and(
+          eq(table.userId, userId),
+          eq(table.isRevoked, false),
+          gt(table.expiresAt, new Date()),
+        ),
+      orderBy: (table, { desc }) => [desc(table.lastUsedAt)],
+    });
+  }
 }
