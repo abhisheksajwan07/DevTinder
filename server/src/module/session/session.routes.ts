@@ -7,8 +7,11 @@ import {
   logoutController,
   logoutOtherSessionsController,
   refreshController,
+  revokeSessionController,
 } from "./session.controller.js";
 import { requireCsrf } from "../../middleware/csrf.middleware.js";
+import { validate } from "../../middleware/validateBody.js";
+import { revokeSessionParamsSchema } from "./session.validator.js";
 
 const router = Router();
 
@@ -21,6 +24,14 @@ router.post(
   requireAccessAuth,
   requireCsrf,
   logoutOtherSessionsController,
+);
+
+router.post(
+  "/:sessionId/revoke",
+  requireAccessAuth,
+  requireCsrf,
+  validate(revokeSessionParamsSchema, "params"),
+  revokeSessionController,
 );
 
 export default router;

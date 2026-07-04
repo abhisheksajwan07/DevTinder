@@ -132,4 +132,6 @@ export class SessionService implements ISessionService {
   ): Promise<void> {
     await this.sessionRepository.revokeOtherSessions(userId, currentSessionId);
   }
+
+  
 }

@@ -40,6 +40,7 @@ export class SessionRepository implements ISessionRepository {
       })
       .where(and(eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
   }
+  
   async revokeAllSessionsByUserId(userId: string): Promise<void> {
     await db
       .update(sessions)

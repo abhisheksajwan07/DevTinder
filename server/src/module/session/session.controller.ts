@@ -72,3 +72,20 @@ export const logoutOtherSessionsController = async (
 
   sendResponse(res, 200, "Logged out from all other devices");
 };
+
+export const revokeSessionController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError("unauthorized", 401);
+  }
+
+  const { sessionId } = req.params;
+  if (typeof sessionId !== "string") {
+    throw new AppError("Invalid session id", 400);
+  }
+
+  if (sessionId === req.user.sessionId) {
+    throw new AppError("use Logout endpoint for current session", 400);
+  }
+  await sessionService.revokeSession(sessionId);
+  sendResponse(res, 200, "Session revoked successfully");
+};
