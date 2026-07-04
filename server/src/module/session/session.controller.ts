@@ -59,3 +59,16 @@ export const logoutAllController = async (req: Request, res: Response) => {
   clearCsrfCookie(res);
   sendResponse(res, 200, "logout from all the devices");
 };
+
+export const logoutOtherSessionsController = async (
+  req: Request,
+  res: Response,
+) => {
+  if (!req.user) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  await sessionService.revokeOtherSessions(req.user.userId, req.user.sessionId);
+
+  sendResponse(res, 200, "Logged out from all other devices");
+};

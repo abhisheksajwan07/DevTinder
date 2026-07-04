@@ -1,6 +1,6 @@
 import { db } from "../../db/drizzle.js";
 import { sessions } from "../../db/schema/sessions.schema.js";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import {
   CreateSessionDto,
   ISessionRepository,
@@ -38,8 +38,7 @@ export class SessionRepository implements ISessionRepository {
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(and(
-        eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
+      .where(and(eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
   }
   async revokeAllSessionsByUserId(userId: string): Promise<void> {
     await db
@@ -83,5 +82,24 @@ export class SessionRepository implements ISessionRepository {
         lastUsedAt: new Date(),
       })
       .where(eq(sessions.id, sessionId));
+  }
+
+  async revokeOtherSessions(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<void> {
+    await db
+      .update(sessions)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(sessions.userId, userId),
+          ne(sessions.id, currentSessionId),
+          eq(sessions.isRevoked, false),
+        ),
+      );
   }
 }

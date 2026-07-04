@@ -122,8 +122,14 @@ export class SessionService implements ISessionService {
     await this.sessionRepository.revokeSession(sessionId);
   }
 
-
   async revokeAllSessionsByUserId(userId: string): Promise<void> {
-      await this.sessionRepository.revokeAllSessionsByUserId(userId)
+    await this.sessionRepository.revokeAllSessionsByUserId(userId);
+  }
+
+  async revokeOtherSessions(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<void> {
+    await this.sessionRepository.revokeOtherSessions(userId, currentSessionId);
   }
 }

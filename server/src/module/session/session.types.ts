@@ -48,6 +48,7 @@ export interface ISessionRepository {
   revokeSession(sessionId: string): Promise<void>;
   revokeAllSessionsByUserId(userId: string): Promise<void>;
   getActiveSessionsByUserId(userId: string): Promise<Session[]>;
+  revokeOtherSessions(userId: string, currentSessionId: string): Promise<void>;
 }
 
 export interface ISessionService {
@@ -69,4 +70,6 @@ export interface ISessionService {
   revokeSession(sessionId: string): Promise<void>;
 
   revokeAllSessionsByUserId(userId: string): Promise<void>;
+
+  revokeOtherSessions(userId: string, currentSessionId: string): Promise<void>;
 }
