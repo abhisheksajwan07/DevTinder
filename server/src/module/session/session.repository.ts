@@ -1,6 +1,6 @@
 import { db } from "../../db/drizzle.js";
 import { sessions } from "../../db/schema/sessions.schema.js";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import {
   CreateSessionDto,
   ISessionRepository,
@@ -38,8 +38,9 @@ export class SessionRepository implements ISessionRepository {
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(eq(sessions.id, sessionId));
+      .where(and(eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
   }
+  
   async revokeAllSessionsByUserId(userId: string): Promise<void> {
     await db
       .update(sessions)
@@ -47,6 +48,59 @@ export class SessionRepository implements ISessionRepository {
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(eq(sessions.userId, userId));
+      .where(and(eq(sessions.userId, userId), eq(sessions.isRevoked, false)));
+  }
+
+  async getActiveSessionsByUserId(userId: string): Promise<Session[]> {
+    return db.query.sessions.findMany({
+      where: (table, { and, eq, gt }) =>
+        and(
+          eq(table.userId, userId),
+          eq(table.isRevoked, false),
+          gt(table.expiresAt, new Date()),
+        ),
+      orderBy: (table, { desc }) => [desc(table.lastUsedAt)],
+    });
+  }
+
+  async findSessionByTokenHash(hash: string): Promise<Session | null> {
+    const session = await db.query.sessions.findFirst({
+      where: (table, { eq }) => eq(table.refreshTokenHash, hash),
+    });
+
+    return session ?? null;
+  }
+
+  async updateSession(
+    sessionId: string,
+    dto: { refreshTokenHash: string; expiresAt: Date },
+  ): Promise<void> {
+    await db
+      .update(sessions)
+      .set({
+        refreshTokenHash: dto.refreshTokenHash,
+        expiresAt: dto.expiresAt,
+        lastUsedAt: new Date(),
+      })
+      .where(eq(sessions.id, sessionId));
+  }
+
+  async revokeOtherSessions(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<void> {
+    await db
+      .update(sessions)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(sessions.userId, userId),
+          ne(sessions.id, currentSessionId),
+          eq(sessions.isRevoked, false),
+        ),
+      );
   }
 }
