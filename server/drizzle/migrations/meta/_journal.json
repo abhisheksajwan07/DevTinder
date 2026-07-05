@@ -8,6 +8,20 @@
       "when": 1783039819944,
       "tag": "0000_hot_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783176945163,
+      "tag": "0001_colorful_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783226566647,
+      "tag": "0002_perpetual_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }
