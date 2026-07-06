@@ -71,10 +71,6 @@ export const authAccounts = pgTable(
     providerEmail: varchar("provider_email", {
       length: 255,
     }),
-
-    lastUsedAt: timestamp("last_used_at", {
-      withTimezone: true,
-    }).defaultNow(),
     provider: authProviderEnum("provider").notNull(),
 
     providerAccountId: text("provider_account_id").notNull(),
