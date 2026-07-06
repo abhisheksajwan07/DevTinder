@@ -1,16 +1,19 @@
-import { db, emailCredentials } from "../../db/drizzle.js";
-import { authAccounts } from "../../db/drizzle.js";
-import { users } from "../../db/drizzle.js";
+import { db, users, authAccounts, emailCredentials } from "../../db/drizzle.js";
+
 import { eq, and } from "drizzle-orm";
+
 import {
   AuthAccount,
-  CreateAuthAccountInput,
+  CreateOAuthAccountInput,
   EmailCredential,
   NewUser,
   OAuthProvider,
   OAuthRepositoryInterface,
+  ProviderTokenUpdate,
   User,
 } from "./oauth.types.js";
+
+import { AppError } from "../../utils/AppError.js";
 
 export class OAuthRepository implements OAuthRepositoryInterface {
   async findAuthAccount(
@@ -29,47 +32,45 @@ export class OAuthRepository implements OAuthRepositoryInterface {
 
     return account ?? null;
   }
-  async findUserByEmail(email: string): Promise<User | null> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-
-    return user ?? null;
-  }
-  async createUser(data: NewUser): Promise<User> {
-    const [user] = await db.insert(users).values(data).returning();
-    if (!user) throw new Error("Failed to create user");
-    return user;
-  }
-
-  async createAuthAccount(
-    data: CreateAuthAccountInput,
-  ): Promise<AuthAccount | null> {
-    const [res] = await db.insert(authAccounts).values(data).returning();
-    return res ?? null;
-  }
 
   async findUserById(userId: string): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
+
+    return user ?? null;
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+
     return user ?? null;
   }
 
   async findEmailCredentialByUserId(
     userId: string,
   ): Promise<EmailCredential | null> {
-    const [email] = await db
+    const [credential] = await db
       .select()
       .from(emailCredentials)
       .where(eq(emailCredentials.userId, userId));
 
-    return email ?? null;
+    return credential ?? null;
+  }
+
+  async createOAuthAccount(
+    data: CreateOAuthAccountInput,
+  ): Promise<AuthAccount> {
+    const [account] = await db.insert(authAccounts).values(data).returning();
+
+    if (!account) {
+      throw new AppError("Failed to create OAuth account", 500);
+    }
+
+    return account;
   }
 
   async updateProviderTokens(
     authAccountId: string,
-    data: {
-      providerAccessToken?: string;
-      providerRefreshToken?: string;
-      providerTokenExpiresAt?: Date;
-    },
+    data: ProviderTokenUpdate,
   ): Promise<void> {
     await db
       .update(authAccounts)
@@ -77,12 +78,30 @@ export class OAuthRepository implements OAuthRepositoryInterface {
       .where(eq(authAccounts.id, authAccountId));
   }
 
-  async updateLastUsedAt(authAccountId: string): Promise<void> {
-    await db
-      .update(authAccounts)
-      .set({
-        lastUsedAt: new Date(),
-      })
-      .where(eq(authAccounts.id, authAccountId));
+  async createOAuthUser(
+    data: NewUser,
+    account: CreateOAuthAccountInput,
+  ): Promise<User> {
+    return db.transaction(async (tx) => {
+      const [user] = await tx.insert(users).values(data).returning();
+
+      if (!user) {
+        throw new AppError("Failed to create user", 500);
+      }
+
+      const [authAccount] = await tx
+        .insert(authAccounts)
+        .values({
+          ...account,
+          userId: user.id,
+        })
+        .returning();
+
+      if (!authAccount) {
+        throw new AppError("Failed to create OAuth account", 500);
+      }
+
+      return user;
+    });
   }
 }

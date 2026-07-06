@@ -1,67 +1,90 @@
 import { users, authAccounts, emailCredentials } from "../../db/drizzle.js";
 
+
+
 export type OAuthProvider = "google" | "github";
+
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
 export type AuthAccount = typeof authAccounts.$inferSelect;
-export type NewAuthAccount = typeof authAccounts.$inferInsert;
 
 export type EmailCredential = typeof emailCredentials.$inferSelect;
-export type NewEmailCredential = typeof emailCredentials.$inferInsert;
 
-export interface GoogleUserInfo {
-  id: string;
+export interface OAuthProfile {
+  id: string;           //  (Google sub / GitHub id)
   email: string;
   name: string;
-  picture: string;
-  verifiedEmail: boolean;
+  avatar?: string;
+  emailVerified: boolean;
 }
 
 export interface OAuthUserResult {
   user: User;
   isNewUser: boolean;
-  providerProfile: GoogleUserInfo;
 }
 
-export interface CreateAuthAccountInput {
+
+export interface CreateOAuthAccountInput {
   userId: string;
   provider: OAuthProvider;
   providerAccountId: string;
   providerEmail: string;
 
   providerAccessToken?: string;
-
   providerRefreshToken?: string;
-
   providerTokenExpiresAt?: Date;
 }
 
+export interface ProviderTokenUpdate {
+  providerAccessToken?: string;
+  providerRefreshToken?: string;
+  providerTokenExpiresAt?: Date;
+}
+
+
 export interface OAuthRepositoryInterface {
+  
   findAuthAccount(
     provider: OAuthProvider,
     providerAccountId: string,
   ): Promise<AuthAccount | null>;
 
-  findUserByEmail(email: string): Promise<User | null>;
-
   findUserById(userId: string): Promise<User | null>;
 
-  findEmailCredentialByUserId(userId: string): Promise<EmailCredential | null>;
+  findUserByEmail(email: string): Promise<User | null>;
 
-  createUser(data: NewUser): Promise<User>;
+  findEmailCredentialByUserId(
+    userId: string,
+  ): Promise<EmailCredential | null>;
 
-  createAuthAccount(data: CreateAuthAccountInput): Promise<AuthAccount | null>;
+ 
+  createOAuthUser(
+    data: NewUser,
+    account: CreateOAuthAccountInput,
+  ): Promise<User>;
+
+  createOAuthAccount(
+    data: CreateOAuthAccountInput,
+  ): Promise<AuthAccount>;
 
   updateProviderTokens(
     authAccountId: string,
-    data: {
-      providerAccessToken?: string;
-      providerRefreshToken?: string;
-      providerTokenExpiresAt?: Date;
-    },
+    data: ProviderTokenUpdate,
   ): Promise<void>;
+}
 
-  updateLastUsedAt(authAccountId: string): Promise<void>;
+
+export interface IOAuthService {
+  loginWithOAuth(
+    provider: OAuthProvider,
+    profile: OAuthProfile,
+    providerTokens: {
+      accessToken: string;
+      refreshToken?: string;
+      expiresIn: number;
+    },
+    meta: { userAgent?: string; ipAddress?: string },
+  ): Promise<OAuthUserResult & { accessToken: string; rawRefreshToken: string }>;
 }
