@@ -42,3 +42,14 @@ export const clearAuthCookies = (res: Response) => {
 export const clearCsrfCookie = (res: Response) => {
   res.clearCookie("csrfToken");
 };
+
+export const setOauthStateCookie = (res: Response, state: string) => {
+  res.cookie("oauth_state", state, {
+    ...COOKIE_OPTIONS,
+    maxAge: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+export const clearOauthStateCookie = (res: Response) => {
+  res.clearCookie("oauth_state");
+};

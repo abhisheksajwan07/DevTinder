@@ -60,7 +60,17 @@ export const authAccounts = pgTable(
       .references(() => users.id, {
         onDelete: "cascade",
       }),
+    providerAccessToken: text("access_token"),
 
+    providerRefreshToken: text("refresh_token"),
+
+    providerTokenExpiresAt: timestamp("token_expires_at", {
+      withTimezone: true,
+    }),
+
+    providerEmail: varchar("provider_email", {
+      length: 255,
+    }),
     provider: authProviderEnum("provider").notNull(),
 
     providerAccountId: text("provider_account_id").notNull(),
@@ -70,6 +80,13 @@ export const authAccounts = pgTable(
     })
       .defaultNow()
       .notNull(),
+
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [
     uniqueIndex("provider_account_unique").on(
