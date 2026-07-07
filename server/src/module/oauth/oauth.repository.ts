@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import {
   AuthAccount,
   CreateOAuthAccountInput,
+  CreateOAuthAccountInputWithoutUserId,
   EmailCredential,
   NewUser,
   OAuthProvider,
@@ -80,7 +81,7 @@ export class OAuthRepository implements OAuthRepositoryInterface {
 
   async createOAuthUser(
     data: NewUser,
-    account: CreateOAuthAccountInput,
+    account: CreateOAuthAccountInputWithoutUserId,
   ): Promise<User> {
     return db.transaction(async (tx) => {
       const [user] = await tx.insert(users).values(data).returning();

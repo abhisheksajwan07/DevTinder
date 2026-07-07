@@ -8,7 +8,6 @@ import {
   OAuthUserResult,
 } from "./oauth.types.js";
 
-
 export class OAuthService implements IOAuthService {
   constructor(
     private readonly repository: OAuthRepositoryInterface,
@@ -27,7 +26,6 @@ export class OAuthService implements IOAuthService {
   ): Promise<
     OAuthUserResult & { accessToken: string; rawRefreshToken: string }
   > {
-   
     const tokenExpiresAt = new Date(
       Date.now() + providerTokens.expiresIn * 1000,
     );
@@ -67,21 +65,19 @@ export class OAuthService implements IOAuthService {
       };
     }
 
-    // ── Step 2: OAuth never logged before, has  user with this email signed up  ? 
+    // ── Step 2: OAuth never logged before, has  user with this email signed up  ?
     // because if a user has signup before using credentials,then the email will
     // be there in users
     const existingUser = await this.repository.findUserByEmail(profile.email);
 
     if (!existingUser) {
-      // ── B: Brand-new user — create user + auth_account atomically 
+      // ── B: Brand-new user — create user + auth_account atomically
       const user = await this.repository.createOAuthUser(
         {
           email: profile.email,
         },
-        // future mai, create a separate input wihtout userid, to avoid
-        // passsing a placeholder value
+        
         {
-          userId: "",
           provider,
           providerAccountId: profile.id,
           providerEmail: profile.email,
@@ -112,8 +108,6 @@ export class OAuthService implements IOAuthService {
       );
     }
 
-    // Safe to link: create the auth_account row inside a transaction so that
-    // if the session creation somehow fails we don't leave an orphaned row.
     await this.repository.createOAuthAccount({
       userId: existingUser.id,
       provider,
