@@ -15,6 +15,7 @@ export interface OAuthProfile {
   name: string;
   avatar?: string;
   emailVerified: boolean;
+  githubLogin?: string; // only set for GitHub OAuth — the raw login e.g. "abhishek"
 }
 
 export interface OAuthUserResult {

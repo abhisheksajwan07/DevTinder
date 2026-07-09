@@ -101,6 +101,7 @@ export class GithubProvider {
       name: github.name ?? github.login,
       avatar: github.avatar_url,
       emailVerified: true,
+      githubLogin: github.login, // raw GitHub username e.g. "abhishek"
     };
   }
 }
