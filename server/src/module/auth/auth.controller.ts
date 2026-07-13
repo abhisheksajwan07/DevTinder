@@ -13,6 +13,7 @@ import {
   setCsrfCookie,
   setRefreshTokenCookie,
 } from "../../utils/cookie.js";
+import { AppError } from "../../utils/AppError.js";
 
 export const signUpController = async (
   req: Request<{}, {}, SignUpDto>,
@@ -24,6 +25,14 @@ export const signUpController = async (
     201,
     "SignUp completed ! Check your email for verification",
   );
+};
+
+export const getMeController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError("Unauthorized", 401);
+  }
+  const user = await authService.getMe(req.user.userId);
+  sendResponse(res, 200, "User fetched successfully", { user });
 };
 
 export const verifyEmailController = async (
