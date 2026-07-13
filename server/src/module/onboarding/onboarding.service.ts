@@ -10,4 +10,8 @@ export class OnboardingService implements IOnboardingService {
   async createProfile(userId: string, data: CreateProfileDTO): Promise<void> {
     await this.repository.createProfile(userId, data);
   }
+
+  async getMyProfile(userId: string) {
+    return await this.repository.getMyProfile(userId);
+  }
 }

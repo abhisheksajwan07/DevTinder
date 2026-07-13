@@ -8,9 +8,15 @@ import {
   profileInterests,
   profileLookingFor,
   users,
+  interests,
+  lookingFor,
+  avatars,
 } from "../../db/drizzle.js";
 import { CreateProfileDTO } from "./onboarding.validator.js";
-import { IOnboardingRepository } from "./onboarding.types.js";
+import {
+  IOnboardingRepository,
+  ProfileWithRelations,
+} from "./onboarding.types.js";
 import { AppError } from "../../utils/AppError.js";
 
 export class OnBoardingRepository implements IOnboardingRepository {
@@ -50,7 +56,8 @@ export class OnBoardingRepository implements IOnboardingRepository {
 
       const customSkillsIds: string[] = [];
 
-      for (const skillName of data.customSkills) {
+      for (const rawSkillName of data.customSkills) {
+        const skillName = rawSkillName.trim();
         const existing = await tx
           .select({ id: skills.id })
           .from(skills)
@@ -104,5 +111,52 @@ export class OnBoardingRepository implements IOnboardingRepository {
         .set({ onBoardingComplete: true })
         .where(eq(users.id, userId));
     });
+  }
+
+  async getMyProfile(userId: string): Promise<ProfileWithRelations> {
+    const profile = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+
+    if (!profile[0]) {
+      throw new AppError("Profile not found", 404);
+    }
+    const profileId = profile[0].id;
+
+    const [skillsRows, interestsRows, lookingForRows, avatar] =
+      await Promise.all([
+        db
+          .select({ id: skills.id, name: skills.name })
+          .from(profileSkills)
+          .innerJoin(skills, eq(profileSkills.skillId, skills.id))
+          .where(eq(profileSkills.profileId, profileId)),
+
+        db
+          .select({ id: interests.id, name: interests.name })
+          .from(profileInterests)
+          .innerJoin(interests, eq(profileInterests.interestId, interests.id))
+          .where(eq(profileInterests.profileId, profileId)),
+
+        db
+          .select({ id: lookingFor.id, name: lookingFor.name })
+          .from(profileLookingFor)
+          .innerJoin(
+            lookingFor,
+            eq(profileLookingFor.lookingForId, lookingFor.id),
+          )
+          .where(eq(profileLookingFor.profileId, profileId)),
+
+        db.select().from(avatars).where(eq(avatars.id, profile[0].avatarId)),
+      ]);
+
+    return {
+      ...profile[0],
+      skills: skillsRows,
+      interests: interestsRows,
+      lookingFor: lookingForRows,
+      avatar: avatar[0] ?? null,
+    };
   }
 }

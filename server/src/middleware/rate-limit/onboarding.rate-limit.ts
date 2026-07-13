@@ -15,3 +15,16 @@ export const onboardingLimiter = rateLimit({
     });
   },
 });
+
+export const onboardingReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: createRedisStore("rl:onboard-read-limiter"),
+  handler: (_, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests, please try again later",
+    });
+  },
+});
