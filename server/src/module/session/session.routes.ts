@@ -12,11 +12,15 @@ import {
 import { requireCsrf } from "../../middleware/csrf.middleware.js";
 import { validate } from "../../middleware/validateBody.js";
 import { revokeSessionParamsSchema } from "./session.validator.js";
+import {
+  refreshLimiter,
+  sessionReadLimiter,
+} from "../../middleware/rate-limit/session.rate-limit.js";
 
 const router = Router();
 
-router.get("/", requireAccessAuth, getSessionController);
-router.post("/refresh", requireCsrf, refreshController);
+router.get("/", requireAccessAuth, sessionReadLimiter, getSessionController);
+router.post("/refresh", requireCsrf, refreshLimiter, refreshController);
 router.post("/logout", requireAccessAuth, requireCsrf, logoutController);
 router.post("/logout-all", requireAccessAuth, requireCsrf, logoutAllController);
 router.post(
