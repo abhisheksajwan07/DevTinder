@@ -23,4 +23,7 @@ export class OnboardingService implements IOnboardingService {
   async getOptions(): Promise<OnboardingOptions> {
     return await this.repository.getOptions();
   }
+  async checkUserName(username: string): Promise<boolean> {
+    return await this.repository.checkUserName(username);
+  }
 }

@@ -22,6 +22,7 @@ export interface IOnboardingRepository {
   updateProfile(profileId: string, data: UpdateProfileDTO): Promise<void>;
 
   getOptions(): Promise<OnboardingOptions>;
+  checkUserName(username: string): Promise<boolean>;
 }
 
 export interface IOnboardingService {
@@ -29,6 +30,7 @@ export interface IOnboardingService {
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
   updateProfile(userId: string, data: UpdateProfileDTO): Promise<void>;
   getOptions(): Promise<OnboardingOptions>;
+  checkUserName(username: string): Promise<boolean>;
 }
 
 export interface OnboardingOptions {

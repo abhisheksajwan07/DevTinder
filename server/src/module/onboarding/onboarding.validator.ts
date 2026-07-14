@@ -46,5 +46,16 @@ export const updateProfileSchema = createProfileSchema
     lookingForIds: z.array(z.uuid()).min(1).max(5).optional(),
   });
 
+export const checkUsernameSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(30)
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores",
+    ),
+});
+
 export type CreateProfileDTO = z.infer<typeof createProfileSchema>;
 export type UpdateProfileDTO = z.infer<typeof updateProfileSchema>;

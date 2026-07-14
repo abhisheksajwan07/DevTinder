@@ -290,4 +290,14 @@ export class OnBoardingRepository implements IOnboardingRepository {
       avatars: avatarsRows,
     };
   }
+
+  async checkUserName(username: string): Promise<boolean> {
+    const existing = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.userName, username))
+      .limit(1);
+
+    return existing.length === 0;
+  }
 }

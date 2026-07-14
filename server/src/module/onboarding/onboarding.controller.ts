@@ -34,3 +34,12 @@ export const getOptionsController = async (req: Request, res: Response) => {
   const options = await service.getOptions();
   sendResponse(res, 200, "Options fetched successfully", { options });
 };
+
+export const checkUsernameController = async (req: Request, res: Response) => {
+  const username = req.query.username as string;
+
+  const available = await service.checkUserName(username);
+  sendResponse(res, 200, available ? "Username available" : "Username taken", {
+    available,
+  });
+};

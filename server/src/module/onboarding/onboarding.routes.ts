@@ -6,8 +6,9 @@ import {
   onboardingPatchLimiter,
   onboardingReadLimiter,
 } from "../../middleware/rate-limit/onboarding.rate-limit.js";
-import { createProfileSchema } from "./onboarding.validator.js";
+import { checkUsernameSchema, createProfileSchema } from "./onboarding.validator.js";
 import {
+  checkUsernameController,
   createProfileController,
   getMyProfileController,
   getOptionsController,
@@ -48,4 +49,12 @@ router.get(
   requireAccessAuth,
   onboardingReadLimiter,
   getOptionsController,
+);
+
+router.get(
+  "/check-username",
+  requireAccessAuth,
+  onboardingReadLimiter,
+  validate(checkUsernameSchema, "query"),
+  checkUsernameController,
 );
