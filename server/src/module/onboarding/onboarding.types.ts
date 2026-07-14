@@ -20,10 +20,26 @@ export interface IOnboardingRepository {
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
 
   updateProfile(profileId: string, data: UpdateProfileDTO): Promise<void>;
+
+  getOptions(): Promise<OnboardingOptions>;
 }
 
 export interface IOnboardingService {
   createProfile(userId: string, data: CreateProfileDTO): Promise<void>;
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
   updateProfile(userId: string, data: UpdateProfileDTO): Promise<void>;
+  getOptions(): Promise<OnboardingOptions>;
+}
+
+export interface OnboardingOptions {
+  skills: { id: string; name: string; category: string }[];
+  interests: { id: string; name: string }[];
+  lookingFor: { id: string; name: string }[];
+  avatars: {
+    id: string;
+
+    displayName: string;
+
+    imageUrl: string | null;
+  }[];
 }

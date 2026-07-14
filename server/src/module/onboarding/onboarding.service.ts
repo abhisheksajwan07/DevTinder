@@ -1,6 +1,7 @@
 import {
   IOnboardingRepository,
   IOnboardingService,
+  OnboardingOptions,
 } from "./onboarding.types.js";
 import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 
@@ -14,9 +15,12 @@ export class OnboardingService implements IOnboardingService {
   async getMyProfile(userId: string) {
     return await this.repository.getMyProfile(userId);
   }
-  
+
   async updateProfile(userId: string, data: UpdateProfileDTO): Promise<void> {
     const profile = await this.repository.getMyProfile(userId);
     await this.repository.updateProfile(profile.id, data);
+  }
+  async getOptions(): Promise<OnboardingOptions> {
+    return await this.repository.getOptions();
   }
 }

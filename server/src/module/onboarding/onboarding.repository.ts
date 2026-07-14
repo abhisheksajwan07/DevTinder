@@ -15,6 +15,7 @@ import {
 import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import {
   IOnboardingRepository,
+  OnboardingOptions,
   ProfileWithRelations,
 } from "./onboarding.types.js";
 import { AppError } from "../../utils/AppError.js";
@@ -250,5 +251,43 @@ export class OnBoardingRepository implements IOnboardingRepository {
         }
       }
     });
+  }
+
+  async getOptions(): Promise<OnboardingOptions> {
+    const [skillsRows, interestsRows, lookingForRows, avatarsRows] =
+      await Promise.all([
+        db
+          .select({
+            id: skills.id,
+            name: skills.name,
+            category: skills.category,
+          })
+          .from(skills)
+          .where(eq(skills.isCustom, false)),
+
+        db
+          .select({
+            id: interests.id,
+            name: interests.name,
+          })
+          .from(interests),
+        db
+          .select({ id: lookingFor.id, name: lookingFor.name })
+          .from(lookingFor),
+
+        db
+          .select({
+            id: avatars.id,
+            displayName: avatars.displayName,
+            imageUrl: avatars.imageUrl,
+          })
+          .from(avatars),
+      ]);
+    return {
+      skills: skillsRows,
+      interests: interestsRows,
+      lookingFor: lookingForRows,
+      avatars: avatarsRows,
+    };
   }
 }

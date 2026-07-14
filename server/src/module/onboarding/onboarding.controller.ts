@@ -29,3 +29,8 @@ export const updateProfileController = async (req: Request, res: Response) => {
   await service.updateProfile(req.user.userId, req.body as UpdateProfileDTO);
   sendResponse(res, 200, "Profile updated successfully");
 };
+
+export const getOptionsController = async (req: Request, res: Response) => {
+  const options = await service.getOptions();
+  sendResponse(res, 200, "Options fetched successfully", { options });
+};

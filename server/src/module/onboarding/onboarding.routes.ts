@@ -10,6 +10,7 @@ import { createProfileSchema } from "./onboarding.validator.js";
 import {
   createProfileController,
   getMyProfileController,
+  getOptionsController,
   updateProfileController,
 } from "./onboarding.controller.js";
 import { requireCsrf } from "../../middleware/csrf.middleware.js";
@@ -41,3 +42,10 @@ router.patch(
   updateProfileController,
 );
 export default router;
+
+router.get(
+  "/options",
+  requireAccessAuth,
+  onboardingReadLimiter,
+  getOptionsController,
+);
