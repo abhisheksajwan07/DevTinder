@@ -31,7 +31,20 @@ export const createProfileSchema = z.object({
   lookingForIds: z.array(z.uuid()).min(1).max(5),
 });
 
-export const updateProfileSchema = createProfileSchema.partial();
+export const updateProfileSchema = createProfileSchema
+  .omit({
+    skillIds: true,
+    customSkills: true,
+    interestIds: true,
+    lookingForIds: true,
+  })
+  .partial()
+  .extend({
+    skillIds: z.array(z.uuid()).max(10).optional(),
+    customSkills: z.array(z.string().min(1).max(50)).max(5).optional(),
+    interestIds: z.array(z.uuid()).min(1).max(10).optional(),
+    lookingForIds: z.array(z.uuid()).min(1).max(5).optional(),
+  });
 
 export type CreateProfileDTO = z.infer<typeof createProfileSchema>;
 export type UpdateProfileDTO = z.infer<typeof updateProfileSchema>;

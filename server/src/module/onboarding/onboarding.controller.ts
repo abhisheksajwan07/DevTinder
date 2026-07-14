@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import { CreateProfileDTO } from "./onboarding.validator.js";
+import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 import { service } from "./onboarding.dependencies.js";
 import { AppError } from "../../utils/AppError.js";
@@ -20,4 +20,12 @@ export const getMyProfileController = async (req: Request, res: Response) => {
   }
   const profile = await service.getMyProfile(req.user.userId);
   sendResponse(res, 200, "Profile fetched successfully", { profile });
+};
+
+export const updateProfileController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    return sendResponse(res, 401, "Unauthorized");
+  }
+  await service.updateProfile(req.user.userId, req.body as UpdateProfileDTO);
+  sendResponse(res, 200, "Profile updated successfully");
 };

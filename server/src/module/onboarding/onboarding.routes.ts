@@ -3,12 +3,14 @@ import { validate } from "../../middleware/validateBody.js";
 import { requireAccessAuth } from "../../middleware/auth.middleware.js";
 import {
   onboardingLimiter,
+  onboardingPatchLimiter,
   onboardingReadLimiter,
 } from "../../middleware/rate-limit/onboarding.rate-limit.js";
 import { createProfileSchema } from "./onboarding.validator.js";
 import {
   createProfileController,
   getMyProfileController,
+  updateProfileController,
 } from "./onboarding.controller.js";
 import { requireCsrf } from "../../middleware/csrf.middleware.js";
 import { requireOnboarding } from "../../middleware/onboarding.middleware.js";
@@ -30,4 +32,12 @@ router.get(
   getMyProfileController,
 );
 
+router.patch(
+  "/me",
+  requireAccessAuth,
+  requireCsrf,
+  requireOnboarding,
+  onboardingPatchLimiter,
+  updateProfileController,
+);
 export default router;

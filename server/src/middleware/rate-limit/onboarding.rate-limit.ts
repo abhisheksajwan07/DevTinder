@@ -28,3 +28,19 @@ export const onboardingReadLimiter = rateLimit({
     });
   },
 });
+
+export const onboardingPatchLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: createRedisStore("rl:onboardPatch-limiter"),
+  handler: (_, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many onboarding attempts, please try again later",
+    });
+  },
+});
+
+

@@ -1,4 +1,4 @@
-import { CreateProfileDTO } from "./onboarding.validator.js";
+import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import { InferSelectModel } from "drizzle-orm";
 import {
   profiles,
@@ -18,9 +18,12 @@ export interface IOnboardingRepository {
   createProfile(userId: string, data: CreateProfileDTO): Promise<void>;
 
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
+
+  updateProfile(profileId: string, data: UpdateProfileDTO): Promise<void>;
 }
 
 export interface IOnboardingService {
   createProfile(userId: string, data: CreateProfileDTO): Promise<void>;
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
+  updateProfile(userId: string, data: UpdateProfileDTO): Promise<void>;
 }

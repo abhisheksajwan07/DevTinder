@@ -12,7 +12,7 @@ import {
   lookingFor,
   avatars,
 } from "../../db/drizzle.js";
-import { CreateProfileDTO } from "./onboarding.validator.js";
+import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import {
   IOnboardingRepository,
   ProfileWithRelations,
@@ -158,5 +158,97 @@ export class OnBoardingRepository implements IOnboardingRepository {
       lookingFor: lookingForRows,
       avatar: avatar[0] ?? null,
     };
+  }
+
+  async updateProfile(
+    profileId: string,
+    data: UpdateProfileDTO,
+  ): Promise<void> {
+    await db.transaction(async (tx) => {
+      const {
+        skillIds,
+        customSkills,
+        interestIds,
+        lookingForIds,
+        ...profileData
+      } = data;
+      await tx
+        .update(profiles)
+        .set({ ...profileData, embeddingStatus: "stale" })
+        .where(eq(profiles.id, profileId));
+
+      if (skillIds !== undefined || customSkills !== undefined) {
+        await tx
+          .delete(profileSkills)
+          .where(eq(profileSkills.profileId, profileId));
+        const customSkillIds: string[] = [];
+
+        for (const rawSkillName of customSkills ?? []) {
+          const skillName = rawSkillName.trim();
+          const existing = await tx
+            .select({ id: skills.id })
+            .from(skills)
+            .where(ilike(skills.name, skillName))
+            .limit(1);
+          if (existing.length > 0) {
+            const id = existing[0]?.id;
+            if (id) customSkillIds.push(id);
+          } else {
+            const [newSkill] = await tx
+              .insert(skills)
+              .values({
+                name: skillName,
+                isCustom: true,
+              })
+              .returning({ id: skills.id });
+
+            if (newSkill?.id) customSkillIds.push(newSkill.id);
+          }
+        }
+
+        const allSkillsId = [
+          ...new Set([...(skillIds ?? []), ...customSkillIds]),
+        ];
+
+        if (allSkillsId.length > 0) {
+          await tx.insert(profileSkills).values(
+            allSkillsId.map((skillId) => ({
+              profileId,
+              skillId,
+            })),
+          );
+        }
+      }
+
+      if (interestIds !== undefined) {
+        await tx
+          .delete(profileInterests)
+          .where(eq(profileInterests.profileId, profileId));
+
+        if (interestIds.length > 0) {
+          await tx.insert(profileInterests).values(
+            interestIds.map((interestId) => ({
+              profileId,
+              interestId,
+            })),
+          );
+        }
+      }
+
+      if (lookingForIds !== undefined) {
+        await tx
+          .delete(profileLookingFor)
+          .where(eq(profileLookingFor.profileId, profileId));
+
+        if (lookingForIds.length > 0) {
+          await tx.insert(profileLookingFor).values(
+            lookingForIds.map((lookingForId) => ({
+              profileId,
+              lookingForId,
+            })),
+          );
+        }
+      }
+    });
   }
 }
