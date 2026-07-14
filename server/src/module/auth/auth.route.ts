@@ -7,6 +7,7 @@ import {
   signInController,
   signUpController,
   verifyEmailController,
+  getMeController,
 } from "./auth.controller.js";
 import {
   forgotPasswordSchema,
@@ -17,6 +18,7 @@ import {
   verifyEmailSchema,
 } from "./auth.validator.js";
 import { validate } from "../../middleware/validateBody.js";
+import { requireAccessAuth } from "../../middleware/auth.middleware.js";
 
 import {
   forgotPasswordLimiter,
@@ -29,6 +31,8 @@ import {
 const router = Router();
 
 router.post("/signup", signupLimiter, validate(signUpSchema), signUpController);
+
+router.get("/me", requireAccessAuth, getMeController);
 
 router.post(
   "/verify-email",

@@ -1,10 +1,44 @@
+## Auth Refactors
+
+### Split Session & Token Responsibilities
+
+**Current:** `issueTokenPair()` creates the session and signs JWTs.
+
+**Refactor:** Split into separate services:
+- `SessionService` → session CRUD (DB only)
+- `TokenService` → access/refresh token generation
+
+This makes database transactions cleaner and keeps each service focused on one responsibility.
+
+**Location:** `auth.service.ts`, `session.service.ts`
+
+---
+
+### Wrap Email Verification in a Transaction
+
+**Current:** Email verification and session creation happen as separate database operations.
+
+**Refactor:** Wrap `markEmailVerified()` and session creation in a single DB transaction so they either both succeed or both roll back.
+
+**Location:** `auth.service.ts` → `verifyEmail()`
+
+
+
+---
+
 ## Refresh Token Theft Detection
 
-**Problem:** If a stolen refresh token is used before the legit user,
-the attacker gets a new token. Legit user hits 401. No alert, no trace.
+**Problem:** If a stolen refresh token is used before the legitimate user, the attacker receives a new refresh token while the real user later gets a 401.
 
 **Fix:** Implement refresh token family invalidation.
-- On any suspicious reuse → revoke ALL sessions for that userId
-- Log the event for audit
+- On refresh token reuse, revoke all active sessions for that user.
+- Log the event for auditing.
+- Force the user to sign in again.
 
 **Location:** `session.service.ts` → `refreshSession()`
+
+
+
+## Onboarding Changes
+- isOnboarded in JWT now 
+- Remove it in Security Hardening when requireAccessAuth gets DB session validation 

@@ -28,7 +28,6 @@ import {
   storeResetToken,
 } from "./auth.utils.js";
 
-
 export class AuthService {
   // private authRepository: IAuthRepository;
 
@@ -52,6 +51,18 @@ export class AuthService {
       email,
       otp,
     });
+  }
+
+  async getMe(userId: string) {
+    const user = await this.authRepository.findUserById(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      onBoardingComplete : user.onBoardingComplete,
+    };
   }
 
   async runSignupPipeline(dto: SignUpDto) {
@@ -154,6 +165,7 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
+        onBoardingComplete: user.onBoardingComplete,
       },
       accessToken,
       rawRefreshToken,
@@ -260,8 +272,8 @@ export class AuthService {
     const hashToken = hashResetToken(rawToken);
 
     await storeResetToken(hashToken, user.id);
-    const resetUrl =`${env.CLIENT_URL}/reset-password?token=${rawToken}`;
-   
+    const resetUrl = `${env.CLIENT_URL}/reset-password?token=${rawToken}`;
+
     await emailQueue.add(
       "send-reset-password",
       {

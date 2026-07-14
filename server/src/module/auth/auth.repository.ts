@@ -33,6 +33,24 @@ export class AuthRepository implements IAuthRepository {
     return result[0] ?? null;
   }
 
+  async findUserById(userId: string): Promise<{
+    id: string;
+    email: string;
+    onBoardingComplete: boolean;
+  } | null> {
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        onBoardingComplete: users.onBoardingComplete,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
   async createUser(
     data: CreateUserRepoDTO,
   ): Promise<typeof users.$inferSelect> {

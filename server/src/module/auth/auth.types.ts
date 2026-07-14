@@ -16,6 +16,12 @@ export interface IAuthRepository {
     lockedUntil: Date | null;
   } | null>;
 
+  findUserById(userId: string): Promise<{
+    id: string;
+    email: string;
+    onBoardingComplete: boolean;
+  } | null>;
+
   createUser(data: CreateUserRepoDTO): Promise<typeof users.$inferSelect>;
 
   markEmailVerified(userId: string): Promise<void>;

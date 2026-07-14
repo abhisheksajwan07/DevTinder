@@ -18,6 +18,8 @@ export const validate =
         400,
       );
     }
-    req[target] = result.data;
+    if (target !== "query") {
+      req[target] = result.data;
+    }
     next();
   };
