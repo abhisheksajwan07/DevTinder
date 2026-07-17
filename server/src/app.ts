@@ -9,6 +9,7 @@ import sessionRoutes from "./module/session/session.routes.js";
 import oauthRoutes from "./module/oauth/oauth.routes.js";
 import onboardingRoutes from "./module/onboarding/onboarding.routes.js";
 import "./workers/worker.email.js";
+import "./workers/worker.embedding.js"
 import { globalLimiter } from "./middleware/global.rate-limit.js";
 import { serverAdapter } from "./bull-board.js";
 

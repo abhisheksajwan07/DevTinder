@@ -3,13 +3,14 @@ import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 
 import { emailQueue } from "./queues/email.queue.js";
+import { embeddingQueue } from "./queues/embedding.queue.js";
 
 const serverAdapter = new ExpressAdapter();
 
 serverAdapter.setBasePath("/admin/queues");
 
 createBullBoard({
-  queues: [new BullMQAdapter(emailQueue)],
+  queues: [new BullMQAdapter(emailQueue), new BullMQAdapter(embeddingQueue)],
   serverAdapter,
 });
 

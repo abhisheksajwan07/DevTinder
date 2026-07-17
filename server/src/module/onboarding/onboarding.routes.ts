@@ -6,7 +6,10 @@ import {
   onboardingPatchLimiter,
   onboardingReadLimiter,
 } from "../../middleware/rate-limit/onboarding.rate-limit.js";
-import { checkUsernameSchema, createProfileSchema } from "./onboarding.validator.js";
+import {
+  checkUsernameSchema,
+  createProfileSchema,
+} from "./onboarding.validator.js";
 import {
   checkUsernameController,
   createProfileController,
@@ -25,7 +28,6 @@ router.post(
   validate(createProfileSchema),
   createProfileController,
 );
-
 router.get(
   "/me",
   requireAccessAuth,
@@ -33,7 +35,6 @@ router.get(
   onboardingReadLimiter,
   getMyProfileController,
 );
-
 router.patch(
   "/me",
   requireAccessAuth,
@@ -42,15 +43,12 @@ router.patch(
   onboardingPatchLimiter,
   updateProfileController,
 );
-export default router;
-
 router.get(
   "/options",
   requireAccessAuth,
   onboardingReadLimiter,
   getOptionsController,
 );
-
 router.get(
   "/check-username",
   requireAccessAuth,
@@ -58,3 +56,4 @@ router.get(
   validate(checkUsernameSchema, "query"),
   checkUsernameController,
 );
+export default router;
