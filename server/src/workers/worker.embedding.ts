@@ -6,7 +6,7 @@ import {
   EmbeddingJobData,
 } from "../queues/embedding.queue.js";
 import { logger } from "../config/logger.js";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { generateEmbedding } from "../config/voyage.js";
 import { buildProfileCorpus } from "../utils/buildProfileCorpus.js";
 import { bullMQConnection } from "../config/redis.js";
@@ -24,7 +24,13 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
         embeddingStatus: "processing",
       })
       .where(
-        and(eq(profiles.id, profileId), eq(profiles.embeddingStatus, "stale")),
+        and(
+          eq(profiles.id, profileId),
+          or(
+            eq(profiles.embeddingStatus, "stale"),
+            eq(profiles.embeddingStatus, "processing"),
+          ),
+        ),
       )
       .returning({ embeddingVersion: profiles.embeddingVersion });
 
