@@ -8,6 +8,7 @@ import {
   index,
   pgEnum,
   integer,
+  vector,
 } from "drizzle-orm/pg-core";
 import { users } from "../schema/users.schema.js";
 import { primaryKey } from "drizzle-orm/pg-core";
@@ -62,12 +63,9 @@ export const avatars = pgTable("avatars", {
   displayName: varchar("display_name", { length: 100 }).notNull(),
   gender: varchar("gender", { length: 20 }),
   style: varchar("style", { length: 50 }),
-  imageUrl:varchar("image_url",{length:500}),
-  storageUrl:varchar("storage_key",{length:400})
-  
+  imageUrl: varchar("image_url", { length: 500 }),
+  storageUrl: varchar("storage_key", { length: 400 }),
 });
-
-
 
 export const profiles = pgTable(
   "profiles",
@@ -119,7 +117,7 @@ export const profiles = pgTable(
     embeddingUpdatedAt: timestamp("embedding_updated_at", {
       withTimezone: true,
     }),
-
+    embeddingVector: vector("embedding", { dimensions: 1024 }),
     embeddingVersion: integer("embedding_version").default(1).notNull(),
 
     createdAt: timestamp("created_at", {

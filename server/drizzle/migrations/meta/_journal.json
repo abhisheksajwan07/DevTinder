@@ -43,6 +43,13 @@
       "when": 1783672193566,
       "tag": "0005_magical_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784133432909,
+      "tag": "0006_deep_darkstar",
+      "breakpoints": true
     }
   ]
 }
