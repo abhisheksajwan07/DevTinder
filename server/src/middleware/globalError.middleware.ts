@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
+import { getPostgresError } from "../errors/postgres-error.js";
 import { AppError } from "../utils/AppError.js";
 
 export const globalErrorHandler = (
-  err: Error,
+  err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction,
@@ -12,31 +12,30 @@ export const globalErrorHandler = (
   const isAppError = err instanceof AppError;
   const statusCode = isAppError ? err.statusCode : 500;
   const status = isAppError ? err.status : "error";
+  const dbError = getPostgresError(err);
+  const message = err instanceof Error ? err.message : "A non-error value was thrown";
+  const stack = err instanceof Error ? err.stack : undefined;
 
-  if (env.NODE_ENV === "dev") {
-    logger.error({
-      status,
-      code: isAppError ? err.code : undefined,
-      message: err.message,
-      stack: err.stack,
-    });
+  const errorLog = {
+    status,
+    code: isAppError ? err.code : undefined,
+    message,
+    userId: req.user?.userId,
+    route: req.originalUrl,
+    method: req.method,
+    dbCode: dbError?.code,
+    constraint: dbError?.constraint,
+    detail: dbError?.detail,
+    table: dbError?.table,
+    schema: dbError?.schema,
+    column: dbError?.column,
+    stack,
+  };
 
-    return res.status(statusCode).json({
-      success: false,
-      status,
-      code: isAppError ? err.code : undefined,
-      message: err.message,
-      stack: err.stack,
-    });
-  }
+  // Log only once at the global level
+  logger.error(errorLog);
 
   if (isAppError) {
-    logger.error({
-      status,
-      code: err.code,
-      message: err.message,
-    });
-
     return res.status(statusCode).json({
       success: false,
       status,
@@ -44,12 +43,6 @@ export const globalErrorHandler = (
       message: err.message,
     });
   }
-
-  logger.error({
-    status: "error",
-    message: err.message,
-    stack: err.stack,
-  });
 
   return res.status(500).json({
     success: false,

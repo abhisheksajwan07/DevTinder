@@ -22,6 +22,8 @@ const envSchema = z.object({
   CSRF_TOKEN_SECRET: z.string().min(32),
   ACCESS_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
   REFRESH_TOKEN_EXPIRES_IN: z.custom<StringValue | number>(),
+
+  VOYAGE_API_KEY: z.string().min(1),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
