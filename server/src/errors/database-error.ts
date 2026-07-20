@@ -1,6 +1,7 @@
 import { AppError } from "../utils/AppError.js";
 import { PG_ERROR } from "../constants/postgres-errors.js";
 import { DB_CONSTRAINTS } from "../constants/db-constraints.js";
+import { getPostgresError } from "./postgres-error.js";
 
 const FK_ERROR_MAP: Record<string, { code: string; message: string }> = {
   [DB_CONSTRAINTS.PROFILE_SKILL]: {
@@ -32,10 +33,14 @@ const UNIQUE_ERROR_MAP: Record<string, { code: string; message: string }> = {
   },
 };
 
-export const handleDbError = (error: any): never => {
-  const dbError = error.cause || error;
+export const handleDbError = (error: unknown): never => {
+  const dbError = getPostgresError(error);
 
-  switch (dbError?.code) {
+  if (!dbError) {
+    throw error;
+  }
+
+  switch (dbError.code) {
     case PG_ERROR.UNIQUE: {
       const constraint = dbError.constraint || "";
       const mapped = UNIQUE_ERROR_MAP[constraint];
@@ -53,6 +58,22 @@ export const handleDbError = (error: any): never => {
       }
       throw new AppError("Invalid reference provided.", 400, "INVALID_REFERENCE", dbError);
     }
+
+    case PG_ERROR.NOT_NULL:
+      throw new AppError(
+        "A required value is missing.",
+        400,
+        "REQUIRED_VALUE_MISSING",
+        dbError,
+      );
+
+    case PG_ERROR.INVALID_TEXT:
+      throw new AppError(
+        "An invalid value format was provided.",
+        400,
+        "INVALID_VALUE_FORMAT",
+        dbError,
+      );
   }
 
   throw error;

@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
+import { getPostgresError } from "../errors/postgres-error.js";
 import { AppError } from "../utils/AppError.js";
 
-
 export const globalErrorHandler = (
-  err: Error,
+  err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction,
@@ -13,14 +12,15 @@ export const globalErrorHandler = (
   const isAppError = err instanceof AppError;
   const statusCode = isAppError ? err.statusCode : 500;
   const status = isAppError ? err.status : "error";
+  const dbError = getPostgresError(err);
+  const message = err instanceof Error ? err.message : "A non-error value was thrown";
+  const stack = err instanceof Error ? err.stack : undefined;
 
-  const dbError = (err as any)?.cause ?? err;
-  
   const errorLog = {
     status,
     code: isAppError ? err.code : undefined,
-    message: err.message,
-    userId: (req as any).user?.userId || undefined,
+    message,
+    userId: req.user?.userId,
     route: req.originalUrl,
     method: req.method,
     dbCode: dbError?.code,
@@ -29,7 +29,7 @@ export const globalErrorHandler = (
     table: dbError?.table,
     schema: dbError?.schema,
     column: dbError?.column,
-    stack: env.NODE_ENV === "dev" ? err.stack : undefined,
+    stack,
   };
 
   // Log only once at the global level
@@ -41,7 +41,6 @@ export const globalErrorHandler = (
       status,
       code: err.code,
       message: err.message,
-      stack: env.NODE_ENV === "dev" ? err.stack : undefined,
     });
   }
 
@@ -49,6 +48,5 @@ export const globalErrorHandler = (
     success: false,
     status: "error",
     message: "Something went wrong",
-    stack: env.NODE_ENV === "dev" ? err.stack : undefined,
   });
 };
