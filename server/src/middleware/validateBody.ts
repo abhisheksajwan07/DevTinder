@@ -18,8 +18,16 @@ export const validate =
         400,
       );
     }
-    if (target !== "query") {
+
+    if (target === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        configurable: true,
+      });
+    } else {
       req[target] = result.data;
     }
+
     next();
   };
