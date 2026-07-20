@@ -7,6 +7,7 @@ import { globalErrorHandler } from "./middleware/globalError.middleware.js";
 import authRouter from "./module/auth/auth.route.js";
 import sessionRoutes from "./module/session/session.routes.js";
 import oauthRoutes from "./module/oauth/oauth.routes.js";
+import feedRoutes from "./module/feed/feed.routes.js"
 import onboardingRoutes from "./module/onboarding/onboarding.routes.js";
 import "./workers/worker.email.js";
 import "./workers/worker.embedding.js"
@@ -29,6 +30,7 @@ app.use("/v1/auth", authRouter);
 app.use("/v1/sessions", sessionRoutes);
 app.use("/v1/oauth", oauthRoutes);
 app.use("/v1/onboarding", onboardingRoutes);
+app.use("/v1/feed",feedRoutes)
 
 app.use(globalErrorHandler);
 

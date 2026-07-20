@@ -2,6 +2,7 @@ import { seedSkills } from "./skills.seed.js";
 import { seedInterests } from "./interests.seed.js";
 import { seedLookingFor } from "./looking-for.seed.js";
 import { seedAvatars } from "./avatars.seed.js";
+import { seedFeedProfiles } from "./feed.seed.js";
 import { pool } from "../drizzle.js";
 import { logger } from "../../config/logger.js";
 
@@ -19,6 +20,9 @@ const seed = async () => {
 
   await seedLookingFor();
   logger.info(" LookingFor seeded");
+
+  await seedFeedProfiles();
+  logger.info(" Feed profiles seeded");
 
   logger.info("Seeding complete.");
 
