@@ -19,7 +19,6 @@ import {
   ProfileWithRelations,
 } from "./onboarding.types.js";
 import { AppError } from "../../utils/AppError.js";
-import { embeddingQueue } from "../../queues/embedding.queue.js";
 import { logger } from "../../config/logger.js";
 import { handleDbError } from "../../errors/database-error.js";
 
@@ -135,7 +134,7 @@ export class OnBoardingRepository implements IOnboardingRepository {
       throw error;
     }
 
-    await this.enqueueEmbedding(profileId);
+    
   }
 
   async getOptions(): Promise<OnboardingOptions> {
@@ -399,11 +398,5 @@ export class OnBoardingRepository implements IOnboardingRepository {
     };
   }
 
-  private async enqueueEmbedding(profileId: string): Promise<void> {
-    await embeddingQueue.add(
-      "generate_embedding",
-      { profileId },
-      { jobId: profileId },
-    );
-  }
+
 }

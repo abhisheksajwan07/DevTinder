@@ -78,8 +78,8 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
   },
   {
     connection: bullMQConnection,
-    concurrency: 2,
-    limiter: { max: 4, duration: 1000 },
+    concurrency: 1,
+    limiter: { max: 1, duration: 25000 },
   },
 );
 
