@@ -4,16 +4,27 @@ import { logger } from "./logger.js";
 
 export const redis = new Redis(env.REDIS_URL);
 
-
 export const bullMQConnection = {
-  host: "localhost",
-  port: 6379,
+  url: env.REDIS_URL,
   maxRetriesPerRequest: null,
 };
+
 redis.on("connect", () => {
-  logger.info("Redis Connected successfully");
+  logger.info("Redis connected");
+});
+
+redis.on("ready", () => {
+  logger.info("Redis ready");
+});
+
+redis.on("reconnecting", () => {
+  logger.warn("Redis reconnecting...");
+});
+
+redis.on("close", () => {
+  logger.warn("Redis connection closed");
 });
 
 redis.on("error", (err) => {
-  logger.error({ err }, "Redis connection error");
+  logger.error({ err }, "Redis error");
 });
