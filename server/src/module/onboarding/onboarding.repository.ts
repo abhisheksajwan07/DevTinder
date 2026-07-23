@@ -39,7 +39,11 @@ export class OnBoardingRepository implements IOnboardingRepository {
         ];
 
         await this.attachProfileSkills(tx, profile.id, allSkillIds);
-        await this.attachProfileInterests(tx, profile.id, data.interestIds ?? []);
+        await this.attachProfileInterests(
+          tx,
+          profile.id,
+          data.interestIds ?? [],
+        );
         await this.attachProfileLookingFor(
           tx,
           profile.id,
@@ -54,8 +58,7 @@ export class OnBoardingRepository implements IOnboardingRepository {
         return profile.id;
       });
     } catch (error) {
-      handleDbError(error);
-      throw error;
+      return handleDbError(error);
     }
   }
 
@@ -73,6 +76,8 @@ export class OnBoardingRepository implements IOnboardingRepository {
     return this.loadProfileRelations(profile[0]);
   }
 
+ 
+
   async getMyProfileById(profileId: string): Promise<ProfileWithRelations> {
     const profile = await db
       .select()
@@ -85,6 +90,24 @@ export class OnBoardingRepository implements IOnboardingRepository {
     }
 
     return this.loadProfileRelations(profile[0]);
+  }
+
+  async findProfileExists(profileId: string): Promise<boolean> {
+    const [profile] = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.id, profileId));
+
+    return !!profile;
+  }
+
+  async getProfileId(userId: string): Promise<string | null> {
+    const [profile] = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.userId, userId));
+
+    return profile?.id ?? null;
   }
 
   async updateProfile(
@@ -130,11 +153,8 @@ export class OnBoardingRepository implements IOnboardingRepository {
         }
       });
     } catch (error) {
-      handleDbError(error);
-      throw error;
+      return handleDbError(error);
     }
-
-    
   }
 
   async getOptions(): Promise<OnboardingOptions> {
@@ -397,6 +417,4 @@ export class OnBoardingRepository implements IOnboardingRepository {
       avatar: avatarRows[0] ?? null,
     };
   }
-
-
 }

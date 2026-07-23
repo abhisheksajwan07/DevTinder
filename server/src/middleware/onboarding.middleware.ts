@@ -1,7 +1,8 @@
 import { AppError } from "../utils/AppError.js";
 
 import { authService } from "../module/auth/auth.dependencies.js";
-import { NextFunction, Request ,Response} from "express";
+import { repository as onboardingRepository } from "../module/onboarding/onboarding.dependencies.js";
+import { NextFunction, Request, Response } from "express";
 
 export const requireOnboarding = async (
   req: Request,
@@ -21,5 +22,10 @@ export const requireOnboarding = async (
       ),
     );
   }
+  const profileId = await onboardingRepository.getProfileId(req.user.userId);
+  if (!profileId) {
+    return next(new AppError("Profile not found", 404));
+  }
+  req.user.profileId = profileId;
   next();
 };

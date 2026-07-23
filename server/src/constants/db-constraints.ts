@@ -4,5 +4,5 @@ export const DB_CONSTRAINTS = {
   PROFILE_INTEREST: "profile_interests_interest_id_interests_id_fk",
   PROFILE_LOOKING_FOR: "profile_looking_for_looking_for_id_looking_for_id_fk",
   PROFILE_USERNAME: "profiles_user_name_unique",
-  PROFILE_USERNAME_IDX: "profiles_username_unique",
+  SWIPE_UNIQUE_TARGET: "unique_actor_target",
 } as const;
