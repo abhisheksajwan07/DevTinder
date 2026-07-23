@@ -23,7 +23,14 @@ export interface IOnboardingRepository {
 
   getOptions(): Promise<OnboardingOptions>;
   isUsernameAvailable(username: string): Promise<boolean>;
+
+  
+
   getMyProfileById(profileId: string): Promise<ProfileWithRelations>;
+
+  findProfileExists(profileId: string): Promise<boolean>;
+
+  getProfileId(userId: string): Promise<string | null>;
 }
 
 export interface IOnboardingService {
