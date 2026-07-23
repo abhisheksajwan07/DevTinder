@@ -27,9 +27,9 @@ const UNIQUE_ERROR_MAP: Record<string, { code: string; message: string }> = {
     code: "USERNAME_TAKEN",
     message: "Username already taken.",
   },
-  [DB_CONSTRAINTS.PROFILE_USERNAME_IDX]: {
-    code: "USERNAME_TAKEN",
-    message: "Username already taken.",
+  [DB_CONSTRAINTS.SWIPE_UNIQUE_TARGET]: {
+    code: "DUPLICATE_ACTION",
+    message: "You have already acted on this profile.",
   },
 };
 
@@ -47,7 +47,12 @@ export const handleDbError = (error: unknown): never => {
       if (mapped) {
         throw new AppError(mapped.message, 409, mapped.code, dbError);
       }
-      throw new AppError("A duplicate record exists.", 409, "DUPLICATE_RECORD", dbError);
+      throw new AppError(
+        "A duplicate record exists.",
+        409,
+        "DUPLICATE_RECORD",
+        dbError,
+      );
     }
 
     case PG_ERROR.FOREIGN_KEY: {
@@ -56,7 +61,12 @@ export const handleDbError = (error: unknown): never => {
       if (mapped) {
         throw new AppError(mapped.message, 400, mapped.code, dbError);
       }
-      throw new AppError("Invalid reference provided.", 400, "INVALID_REFERENCE", dbError);
+      throw new AppError(
+        "Invalid reference provided.",
+        400,
+        "INVALID_REFERENCE",
+        dbError,
+      );
     }
 
     case PG_ERROR.NOT_NULL:
