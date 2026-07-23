@@ -134,7 +134,7 @@ export const profiles = pgTable(
       .notNull(),
   },
   (table) => [
-    uniqueIndex("profiles_username_unique").on(table.userName),
+    
     index("profiles_user_id_idx").on(table.userId),
   ],
 );
