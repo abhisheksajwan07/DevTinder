@@ -4,6 +4,7 @@ declare global {
       user?: {
         userId: string;
         sessionId: string;
+        profileId?: string;
       };
     }
   }
