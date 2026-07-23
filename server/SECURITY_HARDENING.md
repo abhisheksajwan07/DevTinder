@@ -42,3 +42,13 @@ This makes database transactions cleaner and keeps each service focused on one r
 ## Onboarding Changes
 - isOnboarded in JWT now 
 - Remove it in Security Hardening when requireAccessAuth gets DB session validation 
+
+
+## SWIPE EDGE CASE
+- right now users can technically swipe on profiles not shown in the feed
+- feed_impressions table + validation in swipe service.
+
+## redis persistence
+Redis persistence not configured
+Job loss possible on Redis restart
+Fix: Enable AOF persistence in production Redis config
