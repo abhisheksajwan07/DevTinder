@@ -4,6 +4,7 @@ import { repository } from "../module/onboarding/onboarding.dependencies.js";
 import {
   EMBEDDING_QUEUE_NAME,
   EmbeddingJobData,
+  embeddingQueue,
 } from "../queues/embedding.queue.js";
 import { logger } from "../config/logger.js";
 import { and, eq, or } from "drizzle-orm";
@@ -70,6 +71,11 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
     if (result.length === 0) {
       logger.warn(
         `[Embedding Worker] Version mismatch for ${profileId} — newer job will handle it`,
+      );
+      await embeddingQueue.add(
+        "generate_embedding",
+        { profileId },
+        { jobId: `${profileId}-${Date.now()}` },
       );
       return;
     }
