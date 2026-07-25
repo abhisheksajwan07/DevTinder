@@ -71,6 +71,20 @@
       "when": 1784703267002,
       "tag": "0009_wise_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784878630156,
+      "tag": "0010_steady_butterfly",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784978407370,
+      "tag": "0011_little_domino",
+      "breakpoints": true
     }
   ]
 }

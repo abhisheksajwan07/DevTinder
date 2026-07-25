@@ -5,10 +5,15 @@ import {
   uniqueIndex,
   index,
   pgEnum,
+  check,
 } from "drizzle-orm/pg-core";
 
 import { profiles } from "./onboarding.schema.js";
-export const swipeActionEnum = pgEnum("swipe_action", ["skipped", "interested"]);
+import { sql } from "drizzle-orm";
+export const swipeActionEnum = pgEnum("swipe_action", [
+  "skipped",
+  "interested",
+]);
 
 export const connectionStatusEnum = pgEnum("connection_status", [
   "pending",
@@ -40,11 +45,17 @@ export const profileActions = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
+    
     uniqueIndex("unique_actor_target").on(
       table.actorProfileId,
       table.targetProfileId,
     ),
     index("idx_profile_actions_actor").on(table.actorProfileId),
     index("idx_profile_actions_target").on(table.targetProfileId),
+
+    check(
+      "profile_actions_different_profiles",
+      sql`${table.actorProfileId} <> ${table.targetProfileId}`,
+    ),
   ],
 );

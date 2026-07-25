@@ -30,10 +30,10 @@ export class SwipeService implements ISwipeService {
     });
   }
 
-  async accept(actorProfileId: string, targetProfileId: string) {
+  async accept(requesterProfileId: string, responderProfileId: string) {
     const pending = await this.swipeRepository.findPendingConnection(
-      actorProfileId,
-      targetProfileId,
+      requesterProfileId,
+      responderProfileId,
     );
     if (!pending) {
       throw new AppError(
@@ -43,21 +43,20 @@ export class SwipeService implements ISwipeService {
       );
     }
     await this.swipeRepository.updateStatus({
-      actorProfileId,
-      targetProfileId,
+      actorProfileId: requesterProfileId,
+      targetProfileId: responderProfileId,
       status: "accepted",
     });
 
     await matchingQueue.add("matching", {
-      actorProfileId,
-      targetProfileId,
+      connectionId: pending.id,
     });
   }
 
-  async reject(actorProfileId: string, targetProfileId: string) {
+  async reject(requesterProfileId: string, responderProfileId: string) {
     const pending = await this.swipeRepository.findPendingConnection(
-      actorProfileId,
-      targetProfileId,
+      requesterProfileId,
+      responderProfileId,
     );
 
     if (!pending) {
@@ -69,8 +68,8 @@ export class SwipeService implements ISwipeService {
     }
 
     await this.swipeRepository.updateStatus({
-      actorProfileId,
-      targetProfileId,
+      actorProfileId: requesterProfileId,
+      targetProfileId: responderProfileId,
       status: "rejected",
     });
   }
