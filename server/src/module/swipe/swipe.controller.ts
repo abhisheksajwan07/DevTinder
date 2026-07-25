@@ -5,38 +5,37 @@ import { ProfileParams } from "./swipe.types.js";
 import { logger } from "../../config/logger.js";
 
 export const skip = async (req: Request<ProfileParams>, res: Response) => {
-  
-  const actorProfileId = req.user!.profileId!;
+  const requesterProfileId = req.user!.profileId!;
   const targetProfileId = req.params.profileId;
 
-  await swipeService.skip(actorProfileId, targetProfileId);
+  await swipeService.skip(requesterProfileId, targetProfileId);
 
   return sendResponse(res, 201, "Profile skipped");
 };
 
 export const connect = async (req: Request<ProfileParams>, res: Response) => {
-  const actorProfileId = req.user!.profileId!;
+  const requesterProfileId = req.user!.profileId!;
   const targetProfileId = req.params.profileId;
 
-  await swipeService.connect(actorProfileId, targetProfileId);
+  await swipeService.connect(requesterProfileId, targetProfileId);
 
   return sendResponse(res, 201, "Connection request sent");
 };
 
 export const accept = async (req: Request<ProfileParams>, res: Response) => {
-   const actorProfileId = req.user!.profileId!;
-  const targetProfileId = req.params.profileId;
+  const requesterProfileId = req.params.profileId!;
+  const responderProfileId = req.user!.profileId!;
 
-  await swipeService.accept(actorProfileId, targetProfileId);
+  await swipeService.accept(requesterProfileId, responderProfileId);
 
   return sendResponse(res, 200, "Connection request accepted");
 };
 
 export const reject = async (req: Request<ProfileParams>, res: Response) => {
-  const targetProfileId = req.user!.profileId!;
-  const actorProfileId = req.params.profileId;
+  const requesterProfileId = req.params.profileId!;
+  const responderProfileId = req.user!.profileId!;
 
-  await swipeService.reject(actorProfileId, targetProfileId);
+  await swipeService.reject(requesterProfileId, responderProfileId);
 
   return sendResponse(res, 200, "Connection request rejected");
 };
