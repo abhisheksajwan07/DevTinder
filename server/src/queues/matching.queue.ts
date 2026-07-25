@@ -1,9 +1,9 @@
 import { Queue } from "bullmq";
 import { bullMQConnection } from "../config/redis.js";
 
-export const QUEUE_NAME = "matching";
+export const MATCH_QUEUE_NAME = "matching";
 
-export const matchingQueue = new Queue(QUEUE_NAME, {
+export const matchingQueue = new Queue(MATCH_QUEUE_NAME, {
   connection:  bullMQConnection,
   defaultJobOptions: {
     attempts: 3,
