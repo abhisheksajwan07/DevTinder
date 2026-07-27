@@ -10,6 +10,7 @@ import oauthRoutes from "./module/oauth/oauth.routes.js";
 import feedRoutes from "./module/feed/feed.routes.js";
 import swipeRoutes from "./module/swipe/swipe.routes.js";
 import onboardingRoutes from "./module/onboarding/onboarding.routes.js";
+import chatRoutes from "./module/chat/chat.routes.js";
 import "./workers/worker.email.js";
 import "./workers/worker.embedding.js";
 import "./workers/worker.match.js";
@@ -34,6 +35,7 @@ app.use("/v1/oauth", oauthRoutes);
 app.use("/v1/onboarding", onboardingRoutes);
 app.use("/v1/feed", feedRoutes);
 app.use("/v1/swipes", swipeRoutes);
+app.use("/v1/chat", chatRoutes);
 
 app.use(globalErrorHandler);
 

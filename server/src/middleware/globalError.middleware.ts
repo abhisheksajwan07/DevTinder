@@ -13,7 +13,8 @@ export const globalErrorHandler = (
   const statusCode = isAppError ? err.statusCode : 500;
   const status = isAppError ? err.status : "error";
   const dbError = getPostgresError(err);
-  const message = err instanceof Error ? err.message : "A non-error value was thrown";
+  const message =
+    err instanceof Error ? err.message : "A non-error value was thrown";
   const stack = err instanceof Error ? err.stack : undefined;
 
   const errorLog = {
@@ -32,7 +33,11 @@ export const globalErrorHandler = (
     stack,
   };
 
-  // Log only once at the global level
+  // Log raw error to terminal console during dev
+  if (process.env.NODE_ENV !== "production") {
+    logger.error({ err }, " [UNHANDLED RAW ERROR]:");
+  }
+
   logger.error(errorLog);
 
   if (isAppError) {
@@ -47,6 +52,8 @@ export const globalErrorHandler = (
   return res.status(500).json({
     success: false,
     status: "error",
-    message: "Something went wrong",
+    message:
+      process.env.NODE_ENV !== "production" ? message : "Something went wrong",
+    ...(process.env.NODE_ENV !== "production" && { stack }),
   });
 };

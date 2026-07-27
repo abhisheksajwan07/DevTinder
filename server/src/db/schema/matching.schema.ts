@@ -55,11 +55,10 @@ export const conversations = pgTable("conversation", {
     .references(() => matches.id, {
       onDelete: "cascade",
     }),
+  
   lastMessageAt: timestamp("last_message_at", {
     withTimezone: true,
-  })
-    .defaultNow()
-    .notNull(),
+  }),
 
   createdAt: timestamp("created_at", {
     withTimezone: true,

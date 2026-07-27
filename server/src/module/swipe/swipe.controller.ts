@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { sendResponse } from "../../utils/sendResponse.js";
 import { service as swipeService } from "./swipe.dependencies.js";
 import { ProfileParams } from "./swipe.types.js";
-import { logger } from "../../config/logger.js";
+
 
 export const skip = async (req: Request<ProfileParams>, res: Response) => {
   const requesterProfileId = req.user!.profileId!;

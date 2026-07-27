@@ -2,6 +2,7 @@ import { AppError } from "../utils/AppError.js";
 import { PG_ERROR } from "../constants/postgres-errors.js";
 import { DB_CONSTRAINTS } from "../constants/db-constraints.js";
 import { getPostgresError } from "./postgres-error.js";
+import { logger } from "../config/logger.js";
 
 const FK_ERROR_MAP: Record<string, { code: string; message: string }> = {
   [DB_CONSTRAINTS.PROFILE_SKILL]: {
@@ -34,7 +35,18 @@ const UNIQUE_ERROR_MAP: Record<string, { code: string; message: string }> = {
 };
 
 export const handleDbError = (error: unknown): never => {
+  // Automatically print raw error to terminal console (no need for manual console.log in repos)
+  if (process.env.NODE_ENV !== "production") {
+    logger.error(
+      {
+        err: error,
+      },
+      "Raw database error",
+    );
+  }
+
   const dbError = getPostgresError(error);
+
 
   if (!dbError) {
     throw error;
@@ -86,5 +98,12 @@ export const handleDbError = (error: unknown): never => {
       );
   }
 
-  throw error;
+  const message = error instanceof Error ? error.message : "Database operation failed";
+  throw new AppError(
+    message,
+    500,
+    "DATABASE_ERROR",
+    dbError,
+  );
 };
+
