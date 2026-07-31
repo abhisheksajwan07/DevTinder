@@ -33,6 +33,7 @@ export type ConversationRow = {
   type: string | null;
   content: string | null;
   created_at: Date | null;
+  unread_count: number;
 };
 export type ConversationListItem = {
   conversationId: string;
@@ -43,6 +44,8 @@ export type ConversationListItem = {
   username: string;
   avatarUrl: string | null;
   lastMessage: LastMessage | null;
+  isOnline: boolean;
+  unreadCount: number;
 };
 
 export interface IChatRepository {
@@ -58,5 +61,14 @@ export interface IChatRepository {
     limit?: number,
   ): Promise<Message[]>;
 
-  getUserConversations(profileId: string): Promise<ConversationListItem[] | undefined>;
+  getUserConversations(
+    profileId: string,
+  ): Promise<ConversationListItem[] | undefined>;
+
+  markMessagesAsRead(
+    conversationId: string,
+    profileId: string,
+  ): Promise<number>;
+
+  getConversationMembersProfileIds(profileId: string): Promise<string[]>;
 }

@@ -10,6 +10,7 @@ import {
 import { conversations } from "./matching.schema.js";
 import { profiles } from "../schema/onboarding.schema.js";
 
+
 export const messageTypeEnum = pgEnum("message_type", [
   "text",
   "image",
@@ -37,6 +38,9 @@ export const messages = pgTable(
     })
       .defaultNow()
       .notNull(),
+    readAt: timestamp("readAt", {
+      withTimezone: true,
+    }),
   },
   (table) => [
     index("messages_conversation_created_idx").on(

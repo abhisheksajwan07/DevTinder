@@ -1,4 +1,4 @@
-import { and, desc, eq, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { conversations, db, matches } from "../../db/drizzle.js";
 import { messages } from "../../db/schema/message.schema.js";
 import {
@@ -89,7 +89,8 @@ export class ChatRepository implements IChatRepository {
           lm.sender_profile_id,
           lm.type,
           lm.content,
-          lm.created_at
+          lm.created_at,
+          COALESCE(uc.count, 0) AS unread_count
       FROM conversation c
 
       JOIN matches m
@@ -123,6 +124,14 @@ export class ChatRepository implements IChatRepository {
         LIMIT 1
       ) lm ON TRUE
 
+      LEFT JOIN LATERAL (
+        SELECT COUNT(*)::int AS count
+        FROM messages msg
+        WHERE msg.conversation_id = c.id
+          AND msg.sender_profile_id != ${profileId}
+          AND msg.read_at IS NULL
+      ) uc ON TRUE
+
       WHERE 
           m.profile_one_id=${profileId}
           OR 
@@ -150,10 +159,52 @@ export class ChatRepository implements IChatRepository {
           username: row.username,
           avatarUrl: row.avatar_url,
           lastMessage,
+          isOnline: false,
+          unreadCount: row.unread_count,
         };
       });
     } catch (err) {
       handleDbError(err);
     }
+  }
+
+  async markMessagesAsRead(
+    conversationId: string,
+    profileId: string,
+  ): Promise<number> {
+    const updated = await db
+      .update(messages)
+      .set({
+        readAt: new Date(),
+      })
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          ne(messages.senderProfileId, profileId),
+          isNull(messages.readAt),
+        ),
+      );
+    return updated.rowCount ?? 0;
+  }
+
+  async getConversationMembersProfileIds(profileId: string): Promise<string[]> {
+    const result = await db
+      .select({
+        profileOneId: matches.profileOneId,
+        profileTwoId: matches.profileTwoId,
+      })
+      .from(conversations)
+      .innerJoin(matches, eq(conversations.matchId, matches.id))
+      .where(
+        or(
+          eq(matches.profileOneId, profileId),
+          eq(matches.profileTwoId, profileId),
+        ),
+      );
+
+    const counterparties = result.map((r) =>
+      r.profileOneId === profileId ? r.profileTwoId : r.profileOneId,
+    );
+    return [...new Set(counterparties)];
   }
 }
