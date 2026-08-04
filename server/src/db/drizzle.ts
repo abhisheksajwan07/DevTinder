@@ -8,6 +8,7 @@ import * as usersSchema from "./schema/users.schema.js";
 import * as onboardingSchema from "./schema/onboarding.schema.js";
 import * as profileActionSchema from "./schema/profile-actions.schema.js";
 import * as matchingSchema from "./schema/matching.schema.js";
+import * as githubSchema from "./schema/github.schema.js";
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
 });
@@ -20,6 +21,7 @@ export const db = drizzle(pool, {
     ...onboardingSchema,
     ...profileActionSchema,
     ...matchingSchema,
+    ...githubSchema,
   },
 });
 
@@ -29,3 +31,4 @@ export * from "./schema/users.schema.js";
 export * from "./schema/onboarding.schema.js";
 export * from "./schema/profile-actions.schema.js";
 export * from "./schema/matching.schema.js";
+export * from "./schema/github.schema.js";

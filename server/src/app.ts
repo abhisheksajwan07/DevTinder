@@ -11,10 +11,13 @@ import feedRoutes from "./module/feed/feed.routes.js";
 import swipeRoutes from "./module/swipe/swipe.routes.js";
 import onboardingRoutes from "./module/onboarding/onboarding.routes.js";
 import chatRoutes from "./module/chat/chat.routes.js";
+import githubRoutes from "./module/github/github.routes.js";
+import profileRoutes from "./module/profile/profile.routes.js";
 
 import "./workers/worker.email.js";
 import "./workers/worker.embedding.js";
 import "./workers/worker.match.js";
+import "./workers/worker.github.js";
 
 import { globalLimiter } from "./middleware/global.rate-limit.js";
 import { serverAdapter } from "./bull-board.js";
@@ -38,6 +41,8 @@ app.use("/v1/onboarding", onboardingRoutes);
 app.use("/v1/feed", feedRoutes);
 app.use("/v1/swipes", swipeRoutes);
 app.use("/v1/chat", chatRoutes);
+app.use("/v1/github", githubRoutes);
+app.use("/v1/profiles", profileRoutes);
 
 
 app.use(globalErrorHandler);

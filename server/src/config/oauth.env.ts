@@ -7,6 +7,7 @@ const oauthEnvSchema = z.object({
   GITHUB_CLIENT_ID: z.string().min(1),
   GITHUB_CLIENT_SECRET: z.string().min(1),
   GITHUB_REDIRECT_URI: z.string().min(1),
+  GITHUB_CONNECT_REDIRECT_URI: z.string().min(1).optional(),
 });
 
 const parsed = oauthEnvSchema.safeParse(process.env);
