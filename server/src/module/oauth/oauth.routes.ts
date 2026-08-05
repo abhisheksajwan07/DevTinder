@@ -4,7 +4,10 @@ import {
   googleRedirectController,
   githubRedirectController,
   githubCallbackController,
+  githubConnectRedirectController,
+  githubConnectCallbackController,
 } from "./oauth.controller.js";
+import { requireAccessAuth } from "../../middleware/auth.middleware.js";
 import {
   oauthCallbackLimiter,
   oauthRedirectLimiter,
@@ -16,6 +19,12 @@ const router = Router();
 
 router.get("/google", oauthRedirectLimiter, googleRedirectController);
 router.get("/github", oauthRedirectLimiter, githubRedirectController);
+router.get(
+  "/github/connect",
+  requireAccessAuth,
+  oauthRedirectLimiter,
+  githubConnectRedirectController,
+);
 
 
 router.get(
@@ -28,6 +37,12 @@ router.get(
   "/github/callback",
   oauthCallbackLimiter,
   githubCallbackController,
+);
+router.get(
+  "/github/connect/callback",
+  requireAccessAuth,
+  oauthCallbackLimiter,
+  githubConnectCallbackController,
 );
 
 export default router;

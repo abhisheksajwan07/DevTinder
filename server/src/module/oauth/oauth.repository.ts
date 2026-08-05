@@ -1,4 +1,10 @@
-import { db, users, authAccounts, emailCredentials } from "../../db/drizzle.js";
+import {
+  db,
+  users,
+  authAccounts,
+  emailCredentials,
+  profiles,
+} from "../../db/drizzle.js";
 
 import { eq, and } from "drizzle-orm";
 
@@ -77,6 +83,16 @@ export class OAuthRepository implements OAuthRepositoryInterface {
       .update(authAccounts)
       .set(data)
       .where(eq(authAccounts.id, authAccountId));
+  }
+
+  async findProfileIdByUserId(userId: string): Promise<string | null> {
+    const [profile] = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+
+    return profile?.id ?? null;
   }
 
   async createOAuthUser(

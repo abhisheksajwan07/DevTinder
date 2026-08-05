@@ -105,9 +105,6 @@ export const profiles = pgTable(
 
     availability: weeklyAvailabilityEnum("availability").notNull(),
 
-    githubUsername: varchar("github_username", {
-      length: 35,
-    }),
     projectDescription: text("project_description"),
 
     embeddingStatus: embeddingStatusEnum("embedding_status")
