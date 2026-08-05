@@ -12,7 +12,7 @@ export class OAuthService implements IOAuthService {
   constructor(
     private readonly repository: OAuthRepositoryInterface,
     private readonly sessionService: ISessionService,
-  ) {}
+  ) { }
 
   async loginWithOAuth(
     provider: OAuthProvider,
@@ -26,14 +26,17 @@ export class OAuthService implements IOAuthService {
   ): Promise<
     OAuthUserResult & { accessToken: string; rawRefreshToken: string }
   > {
-    const tokenExpiresAt = new Date(
-      Date.now() + providerTokens.expiresIn * 1000,
-    );
-    // step1 : is this oauth ever logged before?
+
+    const tokenExpiresAt = providerTokens.expiresIn > 0
+      ? new Date(Date.now() + providerTokens.expiresIn * 1000)
+      : null;
+
+    // step1 : is this oauth ever logged before
     const existingAuthAccount = await this.repository.findAuthAccount(
       provider,
-      profile.id, // providerAccountId — never changes even if email changes
+      profile.id, // providerAccountId 
     );
+
 
     if (existingAuthAccount) {
       const user = await this.repository.findUserById(
@@ -76,7 +79,7 @@ export class OAuthService implements IOAuthService {
         {
           email: profile.email,
         },
-        
+
         {
           provider,
           providerAccountId: profile.id,
@@ -126,6 +129,55 @@ export class OAuthService implements IOAuthService {
       isNewUser: false,
       accessToken,
       rawRefreshToken,
+    };
+  }
+
+  async connectGitHub(
+    userId: string,
+    profile: OAuthProfile,
+    providerTokens: {
+      accessToken: string;
+      refreshToken?: string;
+      expiresIn: number;
+    },
+  ): Promise<{ profileId: string | null }> {
+    const tokenExpiresAt = providerTokens.expiresIn > 0
+      ? new Date(Date.now() + providerTokens.expiresIn * 1000)
+      : null;
+
+    const existingAccount = await this.repository.findAuthAccount(
+      "github",
+      profile.id,
+    );
+
+    if (existingAccount && existingAccount.userId !== userId) {
+      throw new AppError(
+        "This GitHub account is already connected to another user.",
+        409,
+        "GITHUB_ACCOUNT_ALREADY_CONNECTED",
+      );
+    }
+
+    if (existingAccount) {
+      await this.repository.updateProviderTokens(existingAccount.id, {
+        providerAccessToken: providerTokens.accessToken,
+        providerRefreshToken: providerTokens.refreshToken,
+        providerTokenExpiresAt: tokenExpiresAt,
+      });
+    } else {
+      await this.repository.createOAuthAccount({
+        userId,
+        provider: "github",
+        providerAccountId: profile.id,
+        providerEmail: profile.email,
+        providerAccessToken: providerTokens.accessToken,
+        providerRefreshToken: providerTokens.refreshToken,
+        providerTokenExpiresAt: tokenExpiresAt,
+      });
+    }
+
+    return {
+      profileId: await this.repository.findProfileIdByUserId(userId),
     };
   }
 }

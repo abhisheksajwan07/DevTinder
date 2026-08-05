@@ -10,7 +10,7 @@ export const globalLimiter = rateLimit({
   handler: (_, res) => {
     res.status(429).json({
       success: false,
-      message: "Too many registration attempts. Please try again later.",
+      message: "Too many requests. Please try again later.",
     });
   },
 });

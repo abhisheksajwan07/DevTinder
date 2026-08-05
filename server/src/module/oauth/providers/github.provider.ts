@@ -29,18 +29,24 @@ export class GithubProvider {
   private readonly githubClientId = oauthEnv.GITHUB_CLIENT_ID;
   private readonly githubClientSecret = oauthEnv.GITHUB_CLIENT_SECRET;
   private readonly redirectUri = oauthEnv.GITHUB_REDIRECT_URI;
+  private readonly connectRedirectUri =
+    oauthEnv.GITHUB_CONNECT_REDIRECT_URI ??
+    this.redirectUri.replace(/\/github\/callback$/, "/github/connect/callback");
 
-  generateAuthUrl(state: string): string {
+  generateAuthUrl(state: string, redirectUri = this.redirectUri): string {
     const params = new URLSearchParams({
       client_id: this.githubClientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: redirectUri,
       scope: SCOPES,
       state, // CSRF protection
     });
     return `https://github.com/login/oauth/authorize?${params.toString()}`;
   }
 
-  async exchangeCodeForTokens(code: string): Promise<GitHubTokenResponse> {
+  async exchangeCodeForTokens(
+    code: string,
+    redirectUri = this.redirectUri,
+  ): Promise<GitHubTokenResponse> {
     const res = await fetch("https://github.com/login/oauth/access_token", {
       method: "POST",
       headers: {
@@ -51,7 +57,7 @@ export class GithubProvider {
         code,
         client_id: this.githubClientId,
         client_secret: this.githubClientSecret,
-        redirect_uri: this.redirectUri,
+        redirect_uri: redirectUri,
       }),
     });
 
@@ -61,6 +67,10 @@ export class GithubProvider {
     }
 
     return res.json() as Promise<GitHubTokenResponse>;
+  }
+
+  getConnectRedirectUri(): string {
+    return this.connectRedirectUri;
   }
 
   async getUserProfile(accessToken: string): Promise<OAuthProfile> {

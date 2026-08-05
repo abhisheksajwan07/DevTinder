@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { env } from "../config/env.js";
 
-const isProd = env.NODE_ENV === "prod";
+const isProd = env.NODE_ENV === "production";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -48,6 +48,8 @@ export const setOauthStateCookie = (res: Response, state: string) => {
     ...COOKIE_OPTIONS,
     maxAge: 10 * 60 * 1000, // 10 minutes
   });
+
+  
 };
 
 export const clearOauthStateCookie = (res: Response) => {

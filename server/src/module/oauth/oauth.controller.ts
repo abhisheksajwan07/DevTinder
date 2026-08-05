@@ -11,6 +11,8 @@ import { googleProvider } from "./providers/google.provider.js";
 import { githubProvider } from "./providers/github.provider.js";
 import { oauthCallbackSchema } from "./oauth.validator.js";
 import { sendOAuthSuccess } from "./oauth.helper.js";
+import { githubSyncQueue } from "../../queues/github-sync.queue.js";
+import { sendResponse } from "../../utils/sendResponse.js";
 
 export const googleRedirectController = async (
   _req: Request,
@@ -21,6 +23,7 @@ export const googleRedirectController = async (
   const authUrl = googleProvider.generateAuthUrl(state);
   res.redirect(authUrl);
 };
+
 export const googleCallbackController = async (
   req: Request,
   res: Response,
@@ -189,5 +192,97 @@ export const githubCallbackController = async (
       avatar: profile.avatar ?? "",
       githubLogin: profile.githubLogin,
     },
+  });
+};
+
+export const githubConnectRedirectController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  if (!req.user?.userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const state = crypto.randomBytes(32).toString("hex");
+  setOauthStateCookie(res, state);
+  res.redirect(
+    githubProvider.generateAuthUrl(state, githubProvider.getConnectRedirectUri()),
+  );
+};
+
+export const githubConnectCallbackController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  if (!req.user?.userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const parsed = oauthCallbackSchema.safeParse(req.query);
+  if (!parsed.success) {
+    throw new AppError(
+      "Invalid callback parameters.",
+      400,
+      "INVALID_OAUTH_PARAMS",
+    );
+  }
+
+  const { code, state, error } = parsed.data;
+  if (error) {
+    throw new AppError(
+      "GitHub OAuth was denied by the user.",
+      400,
+      "OAUTH_ACCESS_DENIED",
+    );
+  }
+
+  const cookieState = req.cookies?.oauth_state;
+  if (!state || !cookieState || state !== cookieState) {
+    throw new AppError(
+      "Invalid or expired OAuth state.",
+      400,
+      "INVALID_OAUTH_STATE",
+    );
+  }
+  clearOauthStateCookie(res);
+
+  if (!code) {
+    throw new AppError(
+      "Authorization code missing from GitHub callback.",
+      400,
+      "MISSING_OAUTH_CODE",
+    );
+  }
+
+  const tokens = await githubProvider.exchangeCodeForTokens(
+    code,
+    githubProvider.getConnectRedirectUri(),
+  );
+  if (!tokens?.access_token) {
+    throw new AppError(
+      "Failed to obtain tokens from GitHub.",
+      500,
+      "OAUTH_TOKEN_ERROR",
+    );
+  }
+
+  const profile = await githubProvider.getUserProfile(tokens.access_token);
+  const { profileId } = await oauthService.connectGitHub(
+    req.user.userId,
+    profile,
+    {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiresIn: tokens.expires_in ?? 0,
+    },
+  );
+
+  if (profileId) {
+    await githubSyncQueue.add("github_sync", { profileId });
+  }
+
+  sendResponse(res, 200, "GitHub connected successfully", {
+    connected: true,
+    syncStarted: Boolean(profileId),
   });
 };

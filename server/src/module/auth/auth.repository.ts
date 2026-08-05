@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { db, sessions } from "../../db/drizzle.js";
 import { users, emailCredentials } from "../../db/drizzle.js";
@@ -10,6 +10,7 @@ export class AuthRepository implements IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    hasEmailCredentials: boolean;
     isVerified: boolean | null;
     passwordHash: string | null;
     loginAttempts: number | null;
@@ -20,6 +21,10 @@ export class AuthRepository implements IAuthRepository {
         id: users.id,
         email: users.email,
         onBoardingComplete: users.onBoardingComplete,
+        // Explicit flag: true only when an email_credentials row exists for this user
+        hasEmailCredentials: sql<boolean>`
+          CASE WHEN ${emailCredentials.userId} IS NOT NULL THEN true ELSE false END
+        `,
         isVerified: emailCredentials.isVerified,
         passwordHash: emailCredentials.passwordHash,
         loginAttempts: emailCredentials.loginAttempts,

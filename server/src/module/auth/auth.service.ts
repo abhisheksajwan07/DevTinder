@@ -27,6 +27,7 @@ import {
   hashResetToken,
   storeResetToken,
 } from "./auth.utils.js";
+import { handleDbError } from "../../errors/database-error.js";
 
 export class AuthService {
   // private authRepository: IAuthRepository;
@@ -61,7 +62,7 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      onBoardingComplete : user.onBoardingComplete,
+      onBoardingComplete: user.onBoardingComplete,
     };
   }
 
@@ -72,6 +73,16 @@ export class AuthService {
       await this.authRepository.findUserByEmail(normalisedEmail);
 
     if (existingUser) {
+      // User identity exists but was created via OAuth (no email_credentials row)
+      // Direct them to sign in with their social provider instead
+      if (!existingUser.hasEmailCredentials) {
+        throw new AppError(
+          "This email is already linked to a social account (GitHub/Google). Please sign in with that provider instead.",
+          409,
+          "OAUTH_ACCOUNT_EXISTS",
+        );
+      }
+
       if (existingUser.isVerified) {
         throw new AppError(
           "Registration failed. Please check your inputs.",
@@ -95,13 +106,7 @@ export class AuthService {
     try {
       const newUser = await this.authRepository.createUser(repoPayload);
     } catch (error: any) {
-      if (error?.code === "23505") {
-        throw new AppError(
-          "Registration failed. Please check your inputs.",
-          409,
-        );
-      }
-      throw error;
+      return handleDbError(error);
     }
 
     await this.sendVerificationOtp(normalisedEmail);
@@ -173,6 +178,18 @@ export class AuthService {
   }
 
   async resendVerificationOtp(email: string) {
+    const cooldownKey = `otp_resend_cooldown:${email}`;
+
+    const isCoolingDown = await redis.exists(cooldownKey);
+
+    if (isCoolingDown) {
+      throw new AppError(
+        "Please  wait 60s before requesting another OTP.",
+        429,
+        "OTP_RESEND_RATE_LIMITED",
+      );
+    }
+
     const user = await this.authRepository.findUserByEmail(email);
 
     if (!user) {
@@ -184,17 +201,6 @@ export class AuthService {
         "Email already verified.",
         400,
         "EMAIL_ALREADY_VERIFIED",
-      );
-    }
-    const cooldownKey = `otp_resend_cooldown:${email}`;
-
-    const isCoolingDown = await redis.exists(cooldownKey);
-
-    if (isCoolingDown) {
-      throw new AppError(
-        "Please wait before requesting another OTP.",
-        429,
-        "OTP_RESEND_RATE_LIMITED",
       );
     }
 
@@ -226,13 +232,7 @@ export class AuthService {
         " ACCOUNT_LOCKED",
       );
     }
-    const isValid = await comparePassword(data.password, user.passwordHash);
 
-    if (!isValid) {
-      const attemptData = getNextLoginAttemptData(user.loginAttempts ?? 0);
-      await this.authRepository.updateLoginAttempts(user.id, attemptData);
-      throw new AppError("invalid credentials", 401, "INVALID_CREDENTIALS");
-    }
     if (!user.isVerified) {
       throw new AppError(
         "Please verify your email.",
@@ -240,6 +240,15 @@ export class AuthService {
         "EMAIL_NOT_VERIFIED",
       );
     }
+    
+    const isValid = await comparePassword(data.password, user.passwordHash);
+
+    if (!isValid) {
+      const attemptData = getNextLoginAttemptData(user.loginAttempts ?? 0);
+      await this.authRepository.updateLoginAttempts(user.id, attemptData);
+      throw new AppError("invalid credentials", 401, "INVALID_CREDENTIALS");
+    }
+
     await this.authRepository.updateLoginAttempts(
       user.id,
       getClearedAttemptData(),
@@ -279,9 +288,11 @@ export class AuthService {
       {
         email,
         resetUrl,
+        idempotencyKey: `reset-password:${hashToken}`,
       },
       {
         priority: 1,
+        jobId: `reset-password:${email}`, // same jobId = no duplicate job
       },
     );
 
@@ -299,6 +310,7 @@ export class AuthService {
         "INVALID_OR_EXPIRED_TOKEN",
       );
     }
+
     const passwordHash = await hashPassword(dto.newPassword);
 
     await this.authRepository.updatePasswordHash(userId, passwordHash);

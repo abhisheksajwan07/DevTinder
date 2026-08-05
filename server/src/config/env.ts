@@ -5,7 +5,7 @@ import { z } from "zod";
 import { StringValue } from "ms";
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["dev", "prod"]).default("dev"),
+  NODE_ENV: z.enum(["development", "production"]).default("development"),
 
   PORT: z.coerce.number().default(3000),
   CLIENT_URL: z.url(),

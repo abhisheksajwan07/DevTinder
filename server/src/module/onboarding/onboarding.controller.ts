@@ -22,6 +22,7 @@ export const getMyProfileController = async (req: Request, res: Response) => {
   sendResponse(res, 200, "Profile fetched successfully", { profile });
 };
 
+
 export const updateProfileController = async (req: Request, res: Response) => {
   if (!req.user) {
     return sendResponse(res, 401, "Unauthorized");

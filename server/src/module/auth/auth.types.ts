@@ -10,6 +10,7 @@ export interface IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    hasEmailCredentials: boolean;
     isVerified: boolean | null;
     passwordHash: string | null;
     loginAttempts: number | null;

@@ -91,11 +91,17 @@ export class ChatRepository implements IChatRepository {
           lm.content,
           lm.created_at,
           COALESCE(uc.count, 0) AS unread_count
+
+      -- Conversation
+
       FROM conversation c
+
+      -- Match
 
       JOIN matches m
       ON m.id = c.match_id
 
+      -- Other user profile
 
       JOIN profiles p on p.id = 
       CASE 
@@ -105,6 +111,8 @@ export class ChatRepository implements IChatRepository {
       END
 
       JOIN avatars a on a.id = p.avatar_id
+
+      -- latest message
 
       LEFT JOIN LATERAL (
 
@@ -124,6 +132,8 @@ export class ChatRepository implements IChatRepository {
         LIMIT 1
       ) lm ON TRUE
 
+      -- unread count
+      
       LEFT JOIN LATERAL (
         SELECT COUNT(*)::int AS count
         FROM messages msg
@@ -144,12 +154,12 @@ export class ChatRepository implements IChatRepository {
           row.message_id === null
             ? null
             : {
-                messageId: row.message_id,
-                senderProfileId: row.sender_profile_id!,
-                type: row.type!,
-                content: row.content!,
-                createdAt: row.created_at!,
-              };
+              messageId: row.message_id,
+              senderProfileId: row.sender_profile_id!,
+              type: row.type!,
+              content: row.content!,
+              createdAt: row.created_at!,
+            };
         return {
           conversationId: row.conversation_id,
           lastMessageAt: row.last_message_at,

@@ -15,7 +15,7 @@ export interface OAuthProfile {
   name: string;
   avatar?: string;
   emailVerified: boolean;
-  githubLogin?: string; // only set for GitHub OAuth — the raw login e.g. "abhishek"
+  githubLogin?: string; // github user name
 }
 
 export interface OAuthUserResult {
@@ -31,7 +31,7 @@ export interface CreateOAuthAccountInput {
 
   providerAccessToken?: string;
   providerRefreshToken?: string;
-  providerTokenExpiresAt?: Date;
+  providerTokenExpiresAt?: Date | null;
 }
 
 export type CreateOAuthAccountInputWithoutUserId = Omit<
@@ -42,7 +42,7 @@ export type CreateOAuthAccountInputWithoutUserId = Omit<
 export interface ProviderTokenUpdate {
   providerAccessToken?: string;
   providerRefreshToken?: string;
-  providerTokenExpiresAt?: Date;
+  providerTokenExpiresAt?: Date | null;
 }
 
 export interface OAuthRepositoryInterface {
@@ -68,6 +68,8 @@ export interface OAuthRepositoryInterface {
     authAccountId: string,
     data: ProviderTokenUpdate,
   ): Promise<void>;
+
+  findProfileIdByUserId(userId: string): Promise<string | null>;
 }
 
 export interface IOAuthService {
@@ -83,4 +85,14 @@ export interface IOAuthService {
   ): Promise<
     OAuthUserResult & { accessToken: string; rawRefreshToken: string }
   >;
+
+  connectGitHub(
+    userId: string,
+    profile: OAuthProfile,
+    providerTokens: {
+      accessToken: string;
+      refreshToken?: string;
+      expiresIn: number;
+    },
+  ): Promise<{ profileId: string | null }>;
 }
