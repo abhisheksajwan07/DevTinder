@@ -1,4 +1,4 @@
-import { eq, ilike, inArray, sql, InferSelectModel } from "drizzle-orm";
+import { and, eq, ilike, inArray, sql, InferSelectModel } from "drizzle-orm";
 
 import {
   db,
@@ -11,6 +11,9 @@ import {
   interests,
   lookingFor,
   avatars,
+  githubProfiles,
+  githubRepositories,
+  authAccounts,
 } from "../../db/drizzle.js";
 import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import {
@@ -76,8 +79,6 @@ export class OnBoardingRepository implements IOnboardingRepository {
     return this.loadProfileRelations(profile[0]);
   }
 
- 
-
   async getMyProfileById(profileId: string): Promise<ProfileWithRelations> {
     const profile = await db
       .select()
@@ -90,6 +91,20 @@ export class OnBoardingRepository implements IOnboardingRepository {
     }
 
     return this.loadProfileRelations(profile[0]);
+  }
+
+  async getProfileByUsername(username: string): Promise<ProfileWithRelations> {
+    const [profile] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userName, username))
+      .limit(1);
+
+    if (!profile) {
+      throw new AppError("Profile not found", 404);
+    }
+
+    return this.loadProfileRelations(profile);
   }
 
   async findProfileExists(profileId: string): Promise<boolean> {
@@ -108,6 +123,21 @@ export class OnBoardingRepository implements IOnboardingRepository {
       .where(eq(profiles.userId, userId));
 
     return profile?.id ?? null;
+  }
+
+  async hasGitHubAuthAccount(userId: string): Promise<boolean> {
+    const [account] = await db
+      .select({ id: authAccounts.id })
+      .from(authAccounts)
+      .where(
+        and(
+          eq(authAccounts.userId, userId),
+          eq(authAccounts.provider, "github"),
+        ),
+      )
+      .limit(1);
+
+    return Boolean(account);
   }
 
   async updateProfile(
@@ -221,7 +251,6 @@ export class OnBoardingRepository implements IOnboardingRepository {
         primaryRole: data.primaryRole,
         experienceLevel: data.experienceLevel,
         availability: data.availability,
-        githubUsername: data.githubUsername,
         projectDescription: data.projectDescription,
       })
       .returning({ id: profiles.id });
@@ -374,7 +403,14 @@ export class OnBoardingRepository implements IOnboardingRepository {
   ): Promise<ProfileWithRelations> {
     const profileId = profile.id;
 
-    const [skillsRows, interestsRows, lookingForRows, avatarRows] =
+    const [
+      skillsRows,
+      interestsRows,
+      lookingForRows,
+      avatarRows,
+      githubProfileRows,
+      featuredGitHubRepositories,
+    ] =
       await Promise.all([
         db
           .select({
@@ -407,6 +443,27 @@ export class OnBoardingRepository implements IOnboardingRepository {
           .where(eq(profileLookingFor.profileId, profileId)),
 
         db.select().from(avatars).where(eq(avatars.id, profile.avatarId)),
+
+        db
+          .select({ username: githubProfiles.username })
+          .from(githubProfiles)
+          .where(eq(githubProfiles.profileId, profileId))
+          .limit(1),
+
+        db
+          .select({
+            name: githubRepositories.name,
+            description: githubRepositories.description,
+            language: githubRepositories.language,
+          })
+          .from(githubRepositories)
+          .where(
+            and(
+              eq(githubRepositories.profileId, profileId),
+              eq(githubRepositories.isFeatured, true),
+            ),
+          )
+          .limit(3),
       ]);
 
     return {
@@ -415,6 +472,12 @@ export class OnBoardingRepository implements IOnboardingRepository {
       interests: interestsRows,
       lookingFor: lookingForRows,
       avatar: avatarRows[0] ?? null,
+      github: githubProfileRows[0]
+        ? {
+            username: githubProfileRows[0].username,
+            featuredRepositories: featuredGitHubRepositories,
+          }
+        : null,
     };
   }
 }

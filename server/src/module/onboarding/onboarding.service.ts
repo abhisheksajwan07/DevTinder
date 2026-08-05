@@ -1,4 +1,5 @@
 import { embeddingQueue } from "../../queues/embedding.queue.js";
+import { githubSyncQueue } from "../../queues/github-sync.queue.js";
 import {
   IOnboardingRepository,
   IOnboardingService,
@@ -7,19 +8,35 @@ import {
 import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 
 export class OnboardingService implements IOnboardingService {
-  constructor(private repository: IOnboardingRepository) {}
+  constructor(private repository: IOnboardingRepository) { }
 
   async createProfile(userId: string, data: CreateProfileDTO): Promise<void> {
+
     const profileId = await this.repository.createProfile(userId, data);
-    await embeddingQueue.add(
-      "generate_embedding",
-      { profileId },
-      { jobId: `${profileId}-${Date.now()}` },
-    );
+
+
+
+    if (await this.repository.hasGitHubAuthAccount(userId)) {
+      await githubSyncQueue.add(
+        "github_sync",
+        { profileId },
+        { jobId: `embed-${profileId}` },
+      );
+    } else {
+      await embeddingQueue.add(
+        "generate_embedding",
+        { profileId },
+        { jobId: `embed-${profileId}` },
+      );
+    }
   }
 
   async getMyProfile(userId: string) {
     return await this.repository.getMyProfile(userId);
+  }
+
+  async getProfileByUsername(username: string) {
+    return await this.repository.getProfileByUsername(username);
   }
 
   async updateProfile(userId: string, data: UpdateProfileDTO): Promise<void> {
@@ -28,7 +45,7 @@ export class OnboardingService implements IOnboardingService {
     await embeddingQueue.add(
       "generate_embedding",
       { profileId: profile.id },
-      { jobId: `${profile.id}-${Date.now()}` },
+      { jobId: `embed-${profile.id}`, removeOnComplete: true },
     );
   }
   async getOptions(): Promise<OnboardingOptions> {

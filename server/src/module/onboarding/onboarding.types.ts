@@ -6,6 +6,7 @@ import {
   interests,
   lookingFor,
   avatars,
+  githubRepositories,
 } from "../../db/drizzle.js";
 
 export type ProfileWithRelations = InferSelectModel<typeof profiles> & {
@@ -13,11 +14,20 @@ export type ProfileWithRelations = InferSelectModel<typeof profiles> & {
   interests: Pick<InferSelectModel<typeof interests>, "id" | "name">[];
   lookingFor: Pick<InferSelectModel<typeof lookingFor>, "id" | "name">[];
   avatar: InferSelectModel<typeof avatars> | null;
+  github: {
+    username: string;
+    featuredRepositories: Pick<
+      InferSelectModel<typeof githubRepositories>,
+      "name" | "description" | "language"
+    >[];
+  } | null;
 };
 export interface IOnboardingRepository {
   createProfile(userId: string, data: CreateProfileDTO): Promise<string>;
 
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
+
+  getProfileByUsername(username: string): Promise<ProfileWithRelations>;
 
   updateProfile(profileId: string, data: UpdateProfileDTO): Promise<void>;
 
@@ -31,11 +41,14 @@ export interface IOnboardingRepository {
   findProfileExists(profileId: string): Promise<boolean>;
 
   getProfileId(userId: string): Promise<string | null>;
+
+  hasGitHubAuthAccount(userId: string): Promise<boolean>;
 }
 
 export interface IOnboardingService {
   createProfile(userId: string, data: CreateProfileDTO): Promise<void>;
   getMyProfile(userId: string): Promise<ProfileWithRelations>;
+  getProfileByUsername(username: string): Promise<ProfileWithRelations>;
   updateProfile(userId: string, data: UpdateProfileDTO): Promise<void>;
   getOptions(): Promise<OnboardingOptions>;
   checkUserName(username: string): Promise<boolean>;
