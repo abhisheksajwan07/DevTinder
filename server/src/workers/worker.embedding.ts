@@ -75,7 +75,7 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
       await embeddingQueue.add(
         "generate_embedding",
         { profileId },
-        { jobId: `${profileId}-${Date.now()}` },
+        { jobId: `embed-${profileId}` },
       );
       return;
     }

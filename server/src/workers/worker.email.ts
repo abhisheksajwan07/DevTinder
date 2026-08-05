@@ -48,13 +48,18 @@ export const emailWorker = new Worker(
     }
 
     if (job.name === "send-reset-password") {
-      const { email, resetUrl } = job.data;
-      await resend.emails.send({
-        from: "DevTinder <onboarding@resend.dev>",
-        to: email,
-        subject: "Reset your DevTinder Password",
-        html: getResetPasswordTemplate(resetUrl),
-      });
+      const { email, resetUrl, idempotencyKey } = job.data;
+      await resend.emails.send(
+        {
+          from: "DevTinder <onboarding@resend.dev>",
+          to: email,
+          subject: "Reset your DevTinder Password",
+          html: getResetPasswordTemplate(resetUrl),
+        },
+        {
+          idempotencyKey,
+        },
+      );
       logger.info(`[Email Worker]: reset password email delivered to ${email}`);
     }
   },

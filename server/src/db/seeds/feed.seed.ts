@@ -191,7 +191,6 @@ export const seedFeedProfiles = async () => {
         primaryRole: demo.primaryRole,
         experienceLevel: demo.experienceLevel,
         availability: demo.availability,
-        githubUsername: null,
         projectDescription:
           "Demo profile created to test the recommendation feed.",
         embeddingStatus: "stale",
