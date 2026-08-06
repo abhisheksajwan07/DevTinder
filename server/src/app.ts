@@ -14,13 +14,9 @@ import chatRoutes from "./module/chat/chat.routes.js";
 import githubRoutes from "./module/github/github.routes.js";
 import profileRoutes from "./module/profile/profile.routes.js";
 
-import "./workers/worker.email.js";
-import "./workers/worker.embedding.js";
-import "./workers/worker.match.js";
-import "./workers/worker.github.js";
-
 import { globalLimiter } from "./middleware/global.rate-limit.js";
 import { serverAdapter } from "./bull-board.js";
+import { env } from "./config/env.js";
 
 const app = express();
 
@@ -33,7 +29,10 @@ app.use(cookieParser());
 app.use(globalLimiter);
 
 app.use(httpLogger);
-app.use("/admin/queues", serverAdapter.getRouter());
+if (env.NODE_ENV !== "production") {
+  app.use("/admin/queues", serverAdapter.getRouter());
+}
+
 app.use("/v1/auth", authRouter);
 app.use("/v1/sessions", sessionRoutes);
 app.use("/v1/oauth", oauthRoutes);
@@ -43,7 +42,6 @@ app.use("/v1/swipes", swipeRoutes);
 app.use("/v1/chat", chatRoutes);
 app.use("/v1/github", githubRoutes);
 app.use("/v1/profiles", profileRoutes);
-
 
 app.use(globalErrorHandler);
 

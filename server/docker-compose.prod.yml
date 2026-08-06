@@ -1,0 +1,58 @@
+services:
+  api:
+    container_name: devtinder-api
+    command: node dist/server.js
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"   
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.75"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    container_name: devtinder-worker
+    command: node dist/worker.js
+    environment:
+      NODE_ENV: production
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.50"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres:
+    container_name: devtinder-postgres
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  redis:
+    container_name: devtinder-redis
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
