@@ -10,6 +10,7 @@ export default function AuthToggle({ mode, onSelectMode }: AuthToggleProps) {
     <div className="flex justify-end">
       <div className="inline-flex rounded-2xl bg-[#e6e1d7] p-1 shadow-inner">
         <button
+       
           onClick={() => onSelectMode("signin")}
           className={`rounded-xl px-5 py-2 text-xs font-semibold transition-all ${
             mode === "signin"

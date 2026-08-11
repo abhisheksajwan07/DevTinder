@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 
 export default function AuthShowcase() {
@@ -29,6 +30,7 @@ export default function AuthShowcase() {
               <span className="size-3 rounded-full bg-[#ffbd2e]" />
               <span className="size-3 rounded-full bg-[#27c93f]" />
             </div>
+
             <span className="font-mono text-xs font-medium text-[#88827c]">
               devtinder.db
             </span>
@@ -38,23 +40,33 @@ export default function AuthShowcase() {
           <div className="font-mono text-xs leading-relaxed text-slate-200 space-y-1">
             <p>
               <span className="text-orange-400 font-semibold">SELECT</span>{" "}
-              dev_id,
+              profile_id,
             </p>
-            <p className="pl-4">1 - (embedding &lt;=&gt; $query)</p>
-            <p className="pl-4 text-orange-400 font-semibold">AS match_score</p>
+
+            <p className="pl-4">
+              1 - (embedding &lt;=&gt; viewer_embedding)
+            </p>
+
+            <p className="pl-4 text-orange-400 font-semibold">
+              AS match_score
+            </p>
+
             <p>
               <span className="text-orange-400 font-semibold">FROM</span>{" "}
-              developers
+              profiles
             </p>
+
             <p>
               <span className="text-orange-400 font-semibold">ORDER BY</span>{" "}
               match_score DESC
             </p>
+
             <p>
               <span className="text-orange-400 font-semibold">LIMIT</span> 10;
             </p>
+
             <p className="pt-2 text-[#77716b] font-normal">
-              -- 3 developers matched
+              -- semantic developer matching
             </p>
           </div>
 
@@ -71,10 +83,12 @@ export default function AuthShowcase() {
                     — Full Stack
                   </span>
                 </p>
+
                 <p className="font-mono text-[10px] text-[#77716b]">
                   TypeScript, Node.js, Redis
                 </p>
               </div>
+
               <span className="font-mono text-xs font-bold text-orange-400">
                 94%
               </span>
@@ -88,10 +102,12 @@ export default function AuthShowcase() {
                     — Backend Lead
                   </span>
                 </p>
+
                 <p className="font-mono text-[10px] text-[#77716b]">
                   Python, FastAPI, PostgreSQL
                 </p>
               </div>
+
               <span className="font-mono text-xs font-bold text-orange-400">
                 87%
               </span>
@@ -105,10 +121,12 @@ export default function AuthShowcase() {
                     — ML Engineer
                   </span>
                 </p>
+
                 <p className="font-mono text-[10px] text-[#77716b]">
                   React, Go, TensorFlow
                 </p>
               </div>
+
               <span className="font-mono text-xs font-bold text-orange-400">
                 81%
               </span>
@@ -130,8 +148,9 @@ export default function AuthShowcase() {
             you think.
           </span>
         </h2>
+
         <p className="mt-3 font-mono text-[11px] text-[#77716b]">
-          © 2026 DevTinder &bull; Built in India
+          © 2026 DevTinder 
         </p>
       </div>
     </div>
