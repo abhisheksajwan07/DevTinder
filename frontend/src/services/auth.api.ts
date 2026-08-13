@@ -42,7 +42,6 @@ export function useSignIn() {
     onSuccess: (data) => {
       setUser(data.data.user);
     },
-  
   });
 }
 
@@ -69,9 +68,7 @@ export const useSignUp = () => {
     SignUpCredentials
   >({
     mutationFn: signUpCredentials,
-    onError: (err: Error) => {
-    
-    },
+    onError: (err: Error) => {},
   });
 };
 
@@ -148,3 +145,67 @@ export const useResendOtp = () => {
     mutationFn: resendOtp,
   });
 };
+
+// forget password
+
+export interface ForgetPasswordBody {
+  email: string;
+}
+export interface ForgetPasswordResponse {
+  status: string;
+  message: string;
+}
+
+const forgotPassword = async (
+  email: ForgetPasswordBody,
+): Promise<ForgetPasswordResponse> => {
+  const { data } = await api.post("/auth/forgot-password", email);
+  return data;
+};
+
+export const useForgotPassword = () => {
+  return useMutation<
+    ForgetPasswordResponse,
+    AxiosError<{ message: string }>,
+    ForgetPasswordBody
+  >({
+    mutationFn: forgotPassword,
+  });
+};
+
+// reset password
+
+export interface ResetPasswordBody {
+  token: string;
+  newPassword: string;
+}
+export interface ResetPasswordResponse {
+  status: string;
+  message: string;
+}
+
+const resetPassword = async (
+  body: ResetPasswordBody,
+): Promise<ResetPasswordResponse> => {
+  const { data } = await api.post("/auth/reset-password", body);
+  return data;
+};
+
+export const useResetPassword = () => {
+  return useMutation<
+    ResetPasswordResponse,
+    AxiosError<{ message: string }>,
+    ResetPasswordBody
+  >({
+    mutationFn: resetPassword,
+  });
+};
+
+
+// GET me
+
+
+export const getMe = async():Promise<User>=>{
+  const {data}= await api.get("/auth/me")
+  return data.data.user;
+}

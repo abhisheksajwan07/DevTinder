@@ -30,6 +30,8 @@ export default function VerifyEmailForm({
   const [email] = useState<string>(
     initialEmail || locationEmail || searchEmail || "",
   );
+
+  
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [resendCooldown, setResendCooldown] = useState<number>(60);
   const [resendMessage, setResendMessage] = useState<string | null>(null);

@@ -3,10 +3,10 @@ import { persist } from "zustand/middleware";
 
 export type User = {
   id: string;
-  name?: string;
-  email?: string;
-  avatarUrl?: string;
+  email: string;
+  onBoardingComplete: boolean;
 };
+
 type AuthState = {
   user: User | null;
   setUser: (user: User | null) => void;

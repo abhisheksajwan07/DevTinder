@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
 import { SignInCredentials, useSignIn } from "../../services/auth.api";
-import { useState } from "react";
 
 interface SignInFormProps {
   onSwitchToSignUp: () => void;
