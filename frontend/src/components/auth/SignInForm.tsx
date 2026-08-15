@@ -28,7 +28,7 @@ export default function SignInForm({
     signInMutation.mutate(data, {
       onSuccess: (data) => {
         if (data.data.user.onBoardingComplete) {
-          navigate("/discover");
+          navigate("/app/discover");
         } else {
           navigate("/onboarding");
         }
@@ -49,7 +49,7 @@ export default function SignInForm({
       <div className="mt-7 space-y-3">
         <button
           type="button"
-          onClick={() => onSocialAuth("GitHub")}
+          onClick={() => onSocialAuth("github")}
           className="w-full inline-flex items-center justify-center gap-3 rounded-2xl border border-[#e4ded5] bg-white py-3.5 px-4 text-xs font-bold text-[#242322] shadow-xs transition hover:border-orange-300 hover:bg-[#faf8f5] active:scale-[0.99]"
         >
           <svg className="size-4 fill-current" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ export default function SignInForm({
 
         <button
           type="button"
-          onClick={() => onSocialAuth("Google")}
+          onClick={() => onSocialAuth("google")}
           className="w-full inline-flex items-center justify-center gap-3 rounded-2xl border border-[#e4ded5] bg-white py-3.5 px-4 text-xs font-bold text-[#242322] shadow-xs transition hover:border-orange-300 hover:bg-[#faf8f5] active:scale-[0.99]"
         >
           <svg className="size-4" viewBox="0 0 24 24">
@@ -165,7 +165,10 @@ export default function SignInForm({
 
         {signInMutation.isError && (
           <p className="text-sm text-red-600 text-center mt-2">
-            {signInMutation.error.response?.data.message}
+            {signInMutation.error.response?.status &&
+            signInMutation.error.response.status < 500
+              ? signInMutation.error.response.data.message
+              : "Unable to sign in right now. Please try again later."}
           </p>
         )}
       </form>

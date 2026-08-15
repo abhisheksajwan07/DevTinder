@@ -73,7 +73,7 @@ export default function SignUpForm({
       <div className="mt-7 space-y-3">
         <button
           type="button"
-          onClick={() => onSocialAuth("GitHub")}
+          onClick={() => onSocialAuth("github")}
           className="w-full inline-flex items-center justify-center gap-3 rounded-2xl border border-[#e4ded5] bg-white py-3.5 px-4 text-xs font-bold text-[#242322] shadow-xs transition hover:border-orange-300 hover:bg-[#faf8f5] active:scale-[0.99]"
         >
           <svg className="size-4 fill-current" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ export default function SignUpForm({
 
         <button
           type="button"
-          onClick={() => onSocialAuth("Google")}
+          onClick={() => onSocialAuth("google")}
           className="w-full inline-flex items-center justify-center gap-3 rounded-2xl border border-[#e4ded5] bg-white py-3.5 px-4 text-xs font-bold text-[#242322] shadow-xs transition hover:border-orange-300 hover:bg-[#faf8f5] active:scale-[0.99]"
         >
           <svg className="size-4" viewBox="0 0 24 24">

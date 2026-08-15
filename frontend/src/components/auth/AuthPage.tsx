@@ -3,6 +3,7 @@ import AuthShowcase from "./AuthShowcase";
 import AuthToggle, { AuthMode } from "./AuthToggle";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
+import { githubOAuth, googleOAuth } from "../../services/oauth.api";
 
 interface AuthPageProps {
   initialMode?: AuthMode;
@@ -10,13 +11,15 @@ interface AuthPageProps {
 
 export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [socialStatus, setSocialStatus] = useState<string | null>(null);
+ 
 
   const handleSocialAuth = (provider: string) => {
-    setSocialStatus(`Connecting with ${provider}...`);
-    setTimeout(() => {
-      setSocialStatus(null);
-    }, 2000);
+    if(provider === "google"){
+      googleOAuth()
+    }
+    else{
+      githubOAuth()
+    }
   };
 
   return (
@@ -46,12 +49,7 @@ export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
           <AuthToggle mode={mode} onSelectMode={setMode} />
         </div>
 
-        {/* Social Status Notification Toast */}
-        {socialStatus && (
-          <div className="mx-auto mt-4 w-full max-w-md rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs font-medium text-orange-800 animate-fade-in">
-            {socialStatus}
-          </div>
-        )}
+       
 
         {/* Active Form */}
         {mode === "signin" ? (

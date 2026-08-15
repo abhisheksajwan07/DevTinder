@@ -7,6 +7,17 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+api.interceptors.request.use((config) => {
+  const method = config.method?.toLowerCase();
+  if (!['post', 'put', 'patch', 'delete'].includes(method ?? '') || typeof document === 'undefined') return config;
+
+  const csrfCookie = document.cookie.split('; ').find((cookie) => cookie.startsWith('csrfToken='));
+  const csrfToken = csrfCookie?.split('=').slice(1).join('=');
+  if (csrfToken) config.headers.set('x-csrf-token', decodeURIComponent(csrfToken));
+
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -19,4 +30,3 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
