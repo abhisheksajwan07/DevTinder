@@ -1,96 +1,95 @@
-import { roles, experienceLevels, availabilityOptions, type Role, type Experience, type Availability } from "../../app/mock-data";
+import { useFormContext, useWatch } from "react-hook-form";
+import {
+  availabilityOptions,
+  experienceOptions,
+  roleOptions,
+  type OnboardingFormValues,
+} from "../../types/onboarding";
 
-interface Step2Props {
-  selectedRole: Role | null;
-  setSelectedRole: (role: Role) => void;
-  selectedExp: Experience | null;
-  setSelectedExp: (exp: Experience) => void;
-  selectedAvailability: Availability | null;
-  setSelectedAvailability: (av: Availability) => void;
-}
-
-export default function Step2DeveloperIdentity({
-  selectedRole,
-  setSelectedRole,
-  selectedExp,
-  setSelectedExp,
-  selectedAvailability,
-  setSelectedAvailability,
-}: Step2Props) {
+export default function Step2DeveloperIdentity() {
+  const {
+    setValue,
+    formState: { errors },
+  } = useFormContext<OnboardingFormValues>();
+  const [role, experience, availability] = useWatch<OnboardingFormValues>({
+    name: ["primaryRole", "experienceLevel", "availability"],
+  });
+  const button = (active: boolean) =>
+    `rounded-2xl border px-3 py-2.5 text-xs font-semibold transition-all ${active ? "border-orange-500 bg-orange-50 text-orange-700" : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"}`;
   return (
     <div className="mt-7">
-      <h1 className="font-serif text-3xl font-normal text-[#1a1918] leading-tight">
+      <h1 className="font-serif text-3xl font-normal leading-tight text-[#1a1918]">
         Your developer identity.
       </h1>
       <p className="mt-2 text-sm text-[#77736e]">
         Tell us how you build — we'll find developers with complementary styles.
       </p>
-
       <div className="mt-6">
-        <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e] mb-3">
-          Primary Role
+        <label className="mb-3 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
+          Primary role
         </label>
         <div className="grid grid-cols-3 gap-2">
-          {roles.map((role) => (
+          {roleOptions.map((item) => (
             <button
-              key={role}
+              key={item.value}
               type="button"
-              onClick={() => setSelectedRole(role)}
-              className={`rounded-2xl border px-3 py-2.5 text-xs font-semibold text-left transition-all ${
-                selectedRole === role
-                  ? "border-orange-500 bg-orange-50 text-orange-700"
-                  : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"
-              }`}
+              onClick={() =>
+                setValue("primaryRole", item.value, { shouldValidate: true })
+              }
+              className={`${button(role === item.value)} text-left`}
             >
-              {role}
+              {item.label}
             </button>
           ))}
         </div>
       </div>
-
       <div className="mt-5">
-        <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e] mb-3">
-          Experience Level
+        <label className="mb-3 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
+          Experience level
         </label>
         <div className="grid grid-cols-4 gap-2">
-          {experienceLevels.map((level) => (
+          {experienceOptions.map((item) => (
             <button
-              key={level}
+              key={item}
               type="button"
-              onClick={() => setSelectedExp(level)}
-              className={`rounded-2xl border px-3 py-3 text-xs font-semibold text-center transition-all ${
-                selectedExp === level
-                  ? "border-orange-500 bg-orange-50 text-orange-700"
-                  : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"
-              }`}
+              onClick={() =>
+                setValue("experienceLevel", item, { shouldValidate: true })
+              }
+              className={`${button(experience === item)} text-center`}
             >
-              {level}
+              {item}
             </button>
           ))}
         </div>
       </div>
-
       <div className="mt-5">
-        <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e] mb-3">
-          Weekly Availability
+        <label className="mb-3 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
+          Weekly availability
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {availabilityOptions.map((av) => (
+          {availabilityOptions.map((item) => (
             <button
-              key={av}
+              key={item.value}
               type="button"
-              onClick={() => setSelectedAvailability(av)}
-              className={`rounded-2xl border px-4 py-3 text-xs font-semibold text-left transition-all ${
-                selectedAvailability === av
-                  ? "border-orange-500 bg-orange-50 text-orange-700"
-                  : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"
-              }`}
+              onClick={() =>
+                setValue("availability", item.value, { shouldValidate: true })
+              }
+              className={`${button(availability === item.value)} text-left`}
             >
-              {av}
+              {item.label}
             </button>
           ))}
         </div>
       </div>
+      {(errors.primaryRole ||
+        errors.experienceLevel ||
+        errors.availability) && (
+        <p className="mt-3 text-xs text-red-500">
+          {errors.primaryRole?.message ??
+            errors.experienceLevel?.message ??
+            errors.availability?.message}
+        </p>
+      )}
     </div>
   );
 }

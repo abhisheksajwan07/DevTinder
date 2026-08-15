@@ -16,7 +16,7 @@ export default function ProgressBar({ step, totalSteps }: ProgressBarProps) {
       </div>
       <div className="h-1.5 w-full rounded-full bg-[#e9e5df] overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#ee7100] to-amber-500 transition-all duration-500"
+          className="h-full rounded-full bg-linear-to-r from-[#ee7100] to-amber-500 transition-all duration-500"
           style={{ width: `${(step / totalSteps) * 100}%` }}
         />
       </div>
