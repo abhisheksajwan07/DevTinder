@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 
 export default function AuthShowcase() {
   return (
-    <div className="relative flex flex-col justify-between p-8 sm:p-12 lg:p-14 bg-[#121212] text-white overflow-hidden border-r border-[#22211e]">
+    <div className="relative hidden lg:flex h-full flex-col justify-between p-8 sm:p-12 lg:p-12 xl:p-14 bg-[#121212] text-white overflow-hidden border-r border-[#22211e] select-none">
       {/* Subtle Ambient Background Glow */}
       <div className="pointer-events-none absolute top-1/4 left-10 z-0 h-96 w-96 rounded-full bg-orange-600/10 blur-3xl" />
 
       {/* Top Header Logo */}
-      <div className="relative z-10">
+      <div className="relative z-10 shrink-0">
         <Link
           to="/"
           className="inline-flex items-center gap-2.5 rounded-full px-1 py-1 transition hover:opacity-90"
@@ -139,7 +139,7 @@ export default function AuthShowcase() {
       </div>
 
       {/* Bottom Headline & Footer */}
-      <div className="relative z-10">
+      <div className="relative z-10 shrink-0">
         <h2 className="text-2xl sm:text-3xl font-normal tracking-tight text-white">
           Find developers who
           <br />
