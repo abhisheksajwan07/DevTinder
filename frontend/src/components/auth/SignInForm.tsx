@@ -1,8 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { SignInCredentials, useSignIn } from "../../services/auth.api";
+import { signInSchema, type SignInFormValues } from "../../schemas/auth.schema";
+import { type SignInCredentials, useSignIn } from "../../services/auth.api";
 
 interface SignInFormProps {
   onSwitchToSignUp: () => void;
@@ -19,7 +21,9 @@ export default function SignInForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInCredentials>();
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+  });
 
   const signInMutation = useSignIn();
   const navigate = useNavigate();
@@ -103,9 +107,7 @@ export default function SignInForm({
           </label>
           <input
             type="email"
-            {...register("email", {
-              required: " Email is required",
-            })}
+            {...register("email")}
             className="w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
 
@@ -134,13 +136,7 @@ export default function SignInForm({
           <input
             type="password"
             id="signin-password"
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-            })}
+            {...register("password")}
             className="w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
           {errors.password && (

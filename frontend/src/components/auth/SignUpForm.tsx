@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { SignUpCredentials, useSignUp } from "../../services/auth.api";
+import { signUpSchema, type SignUpFormValues } from "../../schemas/auth.schema";
+import { type SignUpCredentials, useSignUp } from "../../services/auth.api";
 
 interface SignUpFormProps {
   onSwitchToSignIn: () => void;
@@ -21,7 +23,9 @@ export default function SignUpForm({
     register,
     watch,
     formState: { errors },
-  } = useForm<SignUpCredentials>();
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+  });
 
   const password = watch("password", "");
 
@@ -127,9 +131,7 @@ export default function SignUpForm({
           </label>
           <input
             type="email"
-            {...register("email", {
-              required: " Email is required",
-            })}
+            {...register("email")}
             className="w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
 
@@ -150,13 +152,7 @@ export default function SignUpForm({
           <input
             id="signup-password"
             type="password"
-            {...register("password", {
-              required: "Password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-            })}
+            {...register("password")}
             placeholder="Min. 8 characters"
             className="w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
