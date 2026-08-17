@@ -1,6 +1,7 @@
 import { Check, LoaderCircle, X } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useUsernameAvailability } from "../../hooks/onboarding.hooks";
+import { USERNAME_REGEX } from "../../schemas/onboarding.schema";
 import type { OnboardingOptions } from "../../services/onboarding.api";
 import type { OnboardingFormValues } from "../../types/onboarding";
 
@@ -22,7 +23,7 @@ export default function Step1BasicProfile({
   const usernameQuery = useUsernameAvailability(username ?? "");
   const validUsername =
     (username ?? "").trim().length >= 3 &&
-    /^[a-zA-Z0-9_]+$/.test((username ?? "").trim());
+    USERNAME_REGEX.test((username ?? "").trim());
   const usernameAvailable = usernameQuery.data;
   const usernameChecked =
     validUsername &&
@@ -31,7 +32,6 @@ export default function Step1BasicProfile({
     typeof usernameAvailable === "boolean";
 
   return (
-    
     <div className="mt-7">
       <h1 className="font-serif text-3xl font-normal leading-tight text-[#1a1918]">
         Set up your profile.
@@ -82,12 +82,7 @@ export default function Step1BasicProfile({
           </span>
         </label>
         <textarea
-          {...register("bio", {
-            maxLength: {
-              value: 500,
-              message: "Bio can be at most 500 characters.",
-            },
-          })}
+          {...register("bio")}
           maxLength={500}
           rows={3}
           placeholder="Tell developers what you like building..."
@@ -101,10 +96,7 @@ export default function Step1BasicProfile({
         <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
           First name
           <input
-            {...register("firstName", {
-              required: "First name is required.",
-              maxLength: 100,
-            })}
+            {...register("firstName")}
             placeholder="Arjun"
             className="mt-1.5 w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm normal-case text-[#242322] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
@@ -112,10 +104,7 @@ export default function Step1BasicProfile({
         <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
           Last name
           <input
-            {...register("lastName", {
-              required: "Last name is required.",
-              maxLength: 100,
-            })}
+            {...register("lastName")}
             placeholder="Mehta"
             className="mt-1.5 w-full rounded-2xl border border-[#e2ded6] bg-white px-4 py-3 text-sm normal-case text-[#242322] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
           />
@@ -135,18 +124,7 @@ export default function Step1BasicProfile({
             @
           </span>
           <input
-            {...register("userName", {
-              required: "Username is required.",
-              minLength: {
-                value: 3,
-                message: "Username must have at least 3 characters.",
-              },
-              maxLength: 30,
-              pattern: {
-                value: /^[a-zA-Z0-9_]+$/,
-                message: "Use letters, numbers, and underscores only.",
-              },
-            })}
+            {...register("userName")}
             placeholder="yourhandle"
             className={`w-full rounded-2xl border bg-white py-3 pl-8 pr-10 text-sm text-[#242322] outline-none transition ${usernameAvailable === true ? "border-emerald-400" : usernameAvailable === false ? "border-red-400" : "border-[#e2ded6] focus:border-orange-500"}`}
           />
@@ -165,6 +143,7 @@ export default function Step1BasicProfile({
         {errors.userName ? (
           <p className="mt-1 text-xs text-red-500">{errors.userName.message}</p>
         ) : usernameQuery.isError ? (
+      
           <p className="mt-1 text-xs text-red-500">
             Could not check this username. Try again.
           </p>

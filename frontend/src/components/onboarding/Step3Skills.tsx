@@ -1,93 +1,138 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
 import type { OnboardingOptions } from "../../services/onboarding.api";
 import type { OnboardingFormValues } from "../../types/onboarding";
 
+const MAX_TOTAL_SKILLS = 10;
+const MAX_CUSTOM_SKILLS = 5;
+
 export default function Step3Skills({
   skills,
 }: Pick<OnboardingOptions, "skills">) {
-  const [input, setInput] = useState("");
+  const [customSkillInput, setCustomSkillInput] = useState("");
   const {
     setValue,
     clearErrors,
     formState: { errors },
   } = useFormContext<OnboardingFormValues>();
-  const selectedIds = useWatch<OnboardingFormValues, "skillIds">({
+
+  const watchedSkillIds = useWatch<OnboardingFormValues, "skillIds">({
     name: "skillIds",
   });
-  const customSkills = useWatch<OnboardingFormValues, "customSkills">({
+  const watchedCustomSkills = useWatch<OnboardingFormValues, "customSkills">({
     name: "customSkills",
   });
-  const ids = selectedIds ?? [];
-  const custom = customSkills ?? [];
-  const total = ids.length + custom.length;
-  const selected = skills.filter((skill) => ids.includes(skill.id));
-  const grouped = skills.reduce<Record<string, typeof skills>>(
-    (groups, skill) => ({
-      ...groups,
-      [skill.category]: [...(groups[skill.category] ?? []), skill],
-    }),
-    {},
+
+  const selectedSkillIds = watchedSkillIds ?? [];
+  const customSkills = watchedCustomSkills ?? [];
+  const totalSelectedSkillsCount = selectedSkillIds.length + customSkills.length;
+
+  const selectedPresetSkills = useMemo(
+    () => skills.filter((skill) => selectedSkillIds.includes(skill.id)),
+    [skills, selectedSkillIds],
   );
-  const toggle = (id: string) => {
-    const nextIds = ids.includes(id)
-      ? ids.filter((item) => item !== id)
-      : total < 10
-        ? [...ids, id]
-        : ids;
-    setValue("skillIds", nextIds, { shouldValidate: true });
-    if (nextIds.length + custom.length > 0) clearErrors("skillIds");
+
+  const skillsByCategory = useMemo(() => {
+    return skills.reduce<Record<string, typeof skills>>((acc, skill) => {
+      if (!acc[skill.category]) {
+        acc[skill.category] = [];
+      }
+      acc[skill.category].push(skill);
+      return acc;
+    }, {});
+  }, [skills]);
+
+  const handleTogglePresetSkill = (skillId: string) => {
+    const isAlreadySelected = selectedSkillIds.includes(skillId);
+    let updatedSkillIds: string[];
+
+    if (isAlreadySelected) {
+      updatedSkillIds = selectedSkillIds.filter((id) => id !== skillId);
+    } else if (totalSelectedSkillsCount < MAX_TOTAL_SKILLS) {
+      updatedSkillIds = [...selectedSkillIds, skillId];
+    } else {
+      updatedSkillIds = selectedSkillIds;
+    }
+
+    setValue("skillIds", updatedSkillIds, { shouldValidate: true });
+    if (updatedSkillIds.length + customSkills.length > 0) {
+      clearErrors("skillIds");
+    }
   };
-  const addCustom = () => {
-    const value = input.trim();
+
+  const handleRemoveCustomSkill = (skillNameToRemove: string) => {
+    const updatedCustomSkills = customSkills.filter(
+      (name) => name !== skillNameToRemove,
+    );
+    setValue("customSkills", updatedCustomSkills, { shouldValidate: true });
+    if (selectedSkillIds.length + updatedCustomSkills.length > 0) {
+      clearErrors("skillIds");
+    }
+  };
+
+  const handleAddCustomSkill = () => {
+    const trimmedInput = customSkillInput.trim();
+    if (!trimmedInput) return;
     if (
-      !value ||
-      total >= 10 ||
-      custom.length >= 5 ||
-      [...selected.map((skill) => skill.name), ...custom].some(
-        (item) => item.toLowerCase() === value.toLowerCase(),
-      )
-    )
+      totalSelectedSkillsCount >= MAX_TOTAL_SKILLS ||
+      customSkills.length >= MAX_CUSTOM_SKILLS
+    ) {
       return;
-    setValue("customSkills", [...custom, value], { shouldValidate: true });
+    }
+
+    const isDuplicateInPreset = selectedPresetSkills.some(
+      (skill) => skill.name.toLowerCase() === trimmedInput.toLowerCase(),
+    );
+    const isDuplicateInCustom = customSkills.some(
+      (name) => name.toLowerCase() === trimmedInput.toLowerCase(),
+    );
+
+    if (isDuplicateInPreset || isDuplicateInCustom) {
+      return;
+    }
+
+    const updatedCustomSkills = [...customSkills, trimmedInput];
+    setValue("customSkills", updatedCustomSkills, { shouldValidate: true });
     clearErrors("skillIds");
-    setInput("");
+    setCustomSkillInput("");
   };
+
   return (
     <div className="mt-7">
       <h1 className="font-serif text-3xl font-normal leading-tight text-[#1a1918]">
         Your tech stack.
       </h1>
       <p className="mt-2 text-sm text-[#77736e]">
-        Select up to 10 skills. This powers your AI match score.
+        Select up to {MAX_TOTAL_SKILLS} skills. This powers your AI match score.
       </p>
-      {total > 0 && (
+
+      {totalSelectedSkillsCount > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {[
-            ...selected.map((skill) => ({
-              id: skill.id,
-              name: skill.name,
-              preset: true,
-            })),
-            ...custom.map((name) => ({ id: name, name, preset: false })),
-          ].map((skill) => (
+          {selectedPresetSkills.map((skill) => (
             <span
-              key={skill.id}
+              key={`preset-${skill.id}`}
               className="inline-flex items-center gap-1.5 rounded-full bg-[#1a1918] px-3 py-1.5 font-mono text-[11px] font-semibold text-white"
             >
               {skill.name}
               <button
                 type="button"
-                onClick={() =>
-                  skill.preset
-                    ? toggle(skill.id)
-                    : setValue(
-                        "customSkills",
-                        custom.filter((item) => item !== skill.name),
-                        { shouldValidate: true },
-                      )
-                }
+                onClick={() => handleTogglePresetSkill(skill.id)}
+              >
+                <X className="size-3" />
+              </button>
+            </span>
+          ))}
+
+          {customSkills.map((customSkillName) => (
+            <span
+              key={`custom-${customSkillName}`}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#1a1918] px-3 py-1.5 font-mono text-[11px] font-semibold text-white"
+            >
+              {customSkillName}
+              <button
+                type="button"
+                onClick={() => handleRemoveCustomSkill(customSkillName)}
               >
                 <X className="size-3" />
               </button>
@@ -95,46 +140,60 @@ export default function Step3Skills({
           ))}
         </div>
       )}
+
       <div className="mt-4 space-y-4">
-        {Object.entries(grouped).map(([category, items]) => (
+        {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
           <div key={category}>
             <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-[#88827c]">
               {category}
             </p>
             <div className="flex flex-wrap gap-2">
-              {items.map((skill) => (
-                <button
-                  key={skill.id}
-                  type="button"
-                  onClick={() => toggle(skill.id)}
-                  disabled={total >= 10 && !ids.includes(skill.id)}
-                  className={`rounded-full border px-3 py-1.5 font-mono text-[11px] font-semibold transition-all ${ids.includes(skill.id) ? "border-orange-500 bg-orange-50 text-orange-700" : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"} ${total >= 10 && !ids.includes(skill.id) ? "cursor-not-allowed opacity-40" : ""}`}
-                >
-                  {skill.name}
-                </button>
-              ))}
+              {categorySkills.map((skill) => {
+                const isSelected = selectedSkillIds.includes(skill.id);
+                const isLimitReached =
+                  totalSelectedSkillsCount >= MAX_TOTAL_SKILLS && !isSelected;
+
+                return (
+                  <button
+                    key={skill.id}
+                    type="button"
+                    onClick={() => handleTogglePresetSkill(skill.id)}
+                    disabled={isLimitReached}
+                    className={`rounded-full border px-3 py-1.5 font-mono text-[11px] font-semibold transition-all ${
+                      isSelected
+                        ? "border-orange-500 bg-orange-50 text-orange-700"
+                        : "border-[#e9e5df] bg-white text-[#55504b] hover:border-orange-300"
+                    } ${isLimitReached ? "cursor-not-allowed opacity-40" : ""}`}
+                  >
+                    {skill.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
+
       <p className="mt-4 font-mono text-[11px] text-[#88827c]">
-        {total}/10 selected
+        {totalSelectedSkillsCount}/{MAX_TOTAL_SKILLS} selected
       </p>
+
       {errors.skillIds && (
         <p className="mt-1 text-xs text-red-500">{errors.skillIds.message}</p>
       )}
+
       <div className="mt-5 rounded-2xl border border-dashed border-[#d4cec6] bg-[#faf8f5] p-4">
         <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
           Add a custom skill
         </label>
         <div className="flex gap-2">
           <input
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
+            value={customSkillInput}
+            onChange={(event) => setCustomSkillInput(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
-                addCustom();
+                handleAddCustomSkill();
               }
             }}
             maxLength={50}
@@ -143,15 +202,15 @@ export default function Step3Skills({
           />
           <button
             type="button"
-            onClick={addCustom}
-            disabled={!input.trim() || total >= 10}
+            onClick={handleAddCustomSkill}
+            disabled={!customSkillInput.trim() || totalSelectedSkillsCount >= MAX_TOTAL_SKILLS}
             className="rounded-xl bg-[#1a1918] px-4 py-2 text-xs font-bold text-white hover:bg-orange-600 disabled:opacity-40"
           >
             Add
           </button>
         </div>
         <p className="mt-2 text-[11px] text-[#88827c]">
-          Up to 5 custom skills; up to 10 total skills.
+          Up to {MAX_CUSTOM_SKILLS} custom skills; up to {MAX_TOTAL_SKILLS} total skills.
         </p>
       </div>
     </div>

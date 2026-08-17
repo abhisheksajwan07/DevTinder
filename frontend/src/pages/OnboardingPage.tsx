@@ -2,7 +2,8 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, LoaderCircle, Sparkles } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import AuthShowcase from "../components/auth/AuthShowcase";
 import ProgressBar from "../components/onboarding/ProgressBar";
 import Step1BasicProfile from "../components/onboarding/Step1BasicProfile";
@@ -17,7 +18,10 @@ import {
   useUsernameAvailability,
 } from "../hooks/onboarding.hooks";
 import { useAuthStore } from "../stores/auth.store";
-import type { OnboardingFormValues } from "../types/onboarding";
+import {
+  onboardingSchema,
+  type OnboardingFormValues,
+} from "../schemas/onboarding.schema";
 import { ONBOARDING_DRAFT_STORAGE_KEY } from "../components/onboarding/Step6GithubConnection";
 
 const TOTAL_STEPS = 6;
@@ -31,7 +35,7 @@ const stepFields: Record<number, (keyof OnboardingFormValues)[]> = {
   6: [],
 };
 
-const emptyOnboardingValues: OnboardingFormValues = {
+const emptyOnboardingValues: Record<keyof OnboardingFormValues, unknown> = {
   firstName: "",
   lastName: "",
   userName: "",
@@ -47,7 +51,7 @@ const emptyOnboardingValues: OnboardingFormValues = {
   lookingForIds: [],
 };
 
-function getInitialOnboardingValues(): OnboardingFormValues {
+function getInitialOnboardingValues() {
   try {
     const draft = sessionStorage.getItem(ONBOARDING_DRAFT_STORAGE_KEY);
     return draft
@@ -60,7 +64,7 @@ function getInitialOnboardingValues(): OnboardingFormValues {
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+
   const [step, setStep] = useState(() => {
     const requestedStep = Number(
       new URLSearchParams(window.location.search).get("step"),
@@ -73,18 +77,18 @@ export default function OnboardingPage() {
   const createProfile = useCreateOnboardingProfile();
   const form = useForm<OnboardingFormValues>({
     mode: "onTouched",
+    resolver: zodResolver(onboardingSchema),
     defaultValues: getInitialOnboardingValues(),
   });
   const username = form.watch("userName");
   const usernameQuery = useUsernameAvailability(username);
+
   const next = async () => {
     const fields = stepFields[step];
     const valid = await form.trigger(fields);
-    if (step === 1) {
-      if (!form.getValues("avatarId")) {
-        form.setError("avatarId", { message: "Choose an avatar." });
-        return;
-      }
+
+    // Username availability is a server-side check — can't be expressed in Zod
+    if (step === 1 && valid) {
       if (usernameQuery.isFetching) {
         form.setError("userName", {
           message: "Checking username availability…",
@@ -96,40 +100,10 @@ export default function OnboardingPage() {
         return;
       }
     }
-    if (
-      step === 2 &&
-      (!form.getValues("primaryRole") ||
-        !form.getValues("experienceLevel") ||
-        !form.getValues("availability"))
-    ) {
-      form.setError("primaryRole", {
-        message: "Choose your role, experience level, and availability.",
-      });
-      return;
-    }
-    if (
-      step === 3 &&
-      form.getValues("skillIds").length +
-        form.getValues("customSkills").length ===
-        0
-    ) {
-      form.setError("skillIds", { message: "Choose at least one skill." });
-      return;
-    }
-    if (step === 4 && form.getValues("interestIds").length === 0) {
-      form.setError("interestIds", {
-        message: "Choose at least one interest.",
-      });
-      return;
-    }
-    if (step === 5 && form.getValues("lookingForIds").length === 0) {
-      form.setError("lookingForIds", {
-        message: "Choose at least one collaboration goal.",
-      });
-      return;
-    }
+
     if (valid) setStep((current) => current + 1);
   };
+
   const complete = form.handleSubmit((values) =>
     createProfile.mutate(values, {
       onSuccess: () => {
@@ -139,7 +113,6 @@ export default function OnboardingPage() {
           useAuthStore
             .getState()
             .setUser({ ...user, onBoardingComplete: true });
-        queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
         navigate("/app/discover", { replace: true });
       },
     }),
@@ -169,10 +142,10 @@ export default function OnboardingPage() {
       </div>
     );
   return (
-    <div className="grid min-h-screen w-full font-sans antialiased lg:grid-cols-2 bg-[#121212]">
+    <div className="grid min-h-screen lg:h-screen lg:overflow-hidden w-full font-sans antialiased lg:grid-cols-2 bg-[#121212]">
       <AuthShowcase />
-      <div className="flex min-h-screen flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-8 text-[#242322] sm:p-12 lg:p-16">
-        <div className="flex items-center justify-between border-b border-[#e4dfd6] pb-4">
+      <div className="flex min-h-screen lg:min-h-0 lg:h-full flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-6 sm:p-10 lg:p-12 xl:p-16 text-[#242322]">
+        <div className="flex items-center justify-between border-b border-[#e4dfd6] pb-4 shrink-0">
           <div className="flex items-center gap-2">
             <div className="size-3 animate-pulse rounded-full bg-orange-500" />
             <span className="font-mono text-xs font-bold uppercase tracking-wider">
@@ -252,7 +225,7 @@ export default function OnboardingPage() {
             )}
           </div>
         </div>
-        <p className="pt-4 text-center font-mono text-[10px] text-[#9c958e]">
+        <p className="pt-4 text-center font-mono text-[10px] text-[#9c958e] shrink-0">
           DevTinder • Voyage AI Matcher • Your data is always under your control
         </p>
       </div>

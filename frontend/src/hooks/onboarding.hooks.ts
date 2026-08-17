@@ -5,6 +5,7 @@ import {
   getGitHubConnectionStatus,
   getOnboardingOptions,
 } from "../services/onboarding.api";
+import { USERNAME_REGEX } from "../schemas/onboarding.schema";
 import type { OnboardingFormValues } from "../types/onboarding";
 import { useDebounce } from "./useDebounce";
 
@@ -17,7 +18,7 @@ export function useOnboardingOptions() {
 
 export function useUsernameAvailability(username: string) {
   const value = useDebounce(username.trim(), 400);
-  const valid = value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(value);
+  const valid = value.length >= 3 && USERNAME_REGEX.test(value);
   return useQuery({
     queryKey: ["onboarding", "username", value],
     queryFn: () => checkUserName(value),
