@@ -1,12 +1,16 @@
 import rateLimit from "express-rate-limit";
 import { createRedisStore } from "../redis-store.js";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 export const feedReadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: isDevelopment ? 500 : 60,
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRedisStore("rl:feed-read-limiter"),
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:feed-read-limiter" : "rl:feed-read-limiter",
+  ),
   handler: (_, res) => {
     res.status(429).json({
       success: false,

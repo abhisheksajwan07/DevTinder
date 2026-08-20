@@ -48,6 +48,7 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
       );
       return;
     }
+
     const fullProfile = await repository.getMyProfileById(profileId);
     const corpus = buildProfileCorpus(fullProfile);
 
@@ -72,11 +73,7 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
       logger.warn(
         `[Embedding Worker] Version mismatch for ${profileId} — newer job will handle it`,
       );
-      await embeddingQueue.add(
-        "generate_embedding",
-        { profileId },
-        { jobId: `embed-${profileId}` },
-      );
+      await embeddingQueue.add("generate_embedding", { profileId });
       return;
     }
 

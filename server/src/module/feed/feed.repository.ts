@@ -103,8 +103,8 @@ export class FeedRepository implements IFeedRepository {
   ): Promise<RawProfileRow[]> {
     const embeddingLiteral = sql`${JSON.stringify(viewerEmbedding)}::vector`;
 
-    const result = await db.execute<RawProfileRow>(sql`        
-            SELECT 
+    const result = await db.execute<RawProfileRow>(sql`
+            SELECT
                 p.id AS "id",
                 p.user_name AS "userName",
                 p.first_name AS "firstName",
@@ -115,15 +115,20 @@ export class FeedRepository implements IFeedRepository {
                 p.availability AS "availability",
                 p.avatar_id AS "avatarId",
                 1-(p.embedding <=> ${embeddingLiteral}) AS "similarityScore"
-            FROM profiles p 
+            FROM profiles p
             JOIN users u ON p.user_id = u.id
-            WHERE 
+            WHERE
                 p.id != ${viewerProfileId}
                 AND p.embedding_status = 'ready'
                 AND p.embedding IS NOT null
                 AND u.on_boarding_complete = true
+                AND NOT EXISTS (
+                    SELECT 1 FROM profile_actions pa
+                    WHERE (pa.actor_profile_id = ${viewerProfileId} AND pa.target_profile_id = p.id) 
+                       OR (pa.actor_profile_id = p.id AND pa.target_profile_id = ${viewerProfileId})
+                )
             ORDER BY p.embedding <=> ${embeddingLiteral} ASC
-            LIMIT ${limit}      
+            LIMIT ${limit}
         `);
 
     return result.rows;

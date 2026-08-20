@@ -1,35 +1,76 @@
-import type { DevProfile } from "../../app/mock-data";
+import { FeedProfile } from "../../types/feed";
 import { X, Heart, Star, Sparkles, Clock, Github } from "lucide-react";
+import { gsap } from "gsap";
+import { useEffect, useRef, useState } from "react";
 
 interface ProfileCardProps {
-  profile: DevProfile;
+  profile: FeedProfile;
   handlePass: () => void;
   handleLike: () => void;
-  setShowMatch: (val: boolean) => void;
 }
 
 export default function ProfileCard({
   profile,
   handlePass,
   handleLike,
-  setShowMatch,
 }: ProfileCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    gsap.fromTo(
+      cardRef.current,
+      { y: 18, opacity: 0, scale: 0.98 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" },
+    );
+  }, []);
+
+  const animateSwipe = (direction: "left" | "right", callback: () => void) => {
+    if (isAnimating || !cardRef.current) return;
+
+    setIsAnimating(true);
+    gsap.to(cardRef.current, {
+      x: direction === "left" ? -window.innerWidth * 0.9 : window.innerWidth * 0.9,
+      rotation: direction === "left" ? -14 : 14,
+      opacity: 0,
+      duration: 0.42,
+      ease: "power2.in",
+      onComplete: callback,
+    });
+  };
+
   return (
-    <div className="rounded-[28px] border border-[#e9e5df] bg-white shadow-sm overflow-hidden">
+    <div
+      ref={cardRef}
+      className="rounded-[28px] border border-[#e9e5df] bg-white shadow-sm overflow-hidden will-change-transform"
+    >
       {/* Card Header */}
       <div className="p-6 pb-4 border-b border-[#f0ece6]">
         <div className="flex items-start gap-4">
-          <div
-            className="size-14 rounded-2xl grid place-items-center text-white font-bold text-lg shrink-0 shadow-sm"
-            style={{ backgroundColor: profile.avatarColor }}
-          >
-            {profile.avatar}
+          <div className="size-14 rounded-2xl grid place-items-center text-white font-bold text-lg shrink-0 shadow-sm">
+            {profile.avatar?.imageUrl ? (
+              <img
+                src={profile.avatar.imageUrl}
+                alt={profile.firstName}
+                className="size-full object-cover"
+              />
+            ) : (
+              <div className="size-full grid place-items-center bg-orange-500 text-white font-bold text-lg">
+                {profile.firstName[0]?.toUpperCase()}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h2 className="text-lg font-bold text-[#242322]">{profile.name}</h2>
-                <p className="font-mono text-xs text-[#77736e]">@{profile.username}</p>
+                <h2 className="text-lg font-bold text-[#242322]">
+                  {profile.firstName}
+                </h2>
+                <p className="font-mono text-xs text-[#77736e]">
+                  @{profile.username}
+                </p>
               </div>
               <div className="shrink-0 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-1.5 text-center">
                 <p className="font-mono text-base font-bold text-orange-600 leading-tight">
@@ -43,26 +84,23 @@ export default function ProfileCard({
 
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#77736e]">
               <span className="inline-flex items-center gap-1 rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-2.5 py-1 font-medium">
-                {profile.role}
+                {profile.primaryRole}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-2.5 py-1 font-medium">
-                {profile.experience}
+                {profile.experienceLevel}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-2.5 py-1 font-medium">
                 <Clock className="size-3" />
                 {profile.availability}
               </span>
-              {profile.isOnline && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700">
-                  <span className="size-1.5 rounded-full bg-emerald-500" />
-                  Online
-                </span>
-              )}
+             
             </div>
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-[#55504b] leading-relaxed">{profile.bio}</p>
+        <p className="mt-4 text-sm text-[#55504b] leading-relaxed">
+          {profile.bio}
+        </p>
       </div>
 
       {/* Skills */}
@@ -73,10 +111,10 @@ export default function ProfileCard({
         <div className="flex flex-wrap gap-1.5">
           {profile.skills.map((skill) => (
             <span
-              key={skill}
+              key={skill.id}
               className="rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-3 py-1 font-mono text-[11px] font-semibold text-[#55504b]"
             >
-              {skill}
+              {skill.name}
             </span>
           ))}
         </div>
@@ -90,10 +128,10 @@ export default function ProfileCard({
         <div className="flex flex-wrap gap-1.5">
           {profile.interests.map((interest) => (
             <span
-              key={interest}
+              key={interest.id}
               className="rounded-full border border-[#e9e5df] bg-orange-50/60 px-3 py-1 text-[11px] font-semibold text-orange-700"
             >
-              {interest}
+              {interest.name}
             </span>
           ))}
         </div>
@@ -105,58 +143,26 @@ export default function ProfileCard({
           Looking For
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {profile.goals.map((goal) => (
+          {profile.lookingFor.map((lf) => (
             <span
-              key={goal}
+              key={lf.id}
               className="inline-flex items-center gap-1 rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-3 py-1 text-[11px] font-semibold text-[#55504b]"
             >
               <Sparkles className="size-3 text-orange-500" />
-              {goal}
+              {lf.name}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Compatibility Reasons */}
-      <div className="px-6 py-4 border-b border-[#f0ece6]">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#88827c] mb-2.5">
-          Why You're Compatible
-        </p>
-        <div className="space-y-1.5">
-          {[
-            "Shared TypeScript & Node.js stack",
-            "Both interested in SaaS & Open source",
-            "Similar collaboration goals",
-            "Compatible availability",
-          ]
-            .slice(0, 3)
-            .map((reason) => (
-              <div key={reason} className="flex items-center gap-2 text-xs text-[#55504b]">
-                <span className="size-1.5 rounded-full bg-orange-500 shrink-0" />
-                {reason}
-              </div>
-            ))}
-        </div>
-      </div>
-
-      {/* Github Username */}
-      <div className="px-6 py-4 border-b border-[#f0ece6]">
-        <a
-          href={`https://github.com/${profile.githubUsername}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl border border-[#e9e5df] bg-[#f7f5f2] px-3.5 py-2 text-xs font-semibold text-[#242322] hover:border-orange-300 transition"
-        >
-          <Github className="size-4" />
-          github.com/{profile.githubUsername}
-        </a>
-      </div>
+     
 
       {/* Action Buttons */}
       <div className="px-6 py-5 flex items-center justify-center gap-5">
         <button
           type="button"
-          onClick={handlePass}
+          onClick={() => animateSwipe("left", handlePass)}
+          disabled={isAnimating}
           className="flex items-center gap-2 rounded-2xl border border-[#e4ded5] bg-white px-6 py-3 text-sm font-semibold text-[#77716b] shadow-xs transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 active:scale-95"
         >
           <X className="size-4" />
@@ -165,20 +171,12 @@ export default function ProfileCard({
 
         <button
           type="button"
-          onClick={handleLike}
+          onClick={() => animateSwipe("right", handleLike)}
+          disabled={isAnimating}
           className="flex items-center gap-2 rounded-2xl bg-[#ee7100] px-6 py-3 text-sm font-bold text-white shadow-md shadow-orange-500/25 transition hover:bg-[#d96500] hover:shadow-lg hover:shadow-orange-500/35 active:scale-95"
         >
           <Heart className="size-4" />
           Interested
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setShowMatch(true)}
-          className="flex items-center gap-2 rounded-2xl border border-orange-300 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-700 shadow-xs transition hover:bg-orange-100 active:scale-95"
-        >
-          <Star className="size-4 fill-orange-400" />
-          Strong Match
         </button>
       </div>
     </div>
