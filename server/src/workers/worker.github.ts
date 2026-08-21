@@ -18,26 +18,27 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
       "[GitHubWorker] Sync job received",
     );
 
-    
+
     const account = await githubRepository.findGitHubAccount(profileId);
 
     if (!account) {
-      
+
       logger.warn(
         { profileId },
         "[GitHubWorker] No GitHub account found — skipping sync",
       );
+      await embeddingQueue.add("generate_embedding", { profileId });
       return;
     }
 
-    
+
     const accessToken = await githubApiClient.getValidAccessToken(account);
 
-   
+
     const githubUser = await githubApiClient.getProfile(accessToken);
     const apiRepos = await githubApiClient.getRepositories(accessToken);
 
-   
+
     await githubRepository.syncGitHubData(
       profileId,
       {
@@ -61,12 +62,8 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
       })),
     );
 
-   
-    await embeddingQueue.add(
-      "generate_embedding",
-      { profileId },
-      { jobId: `embed-${profileId}` },
-    );
+
+    await embeddingQueue.add("generate_embedding", { profileId });
 
     logger.info(
       { profileId, repoCount: apiRepos.length },
