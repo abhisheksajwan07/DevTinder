@@ -1,10 +1,18 @@
 import { AppError } from "../../utils/AppError.js";
 import { githubSyncQueue } from "../../queues/github-sync.queue.js";
 import { embeddingQueue } from "../../queues/embedding.queue.js";
-import type { IGitHubRepository, GitHubProfileResponse } from "./github.types.js";
+import type {
+  GitHubConnectionStatus,
+  GitHubProfileResponse,
+  IGitHubRepository,
+} from "./github.types.js";
 
 export class GitHubService {
   constructor(private readonly repository: IGitHubRepository) {}
+
+  async getConnectionStatus(userId: string): Promise<GitHubConnectionStatus> {
+    return this.repository.getConnectionStatus(userId);
+  }
 
   /**
    * enqueue background sync job for the given profile.
@@ -22,7 +30,11 @@ export class GitHubService {
       );
     }
 
-    await githubSyncQueue.add("github_sync", { profileId });
+    await githubSyncQueue.add(
+      "github_sync",
+      { profileId },
+      { jobId: `github-sync-${profileId}` },
+    );
   }
 
   /**
@@ -83,7 +95,7 @@ export class GitHubService {
     await embeddingQueue.add(
       "generate_embedding",
       { profileId },
-      { jobId: `embed-${profileId}` },
+      { jobId: `generate-embedding-${profileId}` },
     );
   }
 }

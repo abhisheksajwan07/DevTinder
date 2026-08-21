@@ -8,6 +8,7 @@ import {
   githubReadLimiter,
 } from "../../middleware/rate-limit/github.rate-limit.js";
 import {
+  getGitHubStatusController,
   syncGitHubController,
   getGitHubProfileController,
   setFeaturedRepositoriesController,
@@ -16,6 +17,12 @@ import { featuredRepositoriesSchema } from "./github.validator.js";
 
 const router = Router();
 
+router.get(
+  "/status",
+  requireAccessAuth,
+  githubReadLimiter,
+  getGitHubStatusController,
+);
 
 router.use(requireAccessAuth, requireOnboarding);
 

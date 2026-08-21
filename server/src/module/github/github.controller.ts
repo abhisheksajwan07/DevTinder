@@ -23,6 +23,23 @@ export const syncGitHubController = async (
 };
 
 /**
+ * GET /github/status
+ * Returns whether a GitHub OAuth account is connected to the user.
+ *  available this before onboarding is complete.
+ */
+export const getGitHubStatusController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  if (!req.user?.userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const status = await githubService.getConnectionStatus(req.user.userId);
+  sendResponse(res, 200, "GitHub status fetched", status);
+};
+
+/**
  * GET /github/profile
  * Returns cached GitHub profile + repositories from PostgreSQL.
  * Never calls the GitHub API.

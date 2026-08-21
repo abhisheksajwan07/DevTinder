@@ -59,6 +59,10 @@ export interface GitHubProfileResponse {
   repositories: GitHubRepositoryItem[];
 }
 
+export interface GitHubConnectionStatus {
+  connected: boolean;
+}
+
 export interface GitHubRepositoryItem {
   id: string;
   githubRepoId: number;
@@ -74,6 +78,7 @@ export interface GitHubRepositoryItem {
 
 export interface IGitHubRepository {
   findGitHubAccount(profileId: string): Promise<GitHubAuthAccount | null>;
+  getConnectionStatus(userId: string): Promise<GitHubConnectionStatus>;
   syncGitHubData(
     profileId: string,
     profile: UpsertGitHubProfileData,

@@ -27,7 +27,11 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
         { profileId },
         "[GitHubWorker] No GitHub account found — skipping sync",
       );
-      await embeddingQueue.add("generate_embedding", { profileId });
+      await embeddingQueue.add(
+        "generate_embedding",
+        { profileId },
+        { jobId: `generate-embedding-${profileId}` },
+      );
       return;
     }
 
@@ -63,7 +67,11 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
     );
 
 
-    await embeddingQueue.add("generate_embedding", { profileId });
+    await embeddingQueue.add(
+      "generate_embedding",
+      { profileId },
+      { jobId: `generate-embedding-${profileId}` },
+    );
 
     logger.info(
       { profileId, repoCount: apiRepos.length },

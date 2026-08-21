@@ -2,7 +2,6 @@ import { eq, inArray, and, sql } from "drizzle-orm";
 import {
   db,
   authAccounts,
-  users,
   profiles,
   githubProfiles,
   githubRepositories,
@@ -10,6 +9,7 @@ import {
 
 import type {
   GitHubAuthAccount,
+  GitHubConnectionStatus,
   GitHubProfile,
   GitHubRepository as GitHubRepositoryRow,
   IGitHubRepository,
@@ -33,19 +33,34 @@ export class GitHubRepository implements IGitHubRepository {
         providerRefreshToken: authAccounts.providerRefreshToken,
         providerTokenExpiresAt: authAccounts.providerTokenExpiresAt,
       })
-      .from(profiles)
-      .innerJoin(users, eq(profiles.userId, users.id))
-      .innerJoin(
-        authAccounts,
+      .from(authAccounts)
+      .innerJoin(profiles, eq(profiles.userId, authAccounts.userId))
+      .where(
         and(
-          eq(authAccounts.userId, users.id),
+          eq(profiles.id, profileId),
           eq(authAccounts.provider, "github"),
         ),
       )
-      .where(eq(profiles.id, profileId))
       .limit(1);
 
     return rows[0] ?? null;
+  }
+
+  async getConnectionStatus(userId: string): Promise<GitHubConnectionStatus> {
+    const account = await db
+      .select({ id: authAccounts.id })
+      .from(authAccounts)
+      .where(
+        and(
+          eq(authAccounts.userId, userId),
+          eq(authAccounts.provider, "github"),
+        ),
+      )
+      .limit(1);
+
+    return {
+      connected: account.length > 0,
+    };
   }
 
   /**
