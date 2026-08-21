@@ -17,6 +17,7 @@ services:
   worker:
     build: .
     restart: unless-stopped
+    command: node dist/worker.js
     env_file:
       - .env
     depends_on:
