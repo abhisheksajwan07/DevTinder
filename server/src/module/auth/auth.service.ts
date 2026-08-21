@@ -48,10 +48,14 @@ export class AuthService {
     await redis.set(otpKey, otp, "EX", 300);
     await redis.set(attemptsKey, 0, "EX", 300);
 
-    await emailQueue.add("send-welcome-otp", {
-      email,
-      otp,
-    });
+    await emailQueue.add(
+      "send-welcome-otp",
+      {
+        email,
+        otp,
+      },
+      { jobId: `send-welcome-otp-${email}` },
+    );
   }
 
   async getMe(userId: string) {
