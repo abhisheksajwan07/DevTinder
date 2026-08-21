@@ -13,7 +13,15 @@ export const hashResetToken = (token: string) => {
 };
 
 export const storeResetToken = async (tokenHash: string, userId: string) => {
+  // Invalidate any previously issued (still-live) token for this user
+  const existingHash = await redis.get(`reset:user:${userId}`);
+  if (existingHash) {
+    await redis.del(`reset:${existingHash}`);
+  }
+
+  // Bidirectional mapping so we can look up in both directions
   await redis.set(`reset:${tokenHash}`, userId, "EX", RESET_TOKEN_TTL);
+  await redis.set(`reset:user:${userId}`, tokenHash, "EX", RESET_TOKEN_TTL);
 };
 
 export const getResetTokenUserId = async (tokenHash: string) => {
@@ -21,5 +29,11 @@ export const getResetTokenUserId = async (tokenHash: string) => {
 };
 
 export const deleteResetToken = async (tokenHash: string) => {
-  await redis.del(`reset:${tokenHash}`);
+  const userId = await redis.get(`reset:${tokenHash}`);
+  if (userId) {
+    // Clean up both the token→user and user→token entries atomically
+    await redis.del(`reset:${tokenHash}`, `reset:user:${userId}`);
+  } else {
+    await redis.del(`reset:${tokenHash}`);
+  }
 };

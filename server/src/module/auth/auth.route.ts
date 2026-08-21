@@ -22,6 +22,7 @@ import { requireAccessAuth } from "../../middleware/auth.middleware.js";
 
 import {
   forgotPasswordLimiter,
+  resetPasswordLimiter,
   resendOtpLimiter,
   signInLimiter,
   signupLimiter,
@@ -58,6 +59,7 @@ router.post(
 );
 router.post(
   "/reset-password",
+  resetPasswordLimiter,
   validate(resetPasswordSchema),
   resetPasswordController,
 );

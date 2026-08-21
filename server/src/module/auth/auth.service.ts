@@ -288,15 +288,18 @@ export class AuthService {
       {
         email,
         resetUrl,
-        idempotencyKey: `reset-password:${hashToken}`,
+        // Resend keys identify one concrete send attempt. Keep this value in
+        // the job payload so BullMQ retries reuse the same key, while every
+        // newly requested reset email gets a different key.
+        idempotencyKey: crypto.randomUUID(),
       },
       {
         priority: 1,
-        jobId: `reset-password:${email}`, // same jobId = no duplicate job
+        jobId: `reset-email-${hashToken}`, // unique per reset attempt — prevents BullMQ dedup blocking re-sends
       },
     );
 
-    await redis.set(cooldownKey, "1", "EX", 120);
+    await redis.set(cooldownKey, "1", "EX", 300); // cooldown per email to limit inbox flooding
   }
 
   async resetPassword(dto: ResetPasswordDto) {
