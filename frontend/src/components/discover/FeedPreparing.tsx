@@ -18,7 +18,6 @@ export default function FeedPreparing({
   isDataReady = false,
   onFinish,
 }: FeedPreparingProps) {
-
   const [currentStep, setCurrentStep] = useState(0);
   const isDataReadyRef = useRef(isDataReady);
   isDataReadyRef.current = isDataReady;
@@ -68,7 +67,7 @@ export default function FeedPreparing({
       <div className="w-full max-w-md rounded-3xl border border-[#e9e5df] bg-white p-8 shadow-xl shadow-orange-500/5 transition-all">
         {/* Animated Header Icon */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-200">
+          <div className="flex size-11 items-center justify-center rounded-2xl `bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-200">
             <Sparkles className="size-5 text-white animate-pulse" />
           </div>
           <div>
@@ -87,8 +86,9 @@ export default function FeedPreparing({
             return (
               <div
                 key={step}
-                className={`flex items-center gap-3 text-xs transition-all duration-300 ${isPending ? "opacity-30" : "opacity-100"
-                  }`}
+                className={`flex items-center gap-3 text-xs transition-all duration-300 ${
+                  isPending ? "opacity-30" : "opacity-100"
+                }`}
               >
                 {/* Status Indicator */}
                 {isDone ? (
@@ -101,12 +101,13 @@ export default function FeedPreparing({
 
                 {/* Step Label */}
                 <span
-                  className={`font-medium ${isCurrent
+                  className={`font-medium ${
+                    isCurrent
                       ? "text-orange-600 font-semibold"
                       : isDone
                         ? "text-[#242322]"
                         : "text-[#88827c]"
-                    }`}
+                  }`}
                 >
                   {step}
                 </span>
@@ -119,13 +120,13 @@ export default function FeedPreparing({
         <div className="mt-8">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0ece6]">
             <div
-              className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500 ease-out"
+              className="h-full `bg-linear-to-r from-amber-400 to-orange-500 transition-all duration-500 ease-out"
               style={{
                 width: `${Math.min(
                   100,
                   ((Math.min(currentStep, PREPARATION_STEPS.length - 1) + 1) /
                     PREPARATION_STEPS.length) *
-                  100,
+                    100,
                 )}%`,
               }}
             />
