@@ -1,14 +1,17 @@
 import rateLimit from "express-rate-limit";
 import { createRedisStore } from "../../middleware/redis-store.js";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 
 export const oauthCallbackLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: isDevelopment ? 500 : 20,
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRedisStore("rl:oauth-callback"),
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:oauth-callback" : "rl:oauth-callback",
+  ),
   handler: (_, res) => {
     res.status(429).json({
       success: false,
@@ -21,10 +24,12 @@ export const oauthCallbackLimiter = rateLimit({
 
 export const oauthRedirectLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: isDevelopment ? 500 : 30,
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRedisStore("rl:oauth-redirect"),
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:oauth-redirect" : "rl:oauth-redirect",
+  ),
   handler: (_, res) => {
     res.status(429).json({
       success: false,

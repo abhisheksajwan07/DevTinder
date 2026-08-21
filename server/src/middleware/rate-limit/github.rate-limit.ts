@@ -1,12 +1,16 @@
 import rateLimit from "express-rate-limit";
 import { createRedisStore } from "../redis-store.js";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 export const githubSyncLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, 
+  max: isDevelopment ? 100 : 5,
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRedisStore("rl:github-sync"),
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:github-sync" : "rl:github-sync",
+  ),
   handler: (_, res) => {
     res.status(429).json({
       success: false,
@@ -17,10 +21,12 @@ export const githubSyncLimiter = rateLimit({
 
 export const githubReadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: isDevelopment ? 500 : 60,
   standardHeaders: true,
   legacyHeaders: false,
-  store: createRedisStore("rl:github-read"),
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:github-read" : "rl:github-read",
+  ),
   handler: (_, res) => {
     res.status(429).json({
       success: false,
