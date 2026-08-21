@@ -6,7 +6,7 @@ import {
   setRefreshTokenCookie,
 } from "../../utils/cookie.js";
 import { User } from "./oauth.types.js";
-import { sendResponse } from "../../utils/sendResponse.js";
+import { env } from "../../config/env.js";
 
 export const sendOAuthSuccess = (
   res: Response,
@@ -15,26 +15,23 @@ export const sendOAuthSuccess = (
     isNewUser: boolean;
     accessToken: string;
     refreshToken: string;
-    oauthPrefill?: {
-      name: string;
-      avatar: string;
-      githubLogin?: string | null;
-    };
   },
 ) => {
   setAccessTokenCookie(res, data.accessToken);
   setRefreshTokenCookie(res, data.refreshToken);
   setCsrfCookie(res);
 
-  sendResponse(
-    res,
-    200,
-    data.isNewUser ? "Account created successfully." : "Login successful.",
-    {
-      user: data.user,
-      isNewUser: data.isNewUser,
-      onBoardingComplete: data.user.onBoardingComplete,
-      oauthPrefill: data.oauthPrefill ?? null,
-    },
-  );
+  // Redirect the browser back to the frontend SPA.
+  // For new users, go to onboarding; existing users go to the app.
+  let redirectUrl: string;
+
+  if (data.isNewUser) {
+    redirectUrl = `${env.CLIENT_URL}/onboarding`;
+  } else if (!data.user.onBoardingComplete) {
+    redirectUrl = `${env.CLIENT_URL}/onboarding`;
+  } else {
+    redirectUrl = `${env.CLIENT_URL}/app/discover`;
+  }
+
+  res.redirect(redirectUrl);
 };

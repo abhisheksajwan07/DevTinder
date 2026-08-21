@@ -12,7 +12,7 @@ import { githubProvider } from "./providers/github.provider.js";
 import { oauthCallbackSchema } from "./oauth.validator.js";
 import { sendOAuthSuccess } from "./oauth.helper.js";
 import { githubSyncQueue } from "../../queues/github-sync.queue.js";
-import { sendResponse } from "../../utils/sendResponse.js";
+import { env } from "../../config/env.js";
 
 export const googleRedirectController = async (
   _req: Request,
@@ -187,11 +187,6 @@ export const githubCallbackController = async (
     isNewUser,
     accessToken,
     refreshToken: rawRefreshToken,
-    oauthPrefill: {
-      name: profile.name,
-      avatar: profile.avatar ?? "",
-      githubLogin: profile.githubLogin,
-    },
   });
 };
 
@@ -278,11 +273,16 @@ export const githubConnectCallbackController = async (
   );
 
   if (profileId) {
-    await githubSyncQueue.add("github_sync", { profileId });
+    await githubSyncQueue.add(
+      "github_sync",
+      { profileId },
+      { jobId: `github-sync-${profileId}` },
+    );
   }
 
-  sendResponse(res, 200, "GitHub connected successfully", {
-    connected: true,
-    syncStarted: Boolean(profileId),
-  });
+  // A connection started during onboarding has no profile yet. A connection
+  // started later belongs to Settings, where the user can see sync controls.
+  res.redirect(
+    `${env.CLIENT_URL}${profileId ? "/app/settings" : "/onboarding?step=6&github=connected"}`,
+  );
 };

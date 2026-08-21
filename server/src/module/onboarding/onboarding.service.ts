@@ -23,7 +23,11 @@ export class OnboardingService implements IOnboardingService {
         { jobId: `github-sync-${profileId}` },
       );
     } else {
-      await embeddingQueue.add("generate_embedding", { profileId });
+      await embeddingQueue.add(
+        "generate_embedding",
+        { profileId },
+        { jobId: `generate-embedding-${profileId}` },
+      );
     }
   }
 
@@ -38,7 +42,11 @@ export class OnboardingService implements IOnboardingService {
   async updateProfile(userId: string, data: UpdateProfileDTO): Promise<void> {
     const profile = await this.repository.getMyProfile(userId);
     await this.repository.updateProfile(profile.id, data);
-    await embeddingQueue.add("generate_embedding", { profileId: profile.id });
+    await embeddingQueue.add(
+      "generate_embedding",
+      { profileId: profile.id },
+      { jobId: `generate-embedding-${profile.id}` },
+    );
   }
   async getOptions(): Promise<OnboardingOptions> {
     return await this.repository.getOptions();
