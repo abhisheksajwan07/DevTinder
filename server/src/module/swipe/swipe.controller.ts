@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../../utils/sendResponse.js";
+import { AppError } from "../../utils/AppError.js";
 import { service as swipeService } from "./swipe.dependencies.js";
 import { ProfileParams } from "./swipe.types.js";
 
@@ -38,4 +39,13 @@ export const reject = async (req: Request<ProfileParams>, res: Response) => {
   await swipeService.reject(requesterProfileId, responderProfileId);
 
   return sendResponse(res, 200, "Connection request rejected");
+};
+
+export const getIncomingRequests = async (req: Request, res: Response) => {
+  if (!req.user?.profileId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const requests = await swipeService.getIncomingRequests(req.user.profileId);
+  return sendResponse(res, 200, "Connection requests fetched successfully", requests);
 };

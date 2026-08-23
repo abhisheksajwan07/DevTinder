@@ -29,6 +29,7 @@ import OnboardingRoute from "./components/auth/OnBoardingRoute";
 import PublicOnlyRoute from "./components/auth/PublicOnlyRoute";
 import VerifyEmailRoute from "./components/auth/VerifyEmailRoute";
 import { HomeRoute } from "./routes/HomeRoute";
+import ChatPage from "./pages/ChatPage";
 
 export function LandingPage() {
   return (
@@ -108,14 +109,14 @@ function App() {
       <Route element={<OnboardingRoute />}>
         <Route path="/onboarding" element={<OnboardingPage />} />
       </Route>
-
+     
       {/* -- App Routes (authenticated ) -- */}
       <Route element={<ProtectedRoute />}>
         <Route path="/app" element={<AppShell />}>
           <Route index element={<Navigate to="/app/discover" replace />} />
           <Route path="discover" element={<DiscoverPage />} />
           <Route path="matches" element={<MatchesPage />} />
-          {/* <Route path="chat" element={<ChatPage />} /> */}
+          <Route path="chat" element={<ChatPage />} />
           <Route path="sessions" element={<SessionsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/:username" element={<PublicProfilePage />} />

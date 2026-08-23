@@ -62,4 +62,18 @@ This makes database transactions cleaner and keeps each service focused on one r
   The session has not been revoked.
   The session has not expired.
 
-  This enables immediate token invalidation after logout or forced session revocation, even if the access token itself has not yet expired
+This enables immediate token invalidation after logout or forced session revocation, even if the access token itself has not yet expired
+
+## github connection privacy
+
+- github connection is optional. users can complete their profile without connecting github.
+- the app requests only `read:user` and `user:email` permissions.
+- the app imports the user's public profile and public repositories.
+- github passwords are never shared with the app.
+- github tokens must stay on the server and must never be sent to the frontend or written to logs.
+- tokens should be encrypted in the database before production use.
+- settings should provide a disconnect github option.
+- disconnecting github should delete the stored github tokens and cached github profile and repository data.
+- disconnecting github should regenerate the user's matching embedding because github data may be part of it.
+- the app should clearly explain what data is imported before the user connects github.
+- users should also be able to revoke the app from their github account settings.

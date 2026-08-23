@@ -47,74 +47,73 @@ export function registerChatEvents(io: Server, socket: Socket) {
   });
 
   socket.on("message:send", async (payload, ack) => {
-  try {
-    const result = sendMessageSocketSchema.safeParse(payload);
+    try {
+      const result = sendMessageSocketSchema.safeParse(payload);
 
-    if (!result.success) {
+      if (!result.success) {
+        return ack({
+          success: false,
+          message: result.error.issues[0]?.message,
+        });
+      }
+
+      if (!socket.rooms.has(result.data.conversationId)) {
+        return ack?.({
+          success: false,
+          message: "Join the conversation first.",
+        });
+      }
+
+      const message = await chatService.sendMessage(
+        result.data.conversationId,
+        socket.data.profileId,
+        {
+          content: result.data.content,
+          type: result.data.type,
+        },
+      );
+
+      // const sockets = await io.in(result.data.conversationId).fetchSockets()
+
+      // console.log(
+      //   "ROOM SOCKETS:",
+      //   sockets.map((s) => ({
+      //     id: s.id,
+      //     rooms: [...s.rooms],
+      //   })),
+      // );
+
+      // console.log(
+      //   "ADAPTER ROOMS:",
+      //   [...io.sockets.adapter.rooms.entries()].map(([room, ids]) => ({
+      //     room,
+      //     sockets: [...ids],
+      //   })),
+      // );
+
+      io.to(result.data.conversationId).emit("message:new", message);
+
+      // console.log("EMIT DONE");
+
+      return ack({
+        success: true,
+        data: message,
+      });
+    } catch (error) {
+      if (error instanceof AppError) {
+        return ack({
+          success: false,
+          code: error.code,
+          message: error.message,
+        });
+      }
+
       return ack({
         success: false,
-        message: result.error.issues[0]?.message,
+        message: "Internal server error",
       });
     }
-
-    if (!socket.rooms.has(result.data.conversationId)) {
-      return ack?.({
-        success: false,
-        message: "Join the conversation first.",
-      });
-    }
-
-    const message = await chatService.sendMessage(
-      result.data.conversationId,
-      socket.data.profileId,
-      {
-        content: result.data.content,
-        type: result.data.type,
-      },
-    );
-
-    // const sockets = await io.in(result.data.conversationId).fetchSockets()
-
-    // console.log(
-    //   "ROOM SOCKETS:",
-    //   sockets.map((s) => ({
-    //     id: s.id,
-    //     rooms: [...s.rooms],
-    //   })),
-    // );
-
-    // console.log(
-    //   "ADAPTER ROOMS:",
-    //   [...io.sockets.adapter.rooms.entries()].map(([room, ids]) => ({
-    //     room,
-    //     sockets: [...ids],
-    //   })),
-    // );
-
-    io.to(result.data.conversationId).emit("message:new", message);
-
-    // console.log("EMIT DONE");
-   
-
-    return ack({
-      success: true,
-      data: message,
-    });
-  } catch (error) {
-    if (error instanceof AppError) {
-      return ack({
-        success: false,
-        code: error.code,
-        message: error.message,
-      });
-    }
-
-    return ack({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-});
+  });
 
   socket.on("conversation:leave", (payload, ack) => {
     const result = conversationIdParamSchema.safeParse(payload);
@@ -220,6 +219,4 @@ export function registerChatEvents(io: Server, socket: Socket) {
       });
     }
   });
-
-  
 }

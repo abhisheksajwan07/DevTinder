@@ -1,4 +1,4 @@
-import type { DevProfile } from "../../app/mock-data";
+import type { DevProfile } from "../../mock-data";
 
 interface ProfilePanelProps {
   participant: DevProfile;

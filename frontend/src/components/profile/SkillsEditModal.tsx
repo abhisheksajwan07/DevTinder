@@ -1,4 +1,4 @@
-import { currentUser } from "../../app/mock-data";
+import { currentUser } from "../../mock-data";
 import { X } from "lucide-react";
 
 interface SkillsEditModalProps {

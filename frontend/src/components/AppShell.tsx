@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { currentUser } from "../app/mock-data";
+import { currentUser } from "../mock-data";
 import {
   Compass,
   Heart,
@@ -12,6 +12,7 @@ import {
   Bell,
   ChevronRight,
 } from "lucide-react";
+import {socket} from 
 
 const navItems = [
   { to: "/app/discover", label: "Discover", icon: Compass },
@@ -24,6 +25,12 @@ const navItems = [
 export default function AppShell() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f7f5f2] flex">
@@ -60,7 +67,9 @@ export default function AppShell() {
                 <>
                   <Icon
                     className={`size-4.5 shrink-0 ${
-                      isActive ? "text-orange-500" : "text-[#88827c] group-hover:text-[#55504b]"
+                      isActive
+                        ? "text-orange-500"
+                        : "text-[#88827c] group-hover:text-[#55504b]"
                     }`}
                   />
                   <span className="flex-1">{label}</span>

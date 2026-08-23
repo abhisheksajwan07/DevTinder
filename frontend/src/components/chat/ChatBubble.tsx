@@ -1,4 +1,4 @@
-import type { Message } from "../../app/mock-data";
+import type { Message } from "../../mock-data";
 
 interface ChatBubbleProps {
   msg: Message;

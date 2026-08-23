@@ -1,4 +1,4 @@
-import type { SessionDevice } from "../../app/mock-data";
+import type { SessionDevice } from "../../mock-data";
 import { Smartphone, Laptop, Monitor, MapPin, Clock, X } from "lucide-react";
 
 interface SessionCardProps {

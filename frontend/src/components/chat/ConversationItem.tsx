@@ -1,4 +1,4 @@
-import type { Conversation } from "../../app/mock-data";
+import type { Conversation } from "../../mock-data";
 
 interface ConversationItemProps {
   conv: Conversation;
@@ -16,7 +16,9 @@ export default function ConversationItem({
       type="button"
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors ${
-        isActive ? "bg-orange-50 border-r-2 border-orange-500" : "hover:bg-[#f7f5f2]"
+        isActive
+          ? "bg-orange-50 border-r-2 border-orange-500"
+          : "hover:bg-[#f7f5f2]"
       }`}
     >
       <div className="relative shrink-0">
@@ -39,7 +41,9 @@ export default function ConversationItem({
             {conv.lastTimestamp}
           </span>
         </div>
-        <p className="text-xs text-[#77736e] truncate mt-0.5">{conv.lastMessage}</p>
+        <p className="text-xs text-[#77736e] truncate mt-0.5">
+          {conv.lastMessage}
+        </p>
       </div>
       {conv.unreadCount > 0 && (
         <span className="shrink-0 flex size-5 items-center justify-center rounded-full bg-orange-500 font-mono text-[10px] font-bold text-white">

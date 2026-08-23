@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Repository } from "../../app/mock-data";
+import type { Repository } from "../../mock-data";
 import { X, Check, Star } from "lucide-react";
 
 interface RepoManagerModalProps {
@@ -14,7 +14,7 @@ export default function RepoManagerModal({
   onSave,
 }: RepoManagerModalProps) {
   const [selected, setSelected] = useState<string[]>(
-    repos.filter((r) => r.isFeatured).map((r) => r.id)
+    repos.filter((r) => r.isFeatured).map((r) => r.id),
   );
 
   const toggle = (id: string) => {
@@ -22,8 +22,8 @@ export default function RepoManagerModal({
       prev.includes(id)
         ? prev.filter((s) => s !== id)
         : prev.length < 3
-        ? [...prev, id]
-        : prev
+          ? [...prev, id]
+          : prev,
     );
   };
 
@@ -32,7 +32,9 @@ export default function RepoManagerModal({
       <div className="w-full max-w-lg bg-white rounded-t-[28px] sm:rounded-[28px] border border-[#e9e5df] shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-6 border-b border-[#f0ece6]">
           <div>
-            <h3 className="text-base font-bold text-[#242322]">Manage Featured Repos</h3>
+            <h3 className="text-base font-bold text-[#242322]">
+              Manage Featured Repos
+            </h3>
             <p className="font-mono text-[10px] text-[#88827c] mt-0.5">
               {selected.length}/3 selected · max 3
             </p>
@@ -72,13 +74,17 @@ export default function RepoManagerModal({
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-bold text-[#242322] truncate">{repo.name}</p>
+                    <p className="text-sm font-bold text-[#242322] truncate">
+                      {repo.name}
+                    </p>
                     <span className="flex items-center gap-1 font-mono text-xs text-[#77736e] shrink-0">
                       <Star className="size-3 fill-amber-400 text-amber-500" />
                       {repo.stars}
                     </span>
                   </div>
-                  <p className="text-xs text-[#77736e] mt-0.5">{repo.description}</p>
+                  <p className="text-xs text-[#77736e] mt-0.5">
+                    {repo.description}
+                  </p>
                   <span className="mt-1.5 inline-block rounded-full border border-[#e9e5df] bg-[#f7f5f2] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#55504b]">
                     {repo.language}
                   </span>

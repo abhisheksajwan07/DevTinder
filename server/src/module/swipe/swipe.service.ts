@@ -9,6 +9,10 @@ export class SwipeService implements ISwipeService {
     private readonly onboardingRepository: IOnboardingRepository,
   ) {}
 
+  getIncomingRequests(profileId: string) {
+    return this.swipeRepository.getIncomingRequests(profileId);
+  }
+
   async skip(actorProfileId: string, targetProfileId: string) {
     await this.ensureCanSwipe(actorProfileId, targetProfileId);
 
@@ -48,9 +52,11 @@ export class SwipeService implements ISwipeService {
       status: "accepted",
     });
 
-    await matchingQueue.add("matching", {
-      connectionId: pending.id,
-    });
+    await matchingQueue.add(
+      "matching",
+      { connectionId: pending.id },
+      { jobId: `matching-${pending.id}` },
+    );
   }
 
   async reject(requesterProfileId: string, responderProfileId: string) {
