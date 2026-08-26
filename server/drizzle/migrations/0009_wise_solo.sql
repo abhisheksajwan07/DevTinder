@@ -1,1 +1,0 @@
-DROP INDEX "profiles_username_unique";

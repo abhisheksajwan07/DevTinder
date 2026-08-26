@@ -1,1 +1,0 @@
-ALTER TABLE "auth_accounts" DROP COLUMN "last_used_at";
