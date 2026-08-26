@@ -38,7 +38,7 @@ export const messages = pgTable(
     })
       .defaultNow()
       .notNull(),
-    readAt: timestamp("readAt", {
+    readAt: timestamp("read_at", {
       withTimezone: true,
     }),
   },

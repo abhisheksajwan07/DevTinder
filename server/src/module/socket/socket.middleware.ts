@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { verifyAccessToken } from "../../utils/jwt.js";
 import { AccessTokenPayload } from "../../types/jwt.types.js";
 import { repository } from "../onboarding/onboarding.dependencies.js";
+import { sessionRepository } from "../session/session.dependencies.js";
 
 export async function socketAuthMiddleware(
   socket: Socket,
@@ -18,9 +19,13 @@ export async function socketAuthMiddleware(
 
   try {
     const payload = verifyAccessToken(accessToken) as AccessTokenPayload;
-    // TODO(Security):
-    // Validate sessionId to ensure revoked/expired sessions
-    // cannot establish or keep Socket.IO connections.
+
+    // Validate sessionId — reject revoked/logged-out sessions
+    const session = await sessionRepository.findSessionById(payload.sessionId);
+    if (!session || session.isRevoked) {
+      return next(new Error("SESSION_REVOKED"));
+    }
+
     const profileId = await repository.getProfileId(payload.sub);
 
     if (!profileId) return next(new Error("PROFILE_NOT_FOUND"));

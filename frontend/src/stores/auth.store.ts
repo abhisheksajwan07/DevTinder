@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 export type User = {
   id: string;
   email: string;
+  profileId?: string | null;
   onBoardingComplete: boolean;
 };
 

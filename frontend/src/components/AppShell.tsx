@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { currentUser } from "../mock-data";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   Compass,
   Heart,
@@ -9,15 +14,19 @@ import {
   User,
   Settings,
   LogOut,
-  Bell,
   ChevronRight,
 } from "lucide-react";
-import {socket} from 
+import { socket } from "../services/socket";
+import { useAuthStore } from "../stores/auth.store";
+import { useChatRealtime } from "../hooks/useChatRealtime";
+import { useConversations } from "../hooks/chat.hooks";
+import { logoutCurrentSession } from "../services/session.api";
+import { useMyProfile } from "../hooks/profile.hooks";
 
 const navItems = [
   { to: "/app/discover", label: "Discover", icon: Compass },
   { to: "/app/matches", label: "Matches", icon: Heart },
-  { to: "/app/chat", label: "Messages", icon: MessageCircle, badge: 2 },
+  { to: "/app/chat", label: "Messages", icon: MessageCircle, badge: undefined },
   { to: "/app/sessions", label: "Sessions", icon: Monitor },
   { to: "/app/profile", label: "My Profile", icon: User },
 ];
@@ -25,6 +34,23 @@ const navItems = [
 export default function AppShell() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const myProfileId = useAuthStore((state) => state.user?.profileId);
+  const { data: myProfile } = useMyProfile();
+  const activeConversationId =
+    location.pathname.match(/\/app\/chat\/([^/]+)/)?.[1];
+  const { data: conversations = [] } = useConversations();
+  const totalUnread = conversations.reduce(
+    (total, conversation) => total + conversation.unreadCount,
+    0,
+  );
+
+  useChatRealtime(myProfileId, activeConversationId);
+
+  const handleLogout = async () => {
+    await logoutCurrentSession();
+    navigate("/");
+  };
 
   useEffect(() => {
     if (!socket.connected) {
@@ -34,7 +60,7 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen bg-[#f7f5f2] flex">
-      {/* ── Desktop Sidebar ─────────────────────────────────── */}
+      {/*-- Desktop Sidebar -- */}
       <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-[#e9e5df] bg-white fixed top-0 bottom-0 left-0 z-40">
         {/* Brand */}
         <Link
@@ -73,9 +99,9 @@ export default function AppShell() {
                     }`}
                   />
                   <span className="flex-1">{label}</span>
-                  {badge ? (
+                  {(label === "Messages" ? totalUnread : badge) ? (
                     <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-orange-500 px-1 font-mono text-[10px] font-bold text-white">
-                      {badge}
+                      {label === "Messages" ? totalUnread : badge}
                     </span>
                   ) : null}
                 </>
@@ -106,17 +132,16 @@ export default function AppShell() {
             className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#55504b] hover:bg-[#f7f5f2] transition-colors"
           >
             <div
-              className="size-7 rounded-lg grid place-items-center text-white font-bold text-xs shrink-0"
-              style={{ backgroundColor: currentUser.avatarColor }}
+              className="size-7 rounded-lg grid place-items-center bg-orange-500 text-white font-bold text-xs shrink-0"
             >
-              {currentUser.avatar}
+              {myProfile?.firstName?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="text-xs font-semibold text-[#242322] truncate">
-                {currentUser.name}
+                {myProfile ? `${myProfile.firstName} ${myProfile.lastName}` : "Loading profile…"}
               </p>
               <p className="font-mono text-[10px] text-[#88827c] truncate">
-                @{currentUser.username}
+                {myProfile ? `@${myProfile.userName}` : ""}
               </p>
             </div>
             <ChevronRight className="size-3.5 text-[#c0b9b1] shrink-0" />
@@ -126,7 +151,7 @@ export default function AppShell() {
             <div className="mt-1 rounded-xl border border-[#e9e5df] bg-white shadow-lg overflow-hidden">
               <button
                 type="button"
-                onClick={() => navigate("/")}
+                onClick={() => void handleLogout()}
                 className="w-full flex items-center gap-2.5 px-4 py-3 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="size-4" />
@@ -137,7 +162,7 @@ export default function AppShell() {
         </div>
       </aside>
 
-      {/* ── Main Content ────────────────────────────────────── */}
+      {/* --Main Content --*/}
       <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e9e5df] bg-white/90 backdrop-blur-md px-4">
@@ -148,24 +173,12 @@ export default function AppShell() {
             <span className="text-sm font-bold text-[#242322]">DevTinder</span>
           </Link>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="relative flex size-8 items-center justify-center rounded-full border border-[#e9e5df] bg-white text-[#55504b] transition hover:bg-[#f7f5f2]"
-            >
-              <Bell className="size-4" />
-              {currentUser.notificationCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-orange-500 font-mono text-[9px] font-bold text-white">
-                  {currentUser.notificationCount}
-                </span>
-              )}
-            </button>
             <Link
               to="/app/profile"
               className="size-8 rounded-full grid place-items-center text-white font-bold text-xs"
-              style={{ backgroundColor: currentUser.avatarColor }}
+              style={{ backgroundColor: "#ee7100" }}
             >
-              {currentUser.avatar}
+              {myProfile?.firstName?.[0]?.toUpperCase() ?? "?"}
             </Link>
           </div>
         </header>
@@ -175,7 +188,7 @@ export default function AppShell() {
           <Outlet />
         </main>
 
-        {/* ── Mobile Bottom Nav ──────────────────────────────── */}
+        {/*--Mobile Bottom Nav -- */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-[#e9e5df] bg-white/95 backdrop-blur-md">
           <div className="grid grid-cols-5 h-16">
             {navItems.map(({ to, label, icon: Icon, badge }) => (
@@ -194,9 +207,9 @@ export default function AppShell() {
                       <Icon
                         className={`size-5 ${isActive ? "text-orange-500" : ""}`}
                       />
-                      {badge ? (
+                      {(label === "Messages" ? totalUnread : badge) ? (
                         <span className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-orange-500 font-mono text-[9px] font-bold text-white">
-                          {badge}
+                          {label === "Messages" ? totalUnread : badge}
                         </span>
                       ) : null}
                     </div>

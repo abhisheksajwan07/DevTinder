@@ -5,6 +5,7 @@ import {
   sendMessageSocketSchema,
 } from "../chat/chat.validator.js";
 import { chatService } from "../chat/chat.dependencies.js";
+import { chatRepository } from "../chat/chat.dependencies.js";
 
 import { AppError } from "../../utils/AppError.js";
 
@@ -92,6 +93,16 @@ export function registerChatEvents(io: Server, socket: Socket) {
       // );
 
       io.to(result.data.conversationId).emit("message:new", message);
+
+      // Users who are not currently inside the conversation room still need
+      // the event so their global conversation list can update its unread count.
+      const participantProfileIds =
+        await chatRepository.getConversationParticipantProfileIds(
+          result.data.conversationId,
+        );
+      participantProfileIds.forEach((profileId) => {
+        io.to(`profile:${profileId}`).emit("message:new", message);
+      });
 
       // console.log("EMIT DONE");
 
