@@ -67,6 +67,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       onBoardingComplete: user.onBoardingComplete,
+      profileId: user.profileId,
     };
   }
 
@@ -175,6 +176,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         onBoardingComplete: user.onBoardingComplete,
+        profileId: user.profileId,
       },
       accessToken,
       rawRefreshToken,
@@ -267,6 +269,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         onBoardingComplete: user.onBoardingComplete,
+        profileId: user.profileId,
       },
     };
   }
