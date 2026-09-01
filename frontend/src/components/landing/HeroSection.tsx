@@ -170,15 +170,16 @@ export default function HeroSection() {
         {/* Hero Description */}
         <p className="hero-element mt-5 max-w-[510px] text-base leading-relaxed text-[#66615c]">
           Swipe through developer profiles powered by Voyage AI vector
-          embeddings. Connect instantly by tech stack similarity, GitHub
-          featured repos, and real-time pair chat.
+          embeddings. Find compatible people through tech stack similarity,
+          featured repositories, and real-time pair chat.
         </p>
 
         {/* Hero CTAs */}
         <div className="hero-element mt-7 flex flex-wrap items-center gap-4 text-xs">
           <Link
-            className="group inline-flex items-center gap-2.5 rounded-full bg-[#ee7100] px-6 py-3.5 font-bold text-white shadow-md shadow-orange-500/25 transition-transform duration-200 hover:bg-[#d96500] hover:shadow-lg hover:shadow-orange-500/35 active:scale-95"
+            className="group inline-flex items-center gap-2.5 rounded-full bg-[#24292f] px-6 py-3.5 font-bold text-white shadow-md shadow-black/20 transition-transform duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95"
             to="/signup"
+            style={{ color: "#ffffff" }}
           >
             <Github className="size-4.5 transition-transform group-hover:scale-110" />
             <span>Continue with GitHub</span>

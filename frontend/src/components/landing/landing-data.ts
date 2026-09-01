@@ -1,44 +1,24 @@
-export const githubOAuthUrl = `${import.meta.env.VITE_API_URL || "/v1"}/oauth/github`;
-
 export type FeatureCard = {
-
   title: string;
   description: string;
 };
 
 export const featureCards: FeatureCard[] = [
   {
-    title: "1. Connect GitHub & Stack",
-    description: "Auto-sync your profile, public repos, and primary languages.",
-  },
-
-  {
-    title: "2. AI Vector Matching",
+    title: "1. Sync GitHub & Featured Repos",
     description:
-      "Our pgvector & Voyage AI engine matches you with complementary skills.",
+      "Optionally connect GitHub after creating your profile. Our sync worker imports public repositories, languages, and star counts.",
   },
   {
-
-    title: "3. Real-time Chat & Collaborate",
+    title: "2. Voyage AI & pgvector Matching",
     description:
-      "Instant messaging powered by Socket.IO with typing indicators and online presence.",
+      "Our AI vector pipeline calculates cosine similarities across tech stacks and project history to match you with ideal coding partners.",
   },
-];
-
-export type ProfileTag = string;
-
-export type ProfileCompany = {
-  name: string;
-  stack: string;
-  stars: string;
-};
-
-export const heroBadges: ProfileTag[] = [
-  "TypeScript",
-  "Node.js",
-  "Redis",
-  "BullMQ",
-  "PostgreSQL",
+  {
+    title: "3. Real-Time Pair Chat & Connect",
+    description:
+      "Match, connect, and collaborate with instant Socket.IO messaging, live typing indicators, and presence status.",
+  },
 ];
 
 export type DemoProfile = {
@@ -55,13 +35,13 @@ export type DemoProfile = {
 export const demoProfiles: DemoProfile[] = [
   {
     id: "1",
-    name: "Abhishek",
+    name: "Alex",
     avatar: "A",
     role: "Senior Backend Engineer",
     matchScore: 94,
     badges: ["TypeScript", "Node.js", "Redis", "BullMQ", "PostgreSQL"],
     repos: [
-      { name: "DevTinder Engine", stack: "TypeScript", stars: "24" },
+      { name: "devtinder-engine", stack: "TypeScript", stars: "24" },
       { name: "pgvector-search", stack: "Node.js", stars: "15" },
     ],
     bio: "Building high-throughput distributed systems & AI vector matchers.",
@@ -94,11 +74,6 @@ export const demoProfiles: DemoProfile[] = [
   },
 ];
 
-export const profileCompanies: ProfileCompany[] = [
-  { name: "DevTinder", stack: "TypeScript", stars: "24" },
-  { name: "Brainly", stack: "Node.js", stars: "15" },
-];
-
 export type FooterLink = {
   label: string;
   href: string;
@@ -116,7 +91,7 @@ export const footerSections: FooterSection[] = [
       { label: "Overview", href: "#top" },
       { label: "Features", href: "#features" },
       { label: "AI Match Engine", href: "#matching" },
-      { label: "Live Demo", href: "#demo" },
+      { label: "Get Started", href: "#demo" },
     ],
   },
   {
@@ -129,57 +104,58 @@ export const footerSections: FooterSection[] = [
     ],
   },
   {
-    title: "Resources",
+    title: "Get Started",
     items: [
-      { label: "GitHub Auth", href: githubOAuthUrl },
-      { label: "API Reference", href: "#top" },
-      { label: "Privacy Policy", href: "#top" },
-      { label: "Terms of Service", href: "#top" },
+      { label: "Sign In", href: "/signin" },
+      { label: "Create Account", href: "/signup" },
+      { label: "GitHub Integration", href: "/signup" },
     ],
   },
 ];
 
 export type MatchCard = {
-  icon: string;
   title: string;
   description: string;
   details?: string;
   badgeLabel?: string;
   tags?: string[];
+  repositories?: { name: string; language: string | null; stars: number }[];
   codeSnippet?: string;
   columnSpan?: number;
 };
 
 export const matchCards: MatchCard[] = [
   {
-    icon: "♧",
     title: "AI Vector Match Precision",
     description:
-      "pgvector cosine similarity ranks candidates by stack compatibility.",
+      "pgvector cosine similarity ranks candidates by tech stack compatibility and project history.",
     details: "cosine_sim = 0.94",
-    codeSnippet: `SELECT dev_id, 1 - (embedding <=> $query) AS score\nFROM developers ORDER BY score DESC;`,
+    codeSnippet: `SELECT profile_id, 1 - (embedding <=> $query) AS score\nFROM profile_embeddings ORDER BY score DESC LIMIT 10;`,
     columnSpan: 3,
   },
   {
-    icon: "☆",
     title: "Featured GitHub Repos",
-    description: "Live repo sync with stars, language %, and forks.",
-    tags: ["TypeScript 62%", "Node.js 28%", "SQL 10%"],
-    columnSpan: 2,
-  },
-  {
-    icon: "▣",
-    title: "Real-Time Developer Chat",
-    description: "Wanna pair on the queue?",
-    badgeLabel: "Yes! npm i bullmq",
-    columnSpan: 2,
-  },
-  {
-    icon: "♢",
-    title: "Zero Spam",
     description:
-      "Verified GitHub & Google OAuth authentication keeps bots and recruiters gone-wild out — real developers only.",
-    tags: ["GitHub OAuth", "Google OAuth"],
+      "Your top synced repositories include the same details DevTinder stores: language and star count.",
+    repositories: [
+      { name: "devtinder-api", language: "TypeScript", stars: 24 },
+      { name: "matching-worker", language: "Node.js", stars: 15 },
+      { name: "profile-search", language: "Python", stars: 8 },
+    ],
+    columnSpan: 2,
+  },
+  {
+    title: "Real-Time Pair Chat",
+    description:
+      "Connect and chat immediately with typing indicators, online presence, and message history.",
+    badgeLabel: "Online Now",
+    columnSpan: 2,
+  },
+  {
+    title: "Verified Developer Profiles",
+    description:
+      "Secure GitHub & Google OAuth ensures authentic developer identities — no recruiters, no spam bots.",
+    tags: ["GitHub OAuth", "Google OAuth", "Voyage AI"],
     columnSpan: 3,
   },
 ];

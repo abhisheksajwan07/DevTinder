@@ -58,24 +58,19 @@ export default function DemoSection() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[#77736e]">
-            Join developers already building together. Onboarding takes seconds
-            — no forms, just your GitHub profile.
+            Build a profile in minutes, then optionally connect GitHub to import
+            your public repositories and enrich your matches.
           </p>
 
-          <div className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:items-center">
-            <input
-              type="email"
-              aria-label="Email address"
-              placeholder="you@dev.com (optional)"
-              className="w-full flex-1 rounded-full border border-[#e2ded7] bg-white px-5 py-3.5 text-xs font-medium outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
-            />
+          <div className="mx-auto mt-8 flex justify-center">
             <Link
               to="/signup"
-              className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#242322] px-6 py-3.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:bg-orange-600 hover:shadow-orange-500/25 active:scale-95"
+              style={{ color: "#ffffff" }}
+              className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-[#24292f] px-8 py-4 text-sm font-bold text-white shadow-md shadow-black/20 transition-all duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95"
             >
-              <Github className="size-4" />
+              <Github className="size-4.5" />
               <span>Continue with GitHub</span>
-              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 

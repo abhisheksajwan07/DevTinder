@@ -2,6 +2,7 @@ import { FeedProfile } from "../../types/feed";
 import { X, Heart, Star, Sparkles, Clock, Github } from "lucide-react";
 import { gsap } from "gsap";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileCardProps {
   profile: FeedProfile;
@@ -16,6 +17,7 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!cardRef.current) return;
@@ -101,6 +103,9 @@ export default function ProfileCard({
         <p className="mt-4 text-sm text-[#55504b] leading-relaxed">
           {profile.bio}
         </p>
+        <button type="button" onClick={() => navigate(`/app/profile/${profile.username}`)} className="mt-3 text-xs font-semibold text-orange-600 hover:underline">
+          View full profile
+        </button>
       </div>
 
       {/* Skills */}

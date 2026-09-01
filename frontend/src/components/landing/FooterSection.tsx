@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { footerSections } from "./landing-data";
-import { Github, Heart, ArrowUp, Sparkles } from "lucide-react";
+import { Github, ArrowUp, Sparkles } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -103,11 +103,7 @@ export default function FooterSection() {
 
         {/* Bottom Bar */}
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#e2ded7] pt-6 sm:flex-row text-xs text-[#88827c]">
-          <p className="flex items-center gap-1">
-            © 2026 DevTinder. Built with{" "}
-            <Heart className="size-3.5 fill-red-500 text-red-500 inline" /> by{" "}
-            <span className="font-semibold text-[#3a3735]">Abhishek</span>
-          </p>
+          <p>© 2026 DevTinder.</p>
 
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1 font-mono text-[10px] text-[#9a948e]">

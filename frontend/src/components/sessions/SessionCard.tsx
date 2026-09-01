@@ -1,8 +1,8 @@
-import type { SessionDevice } from "../../mock-data";
+import type { Session } from "../../types/session";
 import { Smartphone, Laptop, Monitor, MapPin, Clock, X } from "lucide-react";
 
 interface SessionCardProps {
-  session: SessionDevice;
+  session: Session;
   onRevoke: (id: string) => void;
 }
 
@@ -34,7 +34,7 @@ export default function SessionCard({ session, onRevoke }: SessionCardProps) {
     >
       <div className="flex items-start gap-4">
         <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-[#e9e5df] bg-[#f7f5f2] shadow-xs">
-          <DeviceIcon device={session.device} />
+          <DeviceIcon device={session.deviceType || "unknown"} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -42,7 +42,7 @@ export default function SessionCard({ session, onRevoke }: SessionCardProps) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-[#242322]">
-                  {session.device}
+          {session.deviceType || "Unknown device"}
                 </h3>
                 {session.isCurrent && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-orange-500 px-2 py-0.5 font-mono text-[9px] font-bold text-white uppercase tracking-wider">
@@ -51,7 +51,7 @@ export default function SessionCard({ session, onRevoke }: SessionCardProps) {
                 )}
               </div>
               <p className="text-xs text-[#77736e] mt-0.5">
-                {session.browser} · {session.os}
+                {session.browser || "Unknown browser"} · {session.os || "Unknown OS"}
               </p>
             </div>
 
@@ -70,7 +70,7 @@ export default function SessionCard({ session, onRevoke }: SessionCardProps) {
           <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-[#77736e]">
             <span className="flex items-center gap-1">
               <MapPin className="size-3 text-[#88827c]" />
-              {session.location}
+              {[session.city, session.country].filter(Boolean).join(", ") || "Location unavailable"}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="size-3 text-[#88827c]" />
@@ -79,11 +79,11 @@ export default function SessionCard({ session, onRevoke }: SessionCardProps) {
                   ● Active now
                 </span>
               ) : (
-                `Last active ${session.lastActive}`
+                `Last active ${session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : "unknown"}`
               )}
             </span>
             <span className="font-mono text-[#88827c]">
-              Since {session.createdAt}
+              Since {new Date(session.createdAt).toLocaleDateString()}
             </span>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { matchCards } from "./landing-data";
-import { Sparkles, Github, MessageCircle, ShieldCheck } from "lucide-react";
+import { Sparkles, Github, MessageCircle, ShieldCheck, Code2, Star } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -88,6 +88,7 @@ export default function MatchingSection() {
               details,
               badgeLabel,
               tags,
+              repositories,
               codeSnippet,
               columnSpan = 2,
             },
@@ -154,6 +155,33 @@ export default function MatchingSection() {
                       <span className="size-1.5 rounded-full bg-orange-500" />
                       {tag}
                     </span>
+                  ))}
+                </div>
+              ) : null}
+
+              {repositories ? (
+                <div className="mt-4 space-y-2">
+                  {repositories.map(({ name, language, stars }) => (
+                    <div
+                      key={name}
+                      className="flex items-center justify-between rounded-xl border border-[#f0ede8] bg-[#f8f6f3] px-3 py-2"
+                    >
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Code2 className="size-3.5 shrink-0 text-orange-500" />
+                        <p className="truncate text-xs font-semibold text-[#242322]">
+                          {name}
+                        </p>
+                        {language ? (
+                          <span className="hidden text-[10px] text-[#8e8983] sm:inline">
+                            {language}
+                          </span>
+                        ) : null}
+                      </div>
+                      <span className="ml-3 flex shrink-0 items-center gap-1 font-mono text-xs font-semibold text-orange-600">
+                        <Star className="size-3 fill-orange-400 text-orange-500" />
+                        {stars}
+                      </span>
+                    </div>
                   ))}
                 </div>
               ) : null}

@@ -117,6 +117,7 @@ function App() {
           <Route path="discover" element={<DiscoverPage />} />
           <Route path="matches" element={<MatchesPage />} />
           <Route path="chat" element={<ChatPage />} />
+          <Route path="chat/:conversationId" element={<ChatPage />} />
           <Route path="sessions" element={<SessionsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/:username" element={<PublicProfilePage />} />

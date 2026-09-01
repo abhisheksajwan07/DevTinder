@@ -80,7 +80,7 @@ export default function LandingNav() {
             className="transition hover:text-orange-600"
             href="#demo"
           >
-            Live Demo
+            Get Started
           </a>
           <a
             className="transition hover:text-orange-600"
@@ -98,8 +98,9 @@ export default function LandingNav() {
             Sign In
           </Link>
           <Link
-            className="inline-flex items-center gap-2 rounded-full bg-[#ee7100] px-4 py-2.5 font-semibold text-white shadow-sm shadow-orange-500/20 transition hover:bg-[#d96500] hover:shadow-md hover:shadow-orange-500/30 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-full bg-[#24292f] px-4 py-2.5 font-semibold text-white shadow-sm shadow-black/20 transition hover:bg-[#1a1e22] hover:shadow-md hover:shadow-black/25 active:scale-95"
             to="/signup"
+            style={{ color: "#ffffff" }}
           >
             <Github className="size-4" />
             <span>Get Started</span>
