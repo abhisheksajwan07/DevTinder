@@ -16,7 +16,8 @@
     "db:studio": "npx dotenv-cli -e .env.local -- drizzle-kit studio",
     "db:seed": "tsx src/db/seeds/seed.ts",
     "db:seeed":"dotenv -e .env.local -- tsx src/db/seeds/seed.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:k6": "k6 run k6/api-smoke.js"
   },
   "keywords": [],
   "author": "",
