@@ -66,7 +66,7 @@ export class GitHubRepository implements IGitHubRepository {
   /**
  * Updates the cached GitHub profile and repositories.
  * API calls are made before the transaction to keep it short.
- * Keeps the isFeatured flag for repositories that still exist.
+ * Automatically selects up to three useful repositories for embeddings.
  */
   async syncGitHubData(
     profileId: string,
@@ -110,26 +110,23 @@ export class GitHubRepository implements IGitHubRepository {
         .where(eq(profiles.id, profileId));
 
   
-      const currentFeatured = await tx
-        .select({ githubRepoId: githubRepositories.githubRepoId })
-        .from(githubRepositories)
-        .where(
-          and(
-            eq(githubRepositories.profileId, profileId),
-            eq(githubRepositories.isFeatured, true),
-          ),
-        );
-
-      const featuredIds = new Set(currentFeatured.map((r) => r.githubRepoId));
-
-
       await tx
         .delete(githubRepositories)
         .where(eq(githubRepositories.profileId, profileId));
 
       if (repos.length === 0) return;
 
-      
+      const featuredIds = new Set(
+        [...repos]
+          .sort(
+            (a, b) =>
+              b.stars - a.stars ||
+              b.repoUpdatedAt.getTime() - a.repoUpdatedAt.getTime(),
+          )
+          .slice(0, 3)
+          .map((repo) => repo.githubRepoId),
+      );
+
       await tx.insert(githubRepositories).values(
         repos.map((r) => ({
           profileId,
@@ -140,7 +137,7 @@ export class GitHubRepository implements IGitHubRepository {
           stars: r.stars,
           htmlUrl: r.htmlUrl,
           repoUpdatedAt: r.repoUpdatedAt,
-          // Re-apply featured flag only if this repo was featured before
+          // Featured repositories are chosen server-side during each sync.
           isFeatured: featuredIds.has(r.githubRepoId),
         })),
       );

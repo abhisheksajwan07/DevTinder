@@ -28,6 +28,7 @@ export interface GitHubApiRepo {
   html_url: string;
   updated_at: string;
   private: boolean;
+  fork: boolean;
 }
 
 export interface GitHubApiTokenResponse {

@@ -17,9 +17,12 @@ export const syncGitHubController = async (
 
   const profileId: string = req.user.profileId;
 
-  await githubService.sync(profileId);
+  const jobId = await githubService.sync(profileId);
 
-  sendResponse(res, 202, "GitHub sync started", { status: "sync_started" });
+  sendResponse(res, 202, "GitHub sync started", {
+    status: "sync_started",
+    jobId,
+  });
 };
 
 /**

@@ -69,8 +69,8 @@ export class GitHubApiClient {
     }
 
     const repos = (await res.json()) as GitHubApiRepo[];
-    // filter pvt repo
-    return repos.filter((r) => !r.private);
+    // Only public, original repositories strengthen a developer profile.
+    return repos.filter((r) => !r.private && !r.fork);
   }
 }
 
