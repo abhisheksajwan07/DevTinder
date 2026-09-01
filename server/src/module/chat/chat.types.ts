@@ -71,4 +71,6 @@ export interface IChatRepository {
   ): Promise<number>;
 
   getConversationMembersProfileIds(profileId: string): Promise<string[]>;
+
+  getConversationParticipantProfileIds(conversationId: string): Promise<string[]>;
 }

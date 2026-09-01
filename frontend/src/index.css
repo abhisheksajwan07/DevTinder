@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@layer components {
+  .form-control {
+    @apply w-full rounded-xl border border-[#e2ded6] bg-[#f7f5f2] px-3 py-2 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/20;
+  }
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-serif: "Instrument Serif", Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: #242322;
+  background: #fdfcfb;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background-color: #fdfcfb;
+  color: #242322;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+button, input {
+  font: inherit;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 6s ease-in-out infinite;
+}
+
+/* Background grid utility */
+.bg-grid-dots {
+  background-image: radial-gradient(#e5e1dc 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}

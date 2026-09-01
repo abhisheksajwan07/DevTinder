@@ -1,11 +1,14 @@
 import rateLimit from "express-rate-limit";
 import { createRedisStore } from "../redis-store.js";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 export const refreshLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
-  store: createRedisStore("rl:refresh-limiter"),
+  max: isDevelopment ? 100 : 10,
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:refresh-limiter" : "rl:refresh-limiter",
+  ),
   handler: (_, res) => {
     res
       .status(429)
@@ -15,8 +18,10 @@ export const refreshLimiter = rateLimit({
 
 export const sessionReadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
-  store: createRedisStore("rl:session-read-limiter"),
+  max: isDevelopment ? 500 : 30,
+  store: createRedisStore(
+    isDevelopment ? "rl:dev:session-read-limiter" : "rl:session-read-limiter",
+  ),
   handler: (_, res) => {
     res.status(429).json({ success: false, message: "Too many requests" });
   },

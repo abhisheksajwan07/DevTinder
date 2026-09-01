@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 
 import { db, sessions } from "../../db/drizzle.js";
-import { users, emailCredentials } from "../../db/drizzle.js";
+import { users, emailCredentials, profiles } from "../../db/drizzle.js";
 import { CreateUserRepoDTO, IAuthRepository } from "./auth.types.js";
 import { AppError } from "../../utils/AppError.js";
 
@@ -10,6 +10,7 @@ export class AuthRepository implements IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    profileId: string | null;
     hasEmailCredentials: boolean;
     isVerified: boolean | null;
     passwordHash: string | null;
@@ -21,6 +22,7 @@ export class AuthRepository implements IAuthRepository {
         id: users.id,
         email: users.email,
         onBoardingComplete: users.onBoardingComplete,
+        profileId: profiles.id,
         // Explicit flag: true only when an email_credentials row exists for this user
         hasEmailCredentials: sql<boolean>`
           CASE WHEN ${emailCredentials.userId} IS NOT NULL THEN true ELSE false END
@@ -31,6 +33,7 @@ export class AuthRepository implements IAuthRepository {
         lockedUntil: emailCredentials.lockedUntil,
       })
       .from(users)
+      .leftJoin(profiles, eq(profiles.userId, users.id))
       .leftJoin(emailCredentials, eq(emailCredentials.userId, users.id))
       .where(eq(users.email, email))
       .limit(1);
@@ -42,14 +45,17 @@ export class AuthRepository implements IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    profileId: string | null;
   } | null> {
     const result = await db
       .select({
         id: users.id,
         email: users.email,
         onBoardingComplete: users.onBoardingComplete,
+        profileId: profiles.id,
       })
       .from(users)
+      .leftJoin(profiles, eq(profiles.userId, users.id))
       .where(eq(users.id, userId))
       .limit(1);
 

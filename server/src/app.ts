@@ -13,6 +13,7 @@ import onboardingRoutes from "./module/onboarding/onboarding.routes.js";
 import chatRoutes from "./module/chat/chat.routes.js";
 import githubRoutes from "./module/github/github.routes.js";
 import profileRoutes from "./module/profile/profile.routes.js";
+import matchRoutes from "./module/match/match.routes.js";
 
 import { globalLimiter } from "./middleware/global.rate-limit.js";
 import { serverAdapter } from "./bull-board.js";
@@ -27,8 +28,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(globalLimiter);
-
 app.use(httpLogger);
+
 if (env.NODE_ENV !== "production") {
   app.use("/admin/queues", serverAdapter.getRouter());
 }
@@ -42,6 +43,7 @@ app.use("/v1/swipes", swipeRoutes);
 app.use("/v1/chat", chatRoutes);
 app.use("/v1/github", githubRoutes);
 app.use("/v1/profiles", profileRoutes);
+app.use("/v1/matches", matchRoutes);
 
 app.use(globalErrorHandler);
 

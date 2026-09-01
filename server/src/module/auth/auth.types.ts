@@ -10,6 +10,7 @@ export interface IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    profileId: string | null;
     hasEmailCredentials: boolean;
     isVerified: boolean | null;
     passwordHash: string | null;
@@ -21,6 +22,7 @@ export interface IAuthRepository {
     id: string;
     email: string;
     onBoardingComplete: boolean;
+    profileId: string | null;
   } | null>;
 
   createUser(data: CreateUserRepoDTO): Promise<typeof users.$inferSelect>;

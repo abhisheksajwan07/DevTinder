@@ -82,6 +82,7 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
   await authService.forgotPassword(req.body.email);
   sendResponse(res, 201, "If this email exists, you will receive a reset link");
 };
+
 export const resetPasswordController = async (
   req: Request<{}, {}, ResetPasswordDto>,
   res: Response,

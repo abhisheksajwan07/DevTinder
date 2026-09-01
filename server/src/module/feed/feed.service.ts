@@ -11,9 +11,16 @@ export class FeedService implements IFeedService {
 
   async getFeed(userId: string, query: FeedQuery): Promise<FeedResult> {
     const viewerProfile = await onboardingRepository.getMyProfile(userId);
-
+    if (viewerProfile.embeddingStatus === "failed") {
+      throw new AppError(
+        "We could not prepare your recommendations. Please try again.",
+        503,
+        "EMBEDDING_FAILED",
+      );
+    }
     if (
-      viewerProfile.embeddingStatus !== "ready" ||
+      viewerProfile.embeddingStatus === "stale" ||
+      viewerProfile.embeddingStatus === "processing" ||
       !viewerProfile.embeddingVector
     ) {
       throw new AppError(

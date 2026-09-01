@@ -178,6 +178,22 @@ export class ChatRepository implements IChatRepository {
     }
   }
 
+  async getConversationParticipantProfileIds(
+    conversationId: string,
+  ): Promise<string[]> {
+    const [row] = await db
+      .select({
+        profileOneId: matches.profileOneId,
+        profileTwoId: matches.profileTwoId,
+      })
+      .from(conversations)
+      .innerJoin(matches, eq(conversations.matchId, matches.id))
+      .where(eq(conversations.id, conversationId))
+      .limit(1);
+
+    return row ? [row.profileOneId, row.profileTwoId] : [];
+  }
+
   async markMessagesAsRead(
     conversationId: string,
     profileId: string,

@@ -1,16 +1,30 @@
 import { AppError } from "../../utils/AppError.js";
+import { redis } from "../../config/redis.js";
 import { githubSyncQueue } from "../../queues/github-sync.queue.js";
-import { embeddingQueue } from "../../queues/embedding.queue.js";
-import type { IGitHubRepository, GitHubProfileResponse } from "./github.types.js";
+import {
+  createEmbeddingJobId,
+  embeddingQueue,
+} from "../../queues/embedding.queue.js";
+import type {
+  GitHubConnectionStatus,
+  GitHubProfileResponse,
+  IGitHubRepository,
+} from "./github.types.js";
+
+const MANUAL_SYNC_COOLDOWN_SECONDS = 6 * 60 * 60;
 
 export class GitHubService {
   constructor(private readonly repository: IGitHubRepository) {}
+
+  async getConnectionStatus(userId: string): Promise<GitHubConnectionStatus> {
+    return this.repository.getConnectionStatus(userId);
+  }
 
   /**
    * enqueue background sync job for the given profile.
    * Returns immediately — the worker does the heavy lifting.
    */
-  async sync(profileId: string): Promise<void> {
+  async sync(profileId: string): Promise<string> {
     // Verify GitHub is actually connected before queuing
     const account = await this.repository.findGitHubAccount(profileId);
 
@@ -22,7 +36,37 @@ export class GitHubService {
       );
     }
 
-    await githubSyncQueue.add("github_sync", { profileId });
+    // rate-limit by authenticated profile, not only by ip. 
+    const cooldownKey = `github-sync-cooldown:${profileId}`;
+    const lockAcquired = await redis.set(
+      cooldownKey,
+      "1",
+      "EX",
+      MANUAL_SYNC_COOLDOWN_SECONDS,
+      "NX",
+    );
+
+    if (lockAcquired !== "OK") {
+      throw new AppError(
+        "GitHub was synced recently. Please try again later.",
+        429,
+        "GITHUB_SYNC_COOLDOWN",
+      );
+    }
+
+    try {
+      const job = await githubSyncQueue.add(
+        "github_sync",
+        { profileId },
+        { jobId: `github-sync-${profileId}-${Date.now()}` },
+      );
+
+      return job.id!;
+    } catch (error) {
+      // Do not make a failed queue submission consume the full cooldown.
+      await redis.del(cooldownKey);
+      throw error;
+    }
   }
 
   /**
@@ -83,7 +127,7 @@ export class GitHubService {
     await embeddingQueue.add(
       "generate_embedding",
       { profileId },
-      { jobId: `embed-${profileId}` },
+      { jobId: createEmbeddingJobId(profileId) },
     );
   }
 }

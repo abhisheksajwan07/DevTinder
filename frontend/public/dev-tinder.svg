@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <!-- 
+    DevTinder Professional Logo Mark
+    Style: Swiss, Flat, Geometric
+    Concept: Integrated Brackets, Nodes, and Hidden Heart
+    Color: Lightest Orange (#FFEDD5 - a very pale peach/apricot)
+  -->
+  <g fill="#FFEDD5">
+    <!-- 
+      Left Bracket Structure (<)
+    -->
+    <polygon points="35 10 10 50 35 90 41.5 83.5 23 50 41.5 16.5"/>
+    
+    <!-- 
+      Right Bracket Structure (>)
+    -->
+    <polygon points="65 10 90 50 65 90 58.5 83.5 77 50 58.5 16.5"/>
+    
+    <!-- 
+      Central Connection Node / Heart Apex
+      A precise diamond shape placed at the intersection.
+    -->
+    <rect x="46" y="43" width="8" height="14" transform="rotate(45 50 50)"/>
+  </g>
+</svg>

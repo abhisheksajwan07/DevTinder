@@ -2,7 +2,6 @@ import { eq, inArray, and, sql } from "drizzle-orm";
 import {
   db,
   authAccounts,
-  users,
   profiles,
   githubProfiles,
   githubRepositories,
@@ -10,6 +9,7 @@ import {
 
 import type {
   GitHubAuthAccount,
+  GitHubConnectionStatus,
   GitHubProfile,
   GitHubRepository as GitHubRepositoryRow,
   IGitHubRepository,
@@ -33,25 +33,40 @@ export class GitHubRepository implements IGitHubRepository {
         providerRefreshToken: authAccounts.providerRefreshToken,
         providerTokenExpiresAt: authAccounts.providerTokenExpiresAt,
       })
-      .from(profiles)
-      .innerJoin(users, eq(profiles.userId, users.id))
-      .innerJoin(
-        authAccounts,
+      .from(authAccounts)
+      .innerJoin(profiles, eq(profiles.userId, authAccounts.userId))
+      .where(
         and(
-          eq(authAccounts.userId, users.id),
+          eq(profiles.id, profileId),
           eq(authAccounts.provider, "github"),
         ),
       )
-      .where(eq(profiles.id, profileId))
       .limit(1);
 
     return rows[0] ?? null;
   }
 
+  async getConnectionStatus(userId: string): Promise<GitHubConnectionStatus> {
+    const account = await db
+      .select({ id: authAccounts.id })
+      .from(authAccounts)
+      .where(
+        and(
+          eq(authAccounts.userId, userId),
+          eq(authAccounts.provider, "github"),
+        ),
+      )
+      .limit(1);
+
+    return {
+      connected: account.length > 0,
+    };
+  }
+
   /**
  * Updates the cached GitHub profile and repositories.
  * API calls are made before the transaction to keep it short.
- * Keeps the isFeatured flag for repositories that still exist.
+ * Automatically selects up to three useful repositories for embeddings.
  */
   async syncGitHubData(
     profileId: string,
@@ -95,26 +110,23 @@ export class GitHubRepository implements IGitHubRepository {
         .where(eq(profiles.id, profileId));
 
   
-      const currentFeatured = await tx
-        .select({ githubRepoId: githubRepositories.githubRepoId })
-        .from(githubRepositories)
-        .where(
-          and(
-            eq(githubRepositories.profileId, profileId),
-            eq(githubRepositories.isFeatured, true),
-          ),
-        );
-
-      const featuredIds = new Set(currentFeatured.map((r) => r.githubRepoId));
-
-
       await tx
         .delete(githubRepositories)
         .where(eq(githubRepositories.profileId, profileId));
 
       if (repos.length === 0) return;
 
-      
+      const featuredIds = new Set(
+        [...repos]
+          .sort(
+            (a, b) =>
+              b.stars - a.stars ||
+              b.repoUpdatedAt.getTime() - a.repoUpdatedAt.getTime(),
+          )
+          .slice(0, 3)
+          .map((repo) => repo.githubRepoId),
+      );
+
       await tx.insert(githubRepositories).values(
         repos.map((r) => ({
           profileId,
@@ -125,7 +137,7 @@ export class GitHubRepository implements IGitHubRepository {
           stars: r.stars,
           htmlUrl: r.htmlUrl,
           repoUpdatedAt: r.repoUpdatedAt,
-          // Re-apply featured flag only if this repo was featured before
+          // Featured repositories are chosen server-side during each sync.
           isFeatured: featuredIds.has(r.githubRepoId),
         })),
       );

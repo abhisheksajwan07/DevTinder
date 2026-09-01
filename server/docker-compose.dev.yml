@@ -5,10 +5,17 @@ services:
       context: .
       target: dev
     command: npm run dev
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
     ports:
       - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   worker:
     container_name: devtinder-worker-dev
@@ -16,8 +23,15 @@ services:
       context: .
       target: dev
     command: npm run worker
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     container_name: devtinder-postgres-dev

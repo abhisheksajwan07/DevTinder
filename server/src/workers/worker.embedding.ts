@@ -4,6 +4,7 @@ import { repository } from "../module/onboarding/onboarding.dependencies.js";
 import {
   EMBEDDING_QUEUE_NAME,
   EmbeddingJobData,
+  createEmbeddingJobId,
   embeddingQueue,
 } from "../queues/embedding.queue.js";
 import { logger } from "../config/logger.js";
@@ -48,6 +49,7 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
       );
       return;
     }
+
     const fullProfile = await repository.getMyProfileById(profileId);
     const corpus = buildProfileCorpus(fullProfile);
 
@@ -75,7 +77,7 @@ export const embeddingWorker = new Worker<EmbeddingJobData>(
       await embeddingQueue.add(
         "generate_embedding",
         { profileId },
-        { jobId: `embed-${profileId}` },
+        { jobId: createEmbeddingJobId(profileId) },
       );
       return;
     }

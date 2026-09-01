@@ -33,20 +33,3 @@ export const getConversationMessagesController = async (
   );
   sendResponse(res, 200, "Messages fetched successfully", messages);
 };
-
-// export const sendMessageController = async (
-//   req: Request<{ conversationId: string }, {}, SendMessageDTO>,
-//   res: Response,
-// ): Promise<void> => {
-//   if (!req.user || !req.user.profileId) {
-//     throw new AppError("Unauthorized", 401);
-//   }
-
-//   const { conversationId } = req.params;
-//   const message = await chatService.sendMessage(
-//     conversationId,
-//     req.user.profileId,
-//     req.body,
-//   );
-//   sendResponse(res, 201, "Message sent successfully", message);
-// };

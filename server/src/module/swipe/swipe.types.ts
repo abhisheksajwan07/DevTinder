@@ -44,7 +44,25 @@ export interface ISwipeRepository {
     actorProfileId: string,
     targetProfileId: string,
   ): Promise<ProfileActionRecord | null>;
+
+  getIncomingRequests(profileId: string): Promise<IncomingConnectionRequest[]>;
 }
+
+export type IncomingConnectionRequest = {
+  actionId: string;
+  createdAt: Date;
+  profile: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    bio: string | null;
+    primaryRole: string;
+    experienceLevel: string;
+    availability: string;
+    avatarUrl: string | null;
+  };
+};
 
 export interface ISwipeService {
   skip(actorProfileId: string, targetProfileId: string): Promise<void>;
@@ -54,4 +72,6 @@ export interface ISwipeService {
   accept(actorProfileId: string, targetProfileId: string): Promise<void>;
 
   reject(actorProfileId: string, targetProfileId: string): Promise<void>;
+
+  getIncomingRequests(profileId: string): Promise<IncomingConnectionRequest[]>;
 }

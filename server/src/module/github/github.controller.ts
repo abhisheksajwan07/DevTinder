@@ -17,9 +17,29 @@ export const syncGitHubController = async (
 
   const profileId: string = req.user.profileId;
 
-  await githubService.sync(profileId);
+  const jobId = await githubService.sync(profileId);
 
-  sendResponse(res, 202, "GitHub sync started", { status: "sync_started" });
+  sendResponse(res, 202, "GitHub sync started", {
+    status: "sync_started",
+    jobId,
+  });
+};
+
+/**
+ * GET /github/status
+ * Returns whether a GitHub OAuth account is connected to the user.
+ *  available this before onboarding is complete.
+ */
+export const getGitHubStatusController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  if (!req.user?.userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const status = await githubService.getConnectionStatus(req.user.userId);
+  sendResponse(res, 200, "GitHub status fetched", status);
 };
 
 /**

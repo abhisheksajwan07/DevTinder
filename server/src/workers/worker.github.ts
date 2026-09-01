@@ -5,7 +5,10 @@ import {
   GITHUB_SYNC_QUEUE_NAME,
   type GitHubSyncJobData,
 } from "../queues/github-sync.queue.js";
-import { embeddingQueue } from "../queues/embedding.queue.js";
+import {
+  createEmbeddingJobId,
+  embeddingQueue,
+} from "../queues/embedding.queue.js";
 import { githubApiClient, githubRepository } from "../module/github/github.dependencies.js";
 
 export const githubSyncWorker = new Worker<GitHubSyncJobData>(
@@ -18,26 +21,31 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
       "[GitHubWorker] Sync job received",
     );
 
-    
+
     const account = await githubRepository.findGitHubAccount(profileId);
 
     if (!account) {
-      
+
       logger.warn(
         { profileId },
         "[GitHubWorker] No GitHub account found — skipping sync",
       );
+      await embeddingQueue.add(
+        "generate_embedding",
+        { profileId },
+        { jobId: createEmbeddingJobId(profileId) },
+      );
       return;
     }
 
-    
+
     const accessToken = await githubApiClient.getValidAccessToken(account);
 
-   
+
     const githubUser = await githubApiClient.getProfile(accessToken);
     const apiRepos = await githubApiClient.getRepositories(accessToken);
 
-   
+
     await githubRepository.syncGitHubData(
       profileId,
       {
@@ -61,11 +69,11 @@ export const githubSyncWorker = new Worker<GitHubSyncJobData>(
       })),
     );
 
-   
+
     await embeddingQueue.add(
       "generate_embedding",
       { profileId },
-      { jobId: `embed-${profileId}` },
+      { jobId: createEmbeddingJobId(profileId) },
     );
 
     logger.info(
