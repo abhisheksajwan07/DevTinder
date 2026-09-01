@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+import type { AxiosAuthRefreshRequestConfig } from "axios-auth-refresh";
+import { AxiosError } from "axios";
+
 import { useAuthStore } from "../stores/auth.store";
 import { api } from "../services/api";
-import { AxiosError } from "axios";
 
 // SIGNIN TYPE & CALL
 export interface SignInCredentials {
@@ -12,6 +14,7 @@ export interface SignInCredentials {
 export interface User {
   id: string;
   email: string;
+  profileId?: string | null;
   onBoardingComplete: boolean;
 }
 
@@ -26,7 +29,9 @@ export interface SignInResponse {
 const signInCredentials = async (
   credentials: SignInCredentials,
 ): Promise<SignInResponse> => {
-  const res = await api.post<SignInResponse>("/auth/signin", credentials);
+  const res = await api.post<SignInResponse>("/auth/signin", credentials, {
+    skipAuthRefresh: true,
+  } as AxiosAuthRefreshRequestConfig);
   return res.data;
 };
 
@@ -201,11 +206,9 @@ export const useResetPassword = () => {
   });
 };
 
-
 // GET me
 
-
-export const getMe = async():Promise<User>=>{
-  const {data}= await api.get("/auth/me")
+export const getMe = async (): Promise<User> => {
+  const { data } = await api.get("/auth/me");
   return data.data.user;
-}
+};
