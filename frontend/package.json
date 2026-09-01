@@ -13,8 +13,10 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.9.0",
+    "@radix-ui/react-toast": "^1.2.23",
     "@tanstack/react-query": "^5.90.0",
     "axios": "^1.11.0",
+    "axios-auth-refresh": "^5.0.2",
     "gsap": "^3.13.1",
     "lucide-react": "^0.468.0",
     "react": "^19.1.0",
