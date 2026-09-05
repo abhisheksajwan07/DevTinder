@@ -10,6 +10,8 @@ import {
   integer,
   vector,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm"; 
+
 import { users } from "../schema/users.schema.js";
 import { primaryKey } from "drizzle-orm/pg-core";
 import { boolean } from "drizzle-orm/pg-core";
@@ -130,22 +132,23 @@ export const profiles = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [
-    
-    index("profiles_user_id_idx").on(table.userId),
-  ],
+  (table) => [index("profiles_user_id_idx").on(table.userId)],
 );
 
-export const skills = pgTable("skills", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", {
-    length: 100,
-  })
-    .notNull()
-    .unique(),
-  category: skillCategoryEnum("category").notNull().default("other"),
-  isCustom: boolean("is_custom").notNull().default(false),
-});
+export const skills = pgTable(
+  "skills",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", {
+      length: 100,
+    }).notNull(),
+    category: skillCategoryEnum("category").notNull().default("other"),
+    isCustom: boolean("is_custom").notNull().default(false),
+  },
+  (table) => [
+    uniqueIndex("skills_name_lower_unique").on(sql`lower(${table.name})`),
+  ],
+);
 
 export const interests = pgTable("interests", {
   id: uuid("id").defaultRandom().primaryKey(),
