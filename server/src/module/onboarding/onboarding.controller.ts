@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 
 import { CreateProfileDTO, UpdateProfileDTO } from "./onboarding.validator.js";
 import { sendResponse } from "../../utils/sendResponse.js";

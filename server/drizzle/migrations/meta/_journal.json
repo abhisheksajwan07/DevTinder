@@ -8,6 +8,13 @@
       "when": 1787755336491,
       "tag": "0000_grey_dreaming_celestial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788629785151,
+      "tag": "0001_curved_stardust",
+      "breakpoints": true
     }
   ]
 }

@@ -246,7 +246,7 @@ export class AuthService {
         "EMAIL_NOT_VERIFIED",
       );
     }
-    
+
     const isValid = await comparePassword(data.password, user.passwordHash);
 
     if (!isValid) {
@@ -277,8 +277,9 @@ export class AuthService {
     const cooldownKey = `reset_cooldown:${email}`;
     const isCoolingDown = await redis.exists(cooldownKey);
     if (isCoolingDown) {
-      return;
+      throw new AppError("Please wait 5 minutes before requesting again.", 429);
     }
+    
     const user = await this.authRepository.findUserByEmail(email);
 
     if (!user) {

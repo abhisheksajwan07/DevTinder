@@ -1,11 +1,13 @@
 import dotenv from "dotenv";
-dotenv.config();
+
+// Keep test configuration separate from local development credentials.
+dotenv.config({ path: process.env.NODE_ENV === "test" ? ".env.test" : ".env" });
 
 import { z } from "zod";
 import { StringValue } from "ms";
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "production"]).default("development"),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   PORT: z.coerce.number().default(3000),
   CLIENT_URL: z.url(),

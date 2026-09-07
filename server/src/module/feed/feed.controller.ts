@@ -15,6 +15,6 @@ export const getFeedController = async (
   const userId = req.user.userId;
 
   const result = await feedService.getFeed(userId, { limit });
-  res.setHeader("Cache-Control", "no-store");
+
   sendResponse(res, 200, "Feed fetched successfully", result);
 };

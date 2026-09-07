@@ -267,54 +267,31 @@ export class OnBoardingRepository implements IOnboardingRepository {
     customSkills: string[],
   ): Promise<string[]> {
     const trimmedNames = [
-      ...new Set(customSkills.map((skill) => skill.trim())),
+      ...new Set(customSkills.map((skill) => skill.trim().toLowerCase())),
     ].filter(Boolean);
 
     if (trimmedNames.length === 0) {
       return [];
     }
+    await tx
+      .insert(skills)
+      .values(
+        trimmedNames.map((name) => ({
+          name,
+          isCustom: true,
+        })),
+      )
+      .onConflictDoNothing();
 
-    const existingSkills = await tx
+    const skillsRows = await tx
       .select({
         id: skills.id,
         name: skills.name,
       })
       .from(skills)
-      .where(
-        inArray(
-          sql`lower(${skills.name})`,
-          trimmedNames.map((skill) => skill.toLowerCase()),
-        ),
-      );
+      .where(inArray(sql`lower(${skills.name})`, trimmedNames));
 
-    const existingNames = new Set(
-      existingSkills.map((skill) => skill.name.toLowerCase()),
-    );
-
-    const newSkillNames = trimmedNames.filter(
-      (skill) => !existingNames.has(skill.toLowerCase()),
-    );
-
-    let insertedSkills: { id: string }[] = [];
-
-    if (newSkillNames.length > 0) {
-      insertedSkills = await tx
-        .insert(skills)
-        .values(
-          newSkillNames.map((name) => ({
-            name,
-            isCustom: true,
-          })),
-        )
-        .returning({
-          id: skills.id,
-        });
-    }
-
-    return [
-      ...existingSkills.map((skill) => skill.id),
-      ...insertedSkills.map((skill) => skill.id),
-    ];
+    return skillsRows.map((s) => s.id);
   }
 
   private async attachProfileSkills(
@@ -410,61 +387,60 @@ export class OnBoardingRepository implements IOnboardingRepository {
       avatarRows,
       githubProfileRows,
       featuredGitHubRepositories,
-    ] =
-      await Promise.all([
-        db
-          .select({
-            id: skills.id,
-            name: skills.name,
-          })
-          .from(profileSkills)
-          .innerJoin(skills, eq(profileSkills.skillId, skills.id))
-          .where(eq(profileSkills.profileId, profileId)),
+    ] = await Promise.all([
+      db
+        .select({
+          id: skills.id,
+          name: skills.name,
+        })
+        .from(profileSkills)
+        .innerJoin(skills, eq(profileSkills.skillId, skills.id))
+        .where(eq(profileSkills.profileId, profileId)),
 
-        db
-          .select({
-            id: interests.id,
-            name: interests.name,
-          })
-          .from(profileInterests)
-          .innerJoin(interests, eq(profileInterests.interestId, interests.id))
-          .where(eq(profileInterests.profileId, profileId)),
+      db
+        .select({
+          id: interests.id,
+          name: interests.name,
+        })
+        .from(profileInterests)
+        .innerJoin(interests, eq(profileInterests.interestId, interests.id))
+        .where(eq(profileInterests.profileId, profileId)),
 
-        db
-          .select({
-            id: lookingFor.id,
-            name: lookingFor.name,
-          })
-          .from(profileLookingFor)
-          .innerJoin(
-            lookingFor,
-            eq(profileLookingFor.lookingForId, lookingFor.id),
-          )
-          .where(eq(profileLookingFor.profileId, profileId)),
+      db
+        .select({
+          id: lookingFor.id,
+          name: lookingFor.name,
+        })
+        .from(profileLookingFor)
+        .innerJoin(
+          lookingFor,
+          eq(profileLookingFor.lookingForId, lookingFor.id),
+        )
+        .where(eq(profileLookingFor.profileId, profileId)),
 
-        db.select().from(avatars).where(eq(avatars.id, profile.avatarId)),
+      db.select().from(avatars).where(eq(avatars.id, profile.avatarId)),
 
-        db
-          .select({ username: githubProfiles.username })
-          .from(githubProfiles)
-          .where(eq(githubProfiles.profileId, profileId))
-          .limit(1),
+      db
+        .select({ username: githubProfiles.username })
+        .from(githubProfiles)
+        .where(eq(githubProfiles.profileId, profileId))
+        .limit(1),
 
-        db
-          .select({
-            name: githubRepositories.name,
-            description: githubRepositories.description,
-            language: githubRepositories.language,
-          })
-          .from(githubRepositories)
-          .where(
-            and(
-              eq(githubRepositories.profileId, profileId),
-              eq(githubRepositories.isFeatured, true),
-            ),
-          )
-          .limit(3),
-      ]);
+      db
+        .select({
+          name: githubRepositories.name,
+          description: githubRepositories.description,
+          language: githubRepositories.language,
+        })
+        .from(githubRepositories)
+        .where(
+          and(
+            eq(githubRepositories.profileId, profileId),
+            eq(githubRepositories.isFeatured, true),
+          ),
+        )
+        .limit(3),
+    ]);
 
     return {
       ...profile,

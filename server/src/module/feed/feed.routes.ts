@@ -5,6 +5,7 @@ import { feedReadLimiter } from "../../middleware/rate-limit/feed.rate-limit.js"
 import { getFeedController } from "./feed.controller.js";
 import { validate } from "../../middleware/validateBody.js";
 import { getFeedSchema } from "./feed.validator.js";
+import { noCache } from "../../middleware/noCache.middleware.js";
 
 const router = Router();
 
@@ -13,7 +14,8 @@ router.get(
   requireAccessAuth,
   requireOnboarding,
   feedReadLimiter,
-  validate(getFeedSchema,"query"),
+  validate(getFeedSchema, "query"),
+  noCache,
   getFeedController,
 );
 

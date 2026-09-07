@@ -15,9 +15,13 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:studio": "npx dotenv-cli -e .env.local -- drizzle-kit studio",
     "db:seed": "tsx src/db/seeds/seed.ts",
-    "db:seeed":"dotenv -e .env.local -- tsx src/db/seeds/seed.ts",
+    "db:seed:test": "npx dotenv-cli -e .env.test -- tsx src/db/seeds/seed.ts",
+    "db:seeed": "dotenv -e .env.local -- tsx src/db/seeds/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test:k6": "k6 run k6/api-smoke.js"
+    "test:k6": "k6 run k6/api-smoke.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "keywords": [],
   "author": "",
@@ -61,9 +65,14 @@
     "@types/geoip-lite": "^1.4.4",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^26.0.1",
+    "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/ui": "^4.1.11",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.10",
+    "supertest": "^7.2.2",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   }
 }

@@ -75,12 +75,12 @@ export const signInController = async (
   setAccessTokenCookie(res, result.accessToken);
   setRefreshTokenCookie(res, result.rawRefreshToken);
   setCsrfCookie(res);
-  sendResponse(res, 201, "SignIn successful", { user: result.user });
+  sendResponse(res, 200, "SignIn successful", { user: result.user });
 };
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
   await authService.forgotPassword(req.body.email);
-  sendResponse(res, 201, "If this email exists, you will receive a reset link");
+  sendResponse(res, 200, "If this email exists, you will receive a reset link");
 };
 
 export const resetPasswordController = async (
