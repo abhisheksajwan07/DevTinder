@@ -15,6 +15,29 @@ export default function DiscoverPage() {
 
   const isEmbeddingFailed = errorCode === "EMBEDDING_FAILED";
 
+  if (error && !isPreparing && !isEmbeddingFailed) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center">
+        <div className="rounded-[28px] border border-[#e9e5df] bg-white p-8 shadow-sm">
+          <h2 className="text-base font-bold text-[#242322]">
+            We couldn’t load your feed
+          </h2>
+          <p className="mt-2 text-sm text-[#77736e]">
+            Please try again in a moment.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="mt-5 rounded-2xl bg-[#1a1918] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-orange-600 disabled:opacity-50"
+          >
+            {isRefetching ? "Retrying…" : "Try again"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const isDataReady = !isLoading && !isPreparing && !!profiles;
 
   if (isEmbeddingFailed) {

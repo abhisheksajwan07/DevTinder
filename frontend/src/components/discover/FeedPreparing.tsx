@@ -67,7 +67,7 @@ export default function FeedPreparing({
       <div className="w-full max-w-md rounded-3xl border border-[#e9e5df] bg-white p-8 shadow-xl shadow-orange-500/5 transition-all">
         {/* Animated Header Icon */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex size-11 items-center justify-center rounded-2xl `bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-200">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-200">
             <Sparkles className="size-5 text-white animate-pulse" />
           </div>
           <div>
@@ -120,7 +120,7 @@ export default function FeedPreparing({
         <div className="mt-8">
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f0ece6]">
             <div
-              className="h-full `bg-linear-to-r from-amber-400 to-orange-500 transition-all duration-500 ease-out"
+              className="h-full bg-linear-to-r from-amber-400 to-orange-500 transition-all duration-500 ease-out"
               style={{
                 width: `${Math.min(
                   100,
