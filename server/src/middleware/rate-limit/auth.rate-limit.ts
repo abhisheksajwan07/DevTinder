@@ -5,8 +5,9 @@ import { createRedisStore } from "../redis-store.js";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 export const signupLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000, 
   max: isDevelopment ? 100 : 5,
+  skip:()=> process.env.ENABLE_LOAD_TEST === "true",
   standardHeaders: true,
   legacyHeaders: false,
   store: createRedisStore(isDevelopment ? "rl:dev:signup" : "rl:signup"),
@@ -50,11 +51,10 @@ export const resendOtpLimiter = rateLimit({
   },
 });
 
-
-
 export const signInLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isDevelopment ? 100 : 5,
+  skip: () => process.env.ENABLE_LOAD_TEST === "true",
   standardHeaders: true,
   legacyHeaders: false,
   store: createRedisStore(isDevelopment ? "rl:dev:signin" : "rl:signin"),
