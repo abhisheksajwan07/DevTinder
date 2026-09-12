@@ -8,6 +8,7 @@ export const globalLimiter = rateLimit({
   // Development includes browser reloads, React Query polling, and OAuth
   // retries. Keep production strict while making local testing practical.
   max: isDevelopment ? 5000 : 100,
+  skip: () => process.env.ENABLE_LOAD_TEST === "true",
   standardHeaders: true,
   legacyHeaders: false,
   store: createRedisStore(isDevelopment ? "rl:dev:global" : "rl:global"),

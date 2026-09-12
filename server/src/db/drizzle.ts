@@ -12,6 +12,9 @@ import * as githubSchema from "./schema/github.schema.js";
 import * as messageSchema from "./schema/message.schema.js";
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
+  max: 50,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 3000,
 });
 
 export const db = drizzle(pool, {

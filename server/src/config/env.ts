@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 
-// Keep test configuration separate from local development credentials.
+// Load base environment file
 dotenv.config({ path: process.env.NODE_ENV === "test" ? ".env.test" : ".env" });
+// Load .env.local overrides for local development if not in test
+if (process.env.NODE_ENV !== "test") {
+  dotenv.config({ path: ".env.local", override: true });
+}
 
 import { z } from "zod";
 import { StringValue } from "ms";

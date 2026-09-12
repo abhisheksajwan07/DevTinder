@@ -1,0 +1,26 @@
+
+
+# services:
+#   k6:
+#     image: grafana/k6:latest
+#     volumes:
+#       - ./k6:/scripts
+#     environment:
+#       - BASE_URL=http://host.docker.internal:3000
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+
+services:
+  k6:
+    image: grafana/k6:latest
+    volumes:
+      - ./k6:/scripts
+    environment:
+      - BASE_URL=http://api:3000
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
+    name: server_backend

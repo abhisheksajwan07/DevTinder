@@ -6,6 +6,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 export const swipeLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: isDevelopment ? 1000 : 120,
+  skip: () => process.env.ENABLE_LOAD_TEST === "true",
   store: createRedisStore(
     isDevelopment ? "rl:dev:swipe-limiter" : "rl:swipe-limiter",
   ),

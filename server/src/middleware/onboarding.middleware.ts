@@ -25,5 +25,6 @@ export const requireOnboarding = async (
     throw new AppError("Profile not found", 404);
   }
   req.user.profileId = user.profileId;
+  
   next();
 };
