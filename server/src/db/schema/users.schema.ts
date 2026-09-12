@@ -2,7 +2,6 @@ import {
   pgTable,
   uuid,
   varchar,
-  text,
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";

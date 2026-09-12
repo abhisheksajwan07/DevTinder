@@ -132,7 +132,6 @@ export const profiles = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("profiles_user_id_idx").on(table.userId)],
 );
 
 export const skills = pgTable(
