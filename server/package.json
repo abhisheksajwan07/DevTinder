@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev-load": "cmd /c \"set UV_THREADPOOL_SIZE=12 && tsx watch src/server.ts\"",
-
     "build": "tsc",
     "start": "node dist/server.js",
     "worker": "tsx watch src/worker.ts",
@@ -18,7 +17,11 @@
     "db:studio": "npx dotenv-cli -e .env.local -- drizzle-kit studio",
     "db:seed": "tsx src/db/seeds/seed.ts",
     "db:seed:test": "npx dotenv-cli -e .env.test -- tsx src/db/seeds/seed.ts",
-    "db:seed:load-test": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test.seed.ts",
+    "db:seed:load-test": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test/index.ts",
+    "db:seed:load-test:users": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test/index.ts users",
+    "db:seed:feed": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test/index.ts feed",
+    "db:seed:actions": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test/index.ts actions",
+    "db:cleanup:load-test": "npx dotenv-cli -e .env.local -- tsx src/db/seeds/load-test/cleanup.ts",
     "db:cleanup:sessions": "npx dotenv-cli -e .env.local -- tsx src/db/scripts/cleanup-test-sessions.ts",
     "typecheck": "tsc --noEmit",
     "test:k6:auth": "docker compose -f docker-compose.k6.yml run --rm k6 run /scripts/scenarios/auth.js",
