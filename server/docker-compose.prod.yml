@@ -1,11 +1,28 @@
 services:
+  migration:
+    build: .
+    command: node dist/db/migrate.js
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
   api:
     container_name: devtinder-api
     command: node dist/server.js
+    stop_grace_period: 30s
     environment:
       NODE_ENV: production
-    ports:
-      - "3000:3000"   
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -20,8 +37,16 @@ services:
   worker:
     container_name: devtinder-worker
     command: node dist/worker.js
+    stop_grace_period: 60s
     environment:
       NODE_ENV: production
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -56,3 +81,8 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
+
+  frontend:
+    depends_on:
+      api:
+        condition: service_healthy

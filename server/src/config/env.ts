@@ -15,6 +15,7 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().default(3000),
   CLIENT_URL: z.url(),
+  CORS_ALLOWED_ORIGINS: z.string().default(""),
   DATABASE_URL: z.string().min(1),
   SALT_ROUNDS: z.coerce.number(),
 
