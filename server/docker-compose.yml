@@ -2,6 +2,8 @@ services:
   api:
     build: .
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     env_file:
       - .env
     depends_on:
@@ -21,7 +23,7 @@ services:
   worker:
     build: .
     restart: unless-stopped
-    command: node dist/worker.js
+    command: npm run worker
     env_file:
       - .env
     depends_on:
