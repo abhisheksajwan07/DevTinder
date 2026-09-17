@@ -25,6 +25,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/drizzle/migrations ./drizzle/migrations
 
 EXPOSE 3000
 CMD ["node", "dist/server.js"]

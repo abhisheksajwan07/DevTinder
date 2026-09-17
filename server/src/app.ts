@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 
 import { httpLogger } from "./middleware/httpLogger.middleware.js";
 import { globalErrorHandler } from "./middleware/globalError.middleware.js";
@@ -18,12 +19,46 @@ import matchRoutes from "./module/match/match.routes.js";
 import { globalLimiter } from "./middleware/global.rate-limit.js";
 import { serverAdapter } from "./bull-board.js";
 import { env } from "./config/env.js";
+import { pool } from "./db/drizzle.js";
+import { redis } from "./config/redis.js";
 
 const app = express();
 
+app.disable("x-powered-by");
 app.set("trust proxy", 1);
+app.use(helmet());
 
-app.use(cors({ origin: true, credentials: true }));
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/ready", async (_req, res) => {
+  try {
+    await Promise.all([pool.query("SELECT 1"), redis.ping()]);
+    res.status(200).json({ status: "ready" });
+  } catch {
+    res.status(503).json({ status: "not_ready" });
+  }
+});
+
+const allowedOrigins = new Set(
+  [env.CLIENT_URL, ...env.CORS_ALLOWED_ORIGINS.split(",")]
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 

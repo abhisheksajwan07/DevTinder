@@ -46,9 +46,9 @@ export interface ISessionRepository {
     },
   ): Promise<void>;
   revokeSession(sessionId: string): Promise<void>;
-  revokeAllSessionsByUserId(userId: string): Promise<void>;
+  revokeAllSessionsByUserId(userId: string): Promise<string[]>;
   getActiveSessionsByUserId(userId: string): Promise<Session[]>;
-  revokeOtherSessions(userId: string, currentSessionId: string): Promise<void>;
+  revokeOtherSessions(userId: string, currentSessionId: string): Promise<string[]>;
 }
 
 export interface ISessionService {
@@ -67,9 +67,9 @@ export interface ISessionService {
     rawRefreshToken: string;
   }>;
 
-  revokeSession(sessionId: string): Promise<void>;
+  revokeSession(sessionId: string, rawAccessToken?: string): Promise<void>;
 
-  revokeAllSessionsByUserId(userId: string): Promise<void>;
+  revokeAllSessionsByUserId(userId: string, rawAccessToken?: string): Promise<void>;
 
-  revokeOtherSessions(userId: string, currentSessionId: string): Promise<void>;
+  revokeOtherSessions(userId: string, currentSessionId: string, rawAccessToken?: string): Promise<void>;
 }

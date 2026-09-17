@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    command: npm run dev
+
+  worker:
+    build:
+      context: .
+      target: dev
+    command: npm run worker
+
+  postgres:
+    ports:
+      - "5434:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

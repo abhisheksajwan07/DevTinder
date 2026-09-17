@@ -41,14 +41,17 @@ export class SessionRepository implements ISessionRepository {
       .where(and(eq(sessions.id, sessionId), eq(sessions.isRevoked, false)));
   }
   
-  async revokeAllSessionsByUserId(userId: string): Promise<void> {
-    await db
+  async revokeAllSessionsByUserId(userId: string): Promise<string[]> {
+    const revoked = await db
       .update(sessions)
       .set({
         isRevoked: true,
         revokedAt: new Date(),
       })
-      .where(and(eq(sessions.userId, userId), eq(sessions.isRevoked, false)));
+      .where(and(eq(sessions.userId, userId), eq(sessions.isRevoked, false)))
+      .returning({ id: sessions.id });
+
+    return revoked.map((s) => s.id);
   }
 
   async getActiveSessionsByUserId(userId: string): Promise<Session[]> {
@@ -88,8 +91,8 @@ export class SessionRepository implements ISessionRepository {
   async revokeOtherSessions(
     userId: string,
     currentSessionId: string,
-  ): Promise<void> {
-    await db
+  ): Promise<string[]> {
+    const revoked = await db
       .update(sessions)
       .set({
         isRevoked: true,
@@ -101,6 +104,9 @@ export class SessionRepository implements ISessionRepository {
           ne(sessions.id, currentSessionId),
           eq(sessions.isRevoked, false),
         ),
-      );
+      )
+      .returning({ id: sessions.id });
+
+    return revoked.map((s) => s.id);
   }
 }

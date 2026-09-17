@@ -20,10 +20,13 @@ export default function SignInForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
   });
+
+  const emailValue = watch("email");
 
   const signInMutation = useSignIn();
   const navigate = useNavigate();
@@ -39,6 +42,16 @@ export default function SignInForm({
       },
     });
   };
+
+  const errorStatus = signInMutation.error?.response?.status;
+  const errorData = signInMutation.error?.response?.data as
+    | { code?: string; message?: string }
+    | undefined;
+  const isUnverified =
+    errorData?.code === "EMAIL_NOT_VERIFIED" ||
+    (errorStatus === 403 &&
+      typeof errorData?.message === "string" &&
+      errorData.message.toLowerCase().includes("verify"));
 
   return (
     <div className="my-auto py-6 mx-auto w-full max-w-md">
@@ -159,14 +172,33 @@ export default function SignInForm({
           )}
         </button>
 
-        {signInMutation.isError && (
-          <p className="text-sm text-red-600 text-center mt-2">
-            {signInMutation.error.response?.status &&
-            signInMutation.error.response.status < 500
-              ? signInMutation.error.response.data.message
-              : "Unable to sign in right now. Please try again later."}
-          </p>
-        )}
+        {signInMutation.isError &&
+          (isUnverified ? (
+            <div className="mt-3 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left">
+              <p className="text-xs font-semibold text-amber-900">
+                Your email address is not verified yet.
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                Please enter the verification code to activate your account.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/verify-email", { state: { email: emailValue } })
+                }
+                className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer"
+              >
+                <span>Verify email now</span>
+                <ArrowRight className="size-3.5" />
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-red-600 text-center mt-2">
+              {errorStatus && errorStatus < 500
+                ? errorData?.message
+                : "Unable to sign in right now. Please try again later."}
+            </p>
+          ))}
       </form>
 
       <div className="mt-6 text-center text-xs text-[#77736e]">
