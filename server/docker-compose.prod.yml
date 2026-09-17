@@ -83,6 +83,17 @@ services:
         max-file: "2"
 
   frontend:
+    build:
+      context: ../frontend
+      args:
+        NGINX_CONFIG: nginx.prod.conf
+    ports:
+      - "80:80"
+      - "443:443" 
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt:ro
+
     depends_on:
       api:
         condition: service_healthy
