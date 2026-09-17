@@ -28,6 +28,7 @@ export default function SignUpForm({
   });
 
   const password = watch("password", "");
+  const email = watch("email", "");
 
   const getPasswordStrength = (pass: string) => {
     if (!pass) {
@@ -51,6 +52,16 @@ export default function SignUpForm({
 
   const navigate = useNavigate();
   const signUpMutation = useSignUp();
+
+  const errorStatus = signUpMutation.error?.response?.status;
+  const errorData = signUpMutation.error?.response?.data as
+    | { code?: string; message?: string }
+    | undefined;
+  const isUnverified =
+    errorData?.code === "EMAIL_NOT_VERIFIED" ||
+    (errorStatus === 409 &&
+      typeof errorData?.message === "string" &&
+      errorData.message.toLowerCase().includes("verifi"));
 
   const onSubmit = (formData: SignUpCredentials) => {
     if (!agreed) {
@@ -223,24 +234,44 @@ export default function SignUpForm({
           )}
         </button>
 
-        {signUpMutation.isError && (
-          <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
-            <svg
-              className="w-4 h-4 text-red-500 shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="text-sm text-red-600">
-              {signUpMutation.error.response?.data.message || "Something went wrong"}
-            </p>
-          </div>
-        )}
+        {signUpMutation.isError &&
+          (isUnverified ? (
+            <div className="mt-2 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left">
+              <p className="text-xs font-semibold text-amber-900">
+                Your account already exists but isn't verified yet.
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                Enter the verification code sent to your email to activate your account.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/verify-email", { state: { email } })
+                }
+                className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer"
+              >
+                <span>Verify email now</span>
+                <ArrowRight className="size-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
+              <svg
+                className="w-4 h-4 text-red-500 shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-sm text-red-600">
+                {errorData?.message || "Something went wrong"}
+              </p>
+            </div>
+          ))}
       </form>
 
       <div className="mt-6 text-center text-xs text-[#77736e]">
