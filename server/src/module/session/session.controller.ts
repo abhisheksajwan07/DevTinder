@@ -43,7 +43,8 @@ export const logoutController = async (req: Request, res: Response) => {
   if (!req.user) {
     throw new AppError("Unauthorized", 401);
   }
-  await sessionService.revokeSession(req.user.sessionId);
+  const rawAccessToken = req.cookies?.["accessToken"];
+  await sessionService.revokeSession(req.user.sessionId, rawAccessToken);
   clearAuthCookies(res);
   clearCsrfCookie(res);
   sendResponse(res, 200, "logout successfully");
@@ -54,7 +55,8 @@ export const logoutAllController = async (req: Request, res: Response) => {
     throw new AppError("Unauthorized", 401);
   }
 
-  await sessionService.revokeAllSessionsByUserId(req.user.userId);
+  const rawAccessToken = req.cookies?.["accessToken"];
+  await sessionService.revokeAllSessionsByUserId(req.user.userId, rawAccessToken);
   clearAuthCookies(res);
   clearCsrfCookie(res);
   sendResponse(res, 200, "logout from all the devices");
@@ -68,7 +70,12 @@ export const logoutOtherSessionsController = async (
     throw new AppError("Unauthorized", 401);
   }
 
-  await sessionService.revokeOtherSessions(req.user.userId, req.user.sessionId);
+  const rawAccessToken = req.cookies?.["accessToken"];
+  await sessionService.revokeOtherSessions(
+    req.user.userId,
+    req.user.sessionId,
+    rawAccessToken,
+  );
 
   sendResponse(res, 200, "Logged out from all other devices");
 };

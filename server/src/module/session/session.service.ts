@@ -4,11 +4,12 @@ import {
   ISessionService,
   SessionResponse,
 } from "./session.types.js";
-import { signAccessToken } from "../../utils/jwt.js";
+import { signAccessToken, getTokenRemainingTtlSeconds } from "../../utils/jwt.js";
 import { parseUserAgent } from "../../utils/parseUserAgent.js";
 import { parseIp } from "../../utils/parseIp.js";
 import { AppError } from "../../utils/AppError.js";
 import { SESSION_EXPIRY_DAYS } from "../../utils/constants.js";
+import { blocklistSession } from "../../utils/sessionBlocklist.js";
 
 export class SessionService implements ISessionService {
   constructor(private sessionRepository: ISessionRepository) {}
@@ -118,20 +119,53 @@ export class SessionService implements ISessionService {
     };
   }
 
-  async revokeSession(sessionId: string): Promise<void> {
+  
+  async revokeSession(
+    sessionId: string,
+    rawAccessToken?: string,
+  ): Promise<void> {
     await this.sessionRepository.revokeSession(sessionId);
+
+    const ttl = rawAccessToken
+      ? getTokenRemainingTtlSeconds(rawAccessToken)
+      : 0;
+    if (ttl > 0) {
+      await blocklistSession(sessionId, ttl);
+    }
   }
 
-  async revokeAllSessionsByUserId(userId: string): Promise<void> {
-    await this.sessionRepository.revokeAllSessionsByUserId(userId);
+  async revokeAllSessionsByUserId(
+    userId: string,
+    rawAccessToken?: string,
+  ): Promise<void> {
+    const revokedIds =
+      await this.sessionRepository.revokeAllSessionsByUserId(userId);
+
+    const ttl = rawAccessToken
+      ? getTokenRemainingTtlSeconds(rawAccessToken)
+      : 0;
+
+    if (ttl > 0 && revokedIds.length > 0) {
+      await Promise.all(revokedIds.map((id) => blocklistSession(id, ttl)));
+    }
   }
 
   async revokeOtherSessions(
     userId: string,
     currentSessionId: string,
+    rawAccessToken?: string,
   ): Promise<void> {
-    await this.sessionRepository.revokeOtherSessions(userId, currentSessionId);
-  }
+    const revokedIds = await this.sessionRepository.revokeOtherSessions(
+      userId,
+      currentSessionId,
+    );
 
-  
+    const ttl = rawAccessToken
+      ? getTokenRemainingTtlSeconds(rawAccessToken)
+      : 0;
+
+    if (ttl > 0 && revokedIds.length > 0) {
+      await Promise.all(revokedIds.map((id) => blocklistSession(id, ttl)));
+    }
+  }
 }
