@@ -1,4 +1,5 @@
 import { AppError } from "../../utils/AppError.js";
+import { encryptOAuthToken } from "../../utils/tokenEncryption.js";
 import { ISessionService } from "../session/session.types.js";
 import {
   IOAuthService,
@@ -52,8 +53,10 @@ export class OAuthService implements IOAuthService {
       }
 
       await this.repository.updateProviderTokens(existingAuthAccount.id, {
-        providerAccessToken: providerTokens.accessToken,
-        providerRefreshToken: providerTokens.refreshToken,
+        providerAccessToken: encryptOAuthToken(providerTokens.accessToken),
+        providerRefreshToken: providerTokens.refreshToken
+          ? encryptOAuthToken(providerTokens.refreshToken)
+          : undefined,
         providerTokenExpiresAt: tokenExpiresAt,
       });
 
@@ -84,8 +87,10 @@ export class OAuthService implements IOAuthService {
           provider,
           providerAccountId: profile.id,
           providerEmail: profile.email,
-          providerAccessToken: providerTokens.accessToken,
-          providerRefreshToken: providerTokens.refreshToken,
+          providerAccessToken: encryptOAuthToken(providerTokens.accessToken),
+          providerRefreshToken: providerTokens.refreshToken
+            ? encryptOAuthToken(providerTokens.refreshToken)
+            : undefined,
           providerTokenExpiresAt: tokenExpiresAt,
         },
       );
@@ -116,8 +121,10 @@ export class OAuthService implements IOAuthService {
       provider,
       providerAccountId: profile.id,
       providerEmail: profile.email,
-      providerAccessToken: providerTokens.accessToken,
-      providerRefreshToken: providerTokens.refreshToken,
+      providerAccessToken: encryptOAuthToken(providerTokens.accessToken),
+      providerRefreshToken: providerTokens.refreshToken
+        ? encryptOAuthToken(providerTokens.refreshToken)
+        : undefined,
       providerTokenExpiresAt: tokenExpiresAt,
     });
 
@@ -160,8 +167,10 @@ export class OAuthService implements IOAuthService {
 
     if (existingAccount) {
       await this.repository.updateProviderTokens(existingAccount.id, {
-        providerAccessToken: providerTokens.accessToken,
-        providerRefreshToken: providerTokens.refreshToken,
+        providerAccessToken: encryptOAuthToken(providerTokens.accessToken),
+        providerRefreshToken: providerTokens.refreshToken
+          ? encryptOAuthToken(providerTokens.refreshToken)
+          : undefined,
         providerTokenExpiresAt: tokenExpiresAt,
       });
     } else {
@@ -170,8 +179,10 @@ export class OAuthService implements IOAuthService {
         provider: "github",
         providerAccountId: profile.id,
         providerEmail: profile.email,
-        providerAccessToken: providerTokens.accessToken,
-        providerRefreshToken: providerTokens.refreshToken,
+        providerAccessToken: encryptOAuthToken(providerTokens.accessToken),
+        providerRefreshToken: providerTokens.refreshToken
+          ? encryptOAuthToken(providerTokens.refreshToken)
+          : undefined,
         providerTokenExpiresAt: tokenExpiresAt,
       });
     }

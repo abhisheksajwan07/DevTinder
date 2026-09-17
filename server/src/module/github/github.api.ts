@@ -1,5 +1,6 @@
 
 import { AppError } from "../../utils/AppError.js";
+import { decryptOAuthToken } from "../../utils/tokenEncryption.js";
 
 import type {
   GitHubApiUser,
@@ -24,7 +25,7 @@ export class GitHubApiClient {
       );
     }
 
-    return account.providerAccessToken;
+    return decryptOAuthToken(account.providerAccessToken);
   }
 
   async getProfile(accessToken: string): Promise<GitHubApiUser> {
