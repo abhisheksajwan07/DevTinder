@@ -1,10 +1,11 @@
+import { ipKeyGenerator } from "express-rate-limit";
 import rateLimit from "express-rate-limit";
 import { createRedisStore } from "../redis-store.js";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 const githubReadWindowMs = 15 * 60 * 1000;
 const authenticatedUserKey = (req: { user?: { userId: string }; ip?: string }) =>
-  req.user?.userId ?? req.ip ?? "unknown";
+  req.user?.userId ?? ipKeyGenerator(req.ip ?? "");
 
 export const githubSyncLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

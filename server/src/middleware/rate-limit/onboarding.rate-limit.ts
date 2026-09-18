@@ -1,3 +1,4 @@
+import { ipKeyGenerator } from "express-rate-limit";
 import rateLimit from "express-rate-limit";
 
 import { createRedisStore } from "../redis-store.js";
@@ -16,7 +17,7 @@ const rateLimitHandler = (_req: unknown, res: any) => {
 const authenticatedUserKey = (req: {
   user?: { userId: string };
   ip?: string;
-}) => req.user?.userId ?? req.ip ?? "unknown";
+}) => req.user?.userId ?? ipKeyGenerator(req.ip ?? "");
 
 export const onboardingLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
