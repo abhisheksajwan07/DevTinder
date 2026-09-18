@@ -46,3 +46,11 @@ createAuthRefresh(api, refreshAuth, {
   statusCodes: [401],
   deduplicateRefresh: true,
 });
+
+// clear the logged-in user when the session is invalid or revoked
+api.interceptors.response.use(undefined, (error) => {
+  if (error?.response?.status === 401) {
+    useAuthStore.getState().clear();
+  }
+  return Promise.reject(error);
+});

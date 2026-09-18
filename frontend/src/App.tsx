@@ -58,7 +58,13 @@ function App() {
     if (user) {
       useAuthStore.getState().setUser(user);
     }
-  }, [user]);
+  
+    // revoked session is an errro reported by /auth/me, clear state of the client so that 
+    // protected shell can't remain visible with dead sesison
+    if (isError) {
+      useAuthStore.getState().clear();
+    }
+  }, [user, isError]);
   if (isLoading) {
     return (
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fdfcfb] text-[#242322]">
