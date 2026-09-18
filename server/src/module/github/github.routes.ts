@@ -5,7 +5,9 @@ import { requireCsrf } from "../../middleware/csrf.middleware.js";
 import { validate } from "../../middleware/validateBody.js";
 import {
   githubSyncLimiter,
-  githubReadLimiter,
+  githubStatusReadLimiter,
+  githubProfileReadLimiter,
+  githubFeaturedRepositoriesLimiter,
 } from "../../middleware/rate-limit/github.rate-limit.js";
 import {
   getGitHubStatusController,
@@ -20,7 +22,7 @@ const router = Router();
 router.get(
   "/status",
   requireAccessAuth,
-  githubReadLimiter,
+  githubStatusReadLimiter,
   getGitHubStatusController,
 );
 
@@ -28,12 +30,12 @@ router.use(requireAccessAuth, requireOnboarding);
 
 router.post("/sync", requireCsrf, githubSyncLimiter, syncGitHubController);
 
-router.get("/profile", githubReadLimiter, getGitHubProfileController);
+router.get("/profile", githubProfileReadLimiter, getGitHubProfileController);
 
 router.patch(
   "/repositories/featured",
   requireCsrf,
-  githubReadLimiter,
+  githubFeaturedRepositoriesLimiter,
   validate(featuredRepositoriesSchema),
   setFeaturedRepositoriesController,
 );

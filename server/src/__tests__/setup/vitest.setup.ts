@@ -36,7 +36,9 @@ vi.mock("../../middleware/rate-limit/swipe.rate-limit.js", () => ({
 }));
 vi.mock("../../middleware/rate-limit/github.rate-limit.js", () => ({
   githubSyncLimiter: passThrough,
-  githubReadLimiter: passThrough,
+  githubStatusReadLimiter: passThrough,
+  githubProfileReadLimiter: passThrough,
+  githubFeaturedRepositoriesLimiter: passThrough,
 }));
 vi.mock("../../middleware/rate-limit/oauth.rate-limit.js", () => ({
   oauthCallbackLimiter: passThrough,
