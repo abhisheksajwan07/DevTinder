@@ -23,7 +23,10 @@ vi.mock("../../middleware/rate-limit/session.rate-limit.js", () => ({
 vi.mock("../../middleware/rate-limit/onboarding.rate-limit.js", () => ({
   onboardingLimiter: passThrough,
   onboardingPatchLimiter: passThrough,
-  onboardingReadLimiter: passThrough,
+  onboardingOptionsReadLimiter: passThrough,
+  onboardingProfileReadLimiter: passThrough,
+  usernameAvailabilityLimiter: passThrough,
+  publicProfileReadLimiter: passThrough,
 }));
 vi.mock("../../middleware/rate-limit/feed.rate-limit.js", () => ({
   feedReadLimiter: passThrough,
@@ -33,7 +36,9 @@ vi.mock("../../middleware/rate-limit/swipe.rate-limit.js", () => ({
 }));
 vi.mock("../../middleware/rate-limit/github.rate-limit.js", () => ({
   githubSyncLimiter: passThrough,
-  githubReadLimiter: passThrough,
+  githubStatusReadLimiter: passThrough,
+  githubProfileReadLimiter: passThrough,
+  githubFeaturedRepositoriesLimiter: passThrough,
 }));
 vi.mock("../../middleware/rate-limit/oauth.rate-limit.js", () => ({
   oauthCallbackLimiter: passThrough,

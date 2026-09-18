@@ -4,7 +4,9 @@ import { requireAccessAuth } from "../../middleware/auth.middleware.js";
 import {
   onboardingLimiter,
   onboardingPatchLimiter,
-  onboardingReadLimiter,
+  onboardingOptionsReadLimiter,
+  onboardingProfileReadLimiter,
+  usernameAvailabilityLimiter,
 } from "../../middleware/rate-limit/onboarding.rate-limit.js";
 import {
   checkUsernameSchema,
@@ -32,7 +34,7 @@ router.get(
   "/me",
   requireAccessAuth,
   requireOnboarding,
-  onboardingReadLimiter,
+  onboardingProfileReadLimiter,
   getMyProfileController,
 );
 router.patch(
@@ -46,13 +48,13 @@ router.patch(
 router.get(
   "/options",
   requireAccessAuth,
-  onboardingReadLimiter,
+  onboardingOptionsReadLimiter,
   getOptionsController,
 );
 router.get(
   "/check-username",
   requireAccessAuth,
-  onboardingReadLimiter,
+  usernameAvailabilityLimiter,
   validate(checkUsernameSchema, "query"),
   checkUsernameController,
 );
