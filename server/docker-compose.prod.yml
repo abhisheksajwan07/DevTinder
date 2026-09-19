@@ -13,7 +13,7 @@ services:
   api:
     container_name: devtinder-api
     command: node dist/server.js
-    ports: []
+    ports: !reset []
     stop_grace_period: 30s
     environment:
       NODE_ENV: production
@@ -101,8 +101,8 @@ services:
         condition: service_healthy
 
   prometheus:
-    ports: []
+    ports: !reset []
 
   grafana: 
-    ports: []
+    ports: !reset []
       
