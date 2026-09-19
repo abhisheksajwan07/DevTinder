@@ -17,6 +17,10 @@ import profileRoutes from "./module/profile/profile.routes.js";
 import matchRoutes from "./module/match/match.routes.js";
 
 import { globalLimiter } from "./middleware/global.rate-limit.js";
+import {
+  metricsHandler,
+  metricsMiddleware,
+} from "./middleware/metrics.middleware.js";
 import { serverAdapter } from "./bull-board.js";
 import { env } from "./config/env.js";
 import { pool } from "./db/drizzle.js";
@@ -27,6 +31,15 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(helmet());
+
+
+app.get("/metrics", metricsHandler);
+
+
+app.use(httpLogger);
+app.use(metricsMiddleware);
+
+
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
@@ -40,6 +53,8 @@ app.get("/ready", async (_req, res) => {
     res.status(503).json({ status: "not_ready" });
   }
 });
+
+
 
 const allowedOrigins = new Set(
   [env.CLIENT_URL, ...env.CORS_ALLOWED_ORIGINS.split(",")]
@@ -61,9 +76,8 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-
 app.use(globalLimiter);
-app.use(httpLogger);
+
 
 if (env.NODE_ENV !== "production") {
   app.use("/admin/queues", serverAdapter.getRouter());
