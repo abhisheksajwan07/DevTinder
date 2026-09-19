@@ -85,6 +85,7 @@ services:
       - "9090:9090"
     volumes: 
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus 
     networks:
       - backend
 
@@ -94,12 +95,18 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD} 
+    volumes:
+      - grafana_data:/var/lib/grafana
     networks:
       - backend
 
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   backend:

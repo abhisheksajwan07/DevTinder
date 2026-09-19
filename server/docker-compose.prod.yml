@@ -13,9 +13,11 @@ services:
   api:
     container_name: devtinder-api
     command: node dist/server.js
+    ports: []
     stop_grace_period: 30s
     environment:
       NODE_ENV: production
+
     depends_on:
       migration:
         condition: service_completed_successfully
@@ -89,7 +91,7 @@ services:
         NGINX_CONFIG: nginx.prod.conf
     ports:
       - "80:80"
-      - "443:443" 
+      - "443:443"
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt:ro
@@ -97,3 +99,10 @@ services:
     depends_on:
       api:
         condition: service_healthy
+
+  prometheus:
+    ports: []
+
+  grafana: 
+    ports: []
+      
