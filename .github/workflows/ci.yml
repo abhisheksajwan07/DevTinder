@@ -121,3 +121,14 @@ jobs:
             git pull --ff-only origin main
             cd server
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+      - name: Run database migrations
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/azureuser/app/DevTinder/server
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migration
+      
