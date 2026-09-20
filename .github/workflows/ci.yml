@@ -119,3 +119,5 @@ jobs:
           script: |
             cd /home/azureuser/app/DevTinder
             git pull --ff-only origin main
+            cd server
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
