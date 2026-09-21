@@ -7,24 +7,27 @@ import { verifyAccessToken } from "../../utils/jwt.js";
 import { AppError } from "../../utils/AppError.js";
 
 vi.mock("../../utils/jwt.js");
+vi.mock("../../utils/sessionBlocklist.js", () => ({
+  isSessionBlocklisted: vi.fn().mockResolvedValue(false),
+}));
 
-const accessAuth = (cookies: Record<string, string>) => {
+const accessAuth = async (cookies: Record<string, string>) => {
   const next = vi.fn();
   const req = {
     cookies,
   } as unknown as Request;
 
-  requireAccessAuth(req, {} as Response, next as NextFunction);
+  await requireAccessAuth(req, {} as Response, next as NextFunction);
   return { next, req };
 };
 
 describe("requireAccessAuth", () => {
-  it("allow the req. with  valid access token", () => {
+  it("allow the req. with  valid access token", async () => {
     vi.mocked(verifyAccessToken).mockReturnValue({
       sub: "user-123",
       sessionId: "session-123",
     });
-    const { next, req } = accessAuth({ accessToken: "access-token" });
+    const { next, req } = await accessAuth({ accessToken: "access-token" });
     expect(next).toHaveBeenCalledWith();
     expect(req.user).toEqual({
       userId: "user-123",
@@ -32,19 +35,19 @@ describe("requireAccessAuth", () => {
     });
   });
 
-  it("rejects the request without an access token", () => {
-    const { next } = accessAuth({});
+  it("rejects the request without an access token", async () => {
+    const { next } = await accessAuth({});
     const error = next.mock.calls[0]?.[0];
     expect(error).toBeInstanceOf(AppError);
     expect(error).toMatchObject({ statusCode: 401 });
   });
 
-  it("reject an expired access token", () => {
+  it("reject an expired access token", async () => {
     vi.mocked(verifyAccessToken).mockImplementation(() => {
       throw new jwt.TokenExpiredError("jwt expired", new Date());
     });
 
-    const { next } = accessAuth({
+    const { next } = await accessAuth({
       accessToken: "expired-token",
     });
 
@@ -56,11 +59,11 @@ describe("requireAccessAuth", () => {
     });
   });
 
-  it("reject an invalid access token", () => {
+  it("reject an invalid access token", async () => {
     vi.mocked(verifyAccessToken).mockImplementation(() => {
       throw new jwt.JsonWebTokenError("invalid token");
     });
-    const { next } = accessAuth({
+    const { next } = await accessAuth({
       accessToken: "invalid token",
     });
     const error = next.mock.calls[0]?.[0];
