@@ -114,6 +114,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd /home/azureuser/app/DevTinder
             git pull --ff-only origin main
             cd server
