@@ -12,8 +12,6 @@ jobs:
     defaults:
       run:
         working-directory: server
-
-   
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -70,7 +68,7 @@ jobs:
           node-version: 26
           cache: npm
           cache-dependency-path: server/package-lock.json
-        
+
       - name: Install dependencies
         run: npm ci
 
@@ -79,20 +77,20 @@ jobs:
 
       - name: Seed integration-test reference data
         run: npx --no-install tsx src/db/seeds/seed.prod.ts
-        
+
       - name: Typecheck
         run: npm run typecheck
-        
+
       - name: Run tests
         run: npm test
 
       - name: Build
-        run: npm run build  
+        run: npm run build
 
   ssh-test:
     needs: test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Test SSH connection
         uses: appleboy/ssh-action@v1
@@ -104,11 +102,10 @@ jobs:
             whoami
             hostname
 
-
   deploy-test:
     needs: ssh-test
     runs-on: ubuntu-latest
-  
+
     steps:
       - name: Test git pull on VPS
         uses: appleboy/ssh-action@v1
@@ -131,4 +128,15 @@ jobs:
           script: |
             cd /home/azureuser/app/DevTinder/server
             docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migration
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{secrets.VPS_HOST}}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/azureuser/app/DevTinder/server
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api wget -qO- http://localhost:3000/health
       
+            

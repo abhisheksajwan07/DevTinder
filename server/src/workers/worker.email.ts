@@ -37,7 +37,7 @@ export const emailWorker = new Worker(
       const { email, otp } = job.data;
 
       await resend.emails.send({
-        from: "DevTinder <onboarding@resend.dev>",
+        from: "DevTinder <noreply@devtinder.abhishekbytes.space>",
         to: email,
         subject: "Verify your DevTinder Account",
         html: getOtpTemplate(otp),
@@ -51,7 +51,7 @@ export const emailWorker = new Worker(
       const { email, resetUrl, idempotencyKey } = job.data;
       await resend.emails.send(
         {
-          from: "DevTinder <onboarding@resend.dev>",
+          from: "DevTinder <noreply@devtinder.abhishekbytes.space>",
           to: email,
           subject: "Reset your DevTinder Password",
           html: getResetPasswordTemplate(resetUrl),
