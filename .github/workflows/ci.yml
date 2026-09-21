@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+  
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -87,27 +90,14 @@ jobs:
       - name: Build
         run: npm run build
 
-  ssh-test:
+ 
+  deploy-test:
     needs: test
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+  
     steps:
-      - name: Test SSH connection
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          script: |
-            whoami
-            hostname
-
-  deploy-test:
-    needs: ssh-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Test git pull on VPS
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -115,29 +105,21 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
             set -e
+  
             cd /home/azureuser/app/DevTinder
+  
+            
+  
             git pull --ff-only origin main
+            echo "Deploying commit: $(git rev-parse HEAD)"
             cd server
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-
-      - name: Run database migrations
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/azureuser/app/DevTinder/server
+  
             docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migration
-
-      - name: Health check
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{secrets.VPS_HOST}}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/azureuser/app/DevTinder/server
+  
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api wget -qO- http://localhost:3000/health
+            echo "Deployment successful: $(git rev-parse HEAD)"
+         
+  
       
             
