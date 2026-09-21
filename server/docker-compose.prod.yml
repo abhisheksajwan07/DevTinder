@@ -1,6 +1,6 @@
 services:
   migration:
-    build: .
+    image: ${REGISTRY}/devtinder-server:${IMAGE_TAG}
     command: node dist/db/migrate.js
     env_file:
       - .env
@@ -11,6 +11,7 @@ services:
       - backend
 
   api:
+    image: ${REGISTRY}/devtinder-server:${IMAGE_TAG}
     container_name: devtinder-api
     command: node dist/server.js
     ports: !reset []
@@ -37,6 +38,7 @@ services:
         max-file: "3"
 
   worker:
+    image: ${REGISTRY}/devtinder-server:${IMAGE_TAG}
     container_name: devtinder-worker
     command: node dist/worker.js
     stop_grace_period: 60s
@@ -85,10 +87,7 @@ services:
         max-file: "2"
 
   frontend:
-    build:
-      context: ../frontend
-      args:
-        NGINX_CONFIG: nginx.prod.conf
+    image: ${REGISTRY}/devtinder-frontend:${IMAGE_TAG}
     ports:
       - "80:80"
       - "443:443"

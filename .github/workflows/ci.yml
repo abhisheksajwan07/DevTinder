@@ -7,7 +7,13 @@ on:
 concurrency:
   group: production-deployment
   cancel-in-progress: false
-  
+permissions:
+  contents: read
+  packages: write
+env:
+  IMAGE_TAG: ${{ github.sha }}
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -90,12 +96,59 @@ jobs:
       - name: Build
         run: npm run build
 
- 
-  deploy-test:
+  build-and-push:
     needs: test
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: ${{ env.REGISTRY }}/devtinder-server:${{ env.IMAGE_TAG }}
+
+  build-and-push-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            NGINX_CONFIG=nginx.prod.conf
+          tags: ${{ env.REGISTRY }}/devtinder-frontend:${{ env.IMAGE_TAG }}
+  deploy-test:
+    needs:
+      - test
+      - build-and-push
+      - build-and-push-frontend
+    runs-on: ubuntu-latest
     timeout-minutes: 10
-  
+
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
@@ -105,21 +158,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
             set -e
-  
+
             cd /home/azureuser/app/DevTinder
-  
+
+            export IMAGE_TAG=${{ github.sha }}
+            export REGISTRY=ghcr.io/${{ github.repository_owner }}
             
-  
-            git pull --ff-only origin main
-            echo "Deploying commit: $(git rev-parse HEAD)"
-            cd server
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-  
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io \
+              -u "${{ secrets.GHCR_USERNAME }}" \
+              --password-stdin
+            
+            cd /home/azureuser/app/DevTinder/server
+            
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
             docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migration
-  
+
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T api wget -qO- http://localhost:3000/health
-            echo "Deployment successful: $(git rev-parse HEAD)"
-         
-  
-      
-            
+            echo "Deployment successful: ${IMAGE_TAG}"
