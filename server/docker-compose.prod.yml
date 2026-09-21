@@ -88,6 +88,7 @@ services:
 
   frontend:
     image: ${REGISTRY}/devtinder-frontend:${IMAGE_TAG}
+    container_name: devtinder-frontend 
     ports:
       - "80:80"
       - "443:443"
