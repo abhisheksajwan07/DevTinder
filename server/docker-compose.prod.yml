@@ -10,6 +10,17 @@ services:
     networks:
       - backend
 
+  seed:
+    image: ${REGISTRY}/devtinder-server:${IMAGE_TAG}
+    command: node dist/db/seeds/seed.prod.js
+    env_file:
+      - .env
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    networks:
+      - backend
+
   api:
     image: ${REGISTRY}/devtinder-server:${IMAGE_TAG}
     container_name: devtinder-api
@@ -21,6 +32,8 @@ services:
 
     depends_on:
       migration:
+        condition: service_completed_successfully
+      seed:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
@@ -46,6 +59,8 @@ services:
       NODE_ENV: production
     depends_on:
       migration:
+        condition: service_completed_successfully
+      seed:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy

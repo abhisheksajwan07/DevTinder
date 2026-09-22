@@ -142,9 +142,9 @@ export default function OnboardingPage() {
       </div>
     );
   return (
-    <div className="grid min-h-screen lg:h-screen lg:overflow-hidden w-full font-sans antialiased lg:grid-cols-2 bg-[#121212]">
+    <div className="grid min-h-screen w-full font-sans antialiased lg:grid-cols-2 bg-[#121212]">
       <AuthShowcase />
-      <div className="flex min-h-screen lg:min-h-0 lg:h-full flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-6 sm:p-10 lg:p-12 xl:p-16 text-[#242322]">
+      <div className="flex min-h-screen flex-col justify-between bg-[#f5f2eb] p-6 sm:p-10 lg:p-12 xl:p-16 text-[#242322]">
         <div className="flex items-center justify-between border-b border-[#e4dfd6] pb-4 shrink-0">
           <div className="flex items-center gap-2">
             <div className="size-3 animate-pulse rounded-full bg-orange-500" />
