@@ -35,7 +35,7 @@ export type DemoProfile = {
 export const demoProfiles: DemoProfile[] = [
   {
     id: "1",
-    name: "Alex",
+    name: "Aloo Prasad",
     avatar: "A",
     role: "Senior Backend Engineer",
     matchScore: 94,
@@ -48,8 +48,8 @@ export const demoProfiles: DemoProfile[] = [
   },
   {
     id: "2",
-    name: "Sarah Chen",
-    avatar: "S",
+    name: "Chai Sharma",
+    avatar: "C",
     role: "Fullstack & AI Developer",
     matchScore: 89,
     badges: ["Python", "FastAPI", "React", "Voyage AI", "Tailwind"],
@@ -61,8 +61,8 @@ export const demoProfiles: DemoProfile[] = [
   },
   {
     id: "3",
-    name: "Marcus Vance",
-    avatar: "M",
+    name: "Bugesh Kumar",
+    avatar: "B",
     role: "Systems & Rust Architect",
     matchScore: 92,
     badges: ["Rust", "WebAssembly", "Go", "Docker", "gRPC"],

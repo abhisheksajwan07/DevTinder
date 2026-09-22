@@ -63,8 +63,8 @@ export default function FeedPreparing({
   }, [isDataReady, currentStep, onFinish]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-112.5 px-4">
-      <div className="w-full max-w-md rounded-3xl border border-[#e9e5df] bg-white p-8 shadow-xl shadow-orange-500/5 transition-all">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-8">
+      <div className="flex min-h-[27rem] w-full max-w-md flex-col justify-between rounded-3xl border border-[#e9e5df] bg-white p-8 shadow-xl shadow-orange-500/5">
         {/* Animated Header Icon */}
         <div className="flex items-center gap-3 mb-6">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-linear-to-br from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-200">

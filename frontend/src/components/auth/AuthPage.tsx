@@ -23,12 +23,12 @@ export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden w-full font-sans antialiased grid lg:grid-cols-2 bg-[#121212]">
+    <div className="min-h-screen w-full font-sans antialiased grid lg:grid-cols-2 bg-[#121212]">
       {/* LEFT COLUMN: Dark Showcase Section */}
       <AuthShowcase />
 
       {/* RIGHT COLUMN: Light Cream Auth Section */}
-      <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 bg-[#f5f2eb] text-[#242322] overflow-y-auto min-h-screen lg:min-h-0 lg:h-full">
+      <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 bg-[#f5f2eb] text-[#242322] overflow-y-auto min-h-screen">
         {/* Top Header with Step Indicator */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e4dfd6] shrink-0">
           {mode === "signup" ? (

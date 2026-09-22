@@ -83,9 +83,12 @@ export default function LandingNav() {
             Get Started
           </a>
           <a
-            className="transition hover:text-orange-600"
-            href="#footer"
+            className="inline-flex items-center gap-1.5 transition hover:text-orange-600"
+            href="https://github.com/abhisheksajwan07/DevTinder"
+            target="_blank"
+            rel="noreferrer"
           >
+            <Github className="size-3.5" />
             Open Source
           </a>
         </div>
@@ -105,6 +108,15 @@ export default function LandingNav() {
             <Github className="size-4" />
             <span>Get Started</span>
           </Link>
+          <a
+            href="https://github.com/abhisheksajwan07/DevTinder"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Star DevTinder on GitHub"
+            className="hidden size-10 items-center justify-center rounded-full border border-[#ded9d2] text-[#55504b] transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600 sm:inline-flex"
+          >
+            <Github className="size-4" />
+          </a>
         </div>
       </nav>
     </header>

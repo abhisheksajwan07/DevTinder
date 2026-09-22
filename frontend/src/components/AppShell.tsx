@@ -15,6 +15,7 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Github,
 } from "lucide-react";
 import { socket } from "../services/socket";
 import { useAuthStore } from "../stores/auth.store";
@@ -112,6 +113,16 @@ export default function AppShell() {
 
         {/* User Footer */}
         <div className="border-t border-[#f0ece6] p-3 space-y-0.5">
+          <a
+            href="https://github.com/abhisheksajwan07/DevTinder"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#55504b] transition-colors hover:bg-orange-50 hover:text-orange-600"
+          >
+            <Github className="size-4.5 text-[#88827c]" />
+            <span className="flex-1">Open Source</span>
+            <span className="font-mono text-[10px] text-[#99918a]">Star it</span>
+          </a>
           <NavLink
             to="/app/settings"
             className={({ isActive }) =>

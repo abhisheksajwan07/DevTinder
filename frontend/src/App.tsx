@@ -72,8 +72,8 @@ function App() {
 
         <div className="relative flex flex-col items-center gap-5 rounded-[30px] border border-[#f1e9e3] bg-white/80 px-8 py-8 shadow-[0_24px_80px_rgba(38,24,14,0.08)] backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 shadow-lg shadow-orange-200">
-              <span className="text-lg font-bold text-white">D</span>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#ee7100] shadow-lg shadow-orange-200">
+              <img src="/dev-tinder.svg" alt="DevTinder" className="h-7 w-7 object-contain" />
             </div>
 
             <div className="text-left">
@@ -86,8 +86,8 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-full border border-orange-100 bg-orange-50/70 px-4 py-2 text-sm text-[#5f514b]">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-orange-200 border-t-orange-500" />
+          <div className="flex h-10 items-center gap-3 rounded-full border border-orange-100 bg-orange-50/70 px-4 py-2 text-sm text-[#5f514b]">
+            <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-orange-200 border-t-orange-500" />
             <span>Loading your profile...</span>
           </div>
         </div>

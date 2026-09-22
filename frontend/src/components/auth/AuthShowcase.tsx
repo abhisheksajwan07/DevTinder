@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function AuthShowcase() {
   return (
-    <div className="relative hidden lg:flex h-full flex-col justify-between p-8 sm:p-12 lg:p-12 xl:p-14 bg-[#121212] text-white overflow-hidden border-r border-[#22211e] select-none">
+    <div className="relative hidden lg:flex min-h-screen flex-col justify-between p-8 sm:p-12 lg:p-12 xl:p-14 bg-[#121212] text-white overflow-hidden border-r border-[#22211e] select-none">
       {/* Subtle Ambient Background Glow */}
       <div className="pointer-events-none absolute top-1/4 left-10 z-0 h-96 w-96 rounded-full bg-orange-600/10 blur-3xl" />
 
@@ -21,8 +21,8 @@ export default function AuthShowcase() {
       </div>
 
       {/* Center: devtinder.db Code Window */}
-      <div className="relative z-10 my-auto py-8">
-        <div className="mx-auto max-w-lg rounded-2xl border border-[#2a2825] bg-[#181715] p-5 shadow-2xl backdrop-blur-sm">
+      <div className="relative z-10 flex flex-1 items-center py-8">
+        <div className="mx-auto w-full max-w-lg rounded-2xl border border-[#2a2825] bg-[#181715] p-5 shadow-2xl backdrop-blur-sm">
           {/* Window Top Controls */}
           <div className="flex items-center justify-between border-b border-[#292724] pb-3 mb-4">
             <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function AuthShowcase() {
             <div className="flex items-center justify-between rounded-xl bg-[#21201d] px-3.5 py-2.5 transition hover:bg-[#282623]">
               <div>
                 <p className="text-xs font-semibold text-white">
-                  Ananya S.{" "}
+                  Chai Sharma{" "}
                   <span className="text-[#99948e] font-normal">
                     — Full Stack
                   </span>
@@ -97,7 +97,7 @@ export default function AuthShowcase() {
             <div className="flex items-center justify-between rounded-xl bg-[#21201d] px-3.5 py-2.5 transition hover:bg-[#282623]">
               <div>
                 <p className="text-xs font-semibold text-white">
-                  Rahul V.{" "}
+                  Bugesh Kumar{" "}
                   <span className="text-[#99948e] font-normal">
                     — Backend Lead
                   </span>
@@ -116,7 +116,7 @@ export default function AuthShowcase() {
             <div className="flex items-center justify-between rounded-xl bg-[#21201d] px-3.5 py-2.5 transition hover:bg-[#282623]">
               <div>
                 <p className="text-xs font-semibold text-white">
-                  Priya N.{" "}
+                  Aloo Prasad{" "}
                   <span className="text-[#99948e] font-normal">
                     — ML Engineer
                   </span>
