@@ -142,9 +142,9 @@ export default function OnboardingPage() {
       </div>
     );
   return (
-    <div className="grid min-h-screen w-full font-sans antialiased lg:grid-cols-2 bg-[#121212]">
+    <div className="grid min-h-screen w-full grid-cols-1 bg-[#121212] lg:h-screen lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <AuthShowcase />
-      <div className="flex min-h-screen flex-col justify-between bg-[#f5f2eb] p-6 sm:p-10 lg:p-12 xl:p-16 text-[#242322]">
+      <div className="flex min-h-screen min-w-0 flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-5 text-[#242322] sm:p-8 lg:h-screen lg:min-h-0 lg:p-10 xl:p-12">
         <div className="flex items-center justify-between border-b border-[#e4dfd6] pb-4 shrink-0">
           <div className="flex items-center gap-2">
             <div className="size-3 animate-pulse rounded-full bg-orange-500" />
@@ -156,7 +156,7 @@ export default function OnboardingPage() {
             Step {step} of {TOTAL_STEPS} • Profile setup
           </span>
         </div>
-        <div className="my-auto mx-auto w-full max-w-lg py-6">
+        <div className="mx-auto my-auto w-full max-w-lg py-6">
           <div className="rounded-[28px] border border-[#e9e5df] bg-white p-6 shadow-xs sm:p-8">
             <ProgressBar step={step} totalSteps={TOTAL_STEPS} />
             <FormProvider {...form}>

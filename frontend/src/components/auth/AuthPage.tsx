@@ -11,26 +11,24 @@ interface AuthPageProps {
 
 export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
- 
 
   const handleSocialAuth = (provider: string) => {
-    if(provider === "google"){
-      googleOAuth()
-    }
-    else{
-      githubOAuth()
+    if (provider === "google") {
+      googleOAuth();
+    } else {
+      githubOAuth();
     }
   };
 
   return (
-    <div className="min-h-screen w-full font-sans antialiased grid lg:grid-cols-2 bg-[#121212]">
+    <div className="grid min-h-screen w-full grid-cols-1 bg-[#121212] font-sans antialiased lg:h-screen lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       {/* LEFT COLUMN: Dark Showcase Section */}
       <AuthShowcase />
 
       {/* RIGHT COLUMN: Light Cream Auth Section */}
-      <div className="flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 bg-[#f5f2eb] text-[#242322] overflow-y-auto min-h-screen">
+      <div className="flex min-h-screen min-w-0 flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-5 text-[#242322] sm:p-8 lg:h-screen lg:min-h-0 lg:p-10 xl:p-12">
         {/* Top Header with Step Indicator */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e4dfd6] shrink-0">
+        <div className="flex min-w-0 flex-col justify-between gap-3 border-b border-[#e4dfd6] pb-4 sm:flex-row sm:items-center">
           {mode === "signup" ? (
             <div className="flex items-center gap-2">
               <div className="size-3 rounded-full bg-orange-500 animate-pulse" />
@@ -48,8 +46,6 @@ export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
           )}
           <AuthToggle mode={mode} onSelectMode={setMode} />
         </div>
-
-       
 
         {/* Active Form */}
         <div className="my-auto py-6">

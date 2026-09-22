@@ -55,8 +55,7 @@ export default function SignUpForm({
 
   const errorStatus = signUpMutation.error?.response?.status;
   const errorData = signUpMutation.error?.response?.data as
-    | { code?: string; message?: string }
-    | undefined;
+    { code?: string; message?: string } | undefined;
   const isUnverified =
     errorData?.code === "EMAIL_NOT_VERIFIED" ||
     (errorStatus === 409 &&
@@ -76,8 +75,8 @@ export default function SignUpForm({
   };
 
   return (
-    <div className="my-auto py-6 mx-auto w-full max-w-md">
-      <h1 className="font-serif text-4xl sm:text-[54px] font-normal leading-[1.05] tracking-tight text-[#1a1918]">
+    <div className="mx-auto my-auto w-full max-w-md py-4 sm:py-6">
+      <h1 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-[#1a1918] sm:text-5xl">
         Create your profile.
       </h1>
       <p className="mt-3 text-sm text-[#77736e]">
@@ -241,13 +240,12 @@ export default function SignUpForm({
                 Your account already exists but isn't verified yet.
               </p>
               <p className="mt-1 text-xs text-amber-700">
-                Enter the verification code sent to your email to activate your account.
+                Enter the verification code sent to your email to activate your
+                account.
               </p>
               <button
                 type="button"
-                onClick={() =>
-                  navigate("/verify-email", { state: { email } })
-                }
+                onClick={() => navigate("/verify-email", { state: { email } })}
                 className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer"
               >
                 <span>Verify email now</span>

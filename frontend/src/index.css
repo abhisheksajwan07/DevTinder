@@ -1,95 +1,158 @@
 @import "tailwindcss";
 
 @layer components {
-  .form-control {
-    @apply w-full rounded-xl border border-[#e2ded6] bg-[#f7f5f2] px-3 py-2 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/20;
-  }
+    .form-control {
+        @apply w-full rounded-xl border border-[#e2ded6] bg-[#f7f5f2] px-3 py-2 text-sm text-[#242322] outline-none transition focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/20;
+    }
 }
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-serif: "Instrument Serif", Georgia, serif;
+    --font-sans:
+        "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono:
+        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        monospace;
+    --font-serif: "Instrument Serif", Georgia, serif;
 }
 
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 :root {
-  font-family: var(--font-sans);
-  color: #242322;
-  background: #fdfcfb;
-  font-synthesis: none;
+    font-family: var(--font-sans);
+    color: #242322;
+    background: #fdfcfb;
+    font-synthesis: none;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  background-color: #fdfcfb;
-  color: #242322;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+    margin: 0;
+    min-width: 320px;
+    background-color: #fdfcfb;
+    color: #242322;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
 }
 
 @layer base {
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
 }
 
-button, input {
-  font: inherit;
+button,
+input {
+    font: inherit;
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
 @keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-12px) rotate(1deg);
-  }
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-12px) rotate(1deg);
+    }
 }
 
 @keyframes pulse-soft {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.04);
-  }
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.75;
+        transform: scale(1.04);
+    }
 }
 
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
 }
 
 .animate-float-slow {
-  animation: float-slow 7s ease-in-out infinite;
+    animation: float-slow 7s ease-in-out infinite;
 }
 
 .animate-pulse-soft {
-  animation: pulse-soft 6s ease-in-out infinite;
+    animation: pulse-soft 6s ease-in-out infinite;
+}
+
+/* Auth showcase scales fluidly with both viewport width and height. */
+.auth-showcase-content {
+    padding: clamp(1rem, 1.5vw, 2rem);
+}
+
+.auth-showcase-middle {
+    display: grid;
+    min-height: 0;
+    place-items: center;
+    padding-block: clamp(0.75rem, 2vh, 2rem);
+}
+
+.auth-showcase-card {
+    padding: clamp(0.75rem, 1.25vw, 1.25rem);
+}
+
+.auth-showcase-window-header {
+    margin-bottom: clamp(0.65rem, 1.2vh, 1rem);
+    padding-bottom: clamp(0.5rem, 1vh, 0.75rem);
+}
+
+.auth-showcase-query {
+    font-size: clamp(0.65rem, 0.72vw, 0.75rem);
+}
+
+.auth-showcase-divider {
+    margin-block: clamp(0.75rem, 1.5vh, 1rem);
+}
+
+.auth-showcase-developers {
+    gap: clamp(0.4rem, 1vh, 0.75rem);
+}
+
+.auth-showcase-developer {
+    padding: clamp(0.5rem, 1vh, 0.625rem) clamp(0.65rem, 1vw, 0.875rem);
+}
+
+.auth-showcase-marker {
+    margin-top: clamp(0.65rem, 1.2vh, 1rem);
+}
+
+.auth-showcase-caption {
+    padding-top: clamp(0.5rem, 1vh, 0.75rem);
+}
+
+@media (min-width: 1024px) and (max-height: 700px) {
+    .auth-showcase-content {
+        padding-block: 0.75rem;
+    }
+
+    .auth-showcase-caption p {
+        margin-top: 0.35rem;
+    }
 }
 
 /* Background grid utility */
 .bg-grid-dots {
-  background-image: radial-gradient(#e5e1dc 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
+    background-image: radial-gradient(#e5e1dc 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
 }

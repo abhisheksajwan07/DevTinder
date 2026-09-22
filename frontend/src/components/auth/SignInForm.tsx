@@ -15,8 +15,6 @@ export default function SignInForm({
   onSwitchToSignUp,
   onSocialAuth,
 }: SignInFormProps) {
-
-  
   const {
     register,
     handleSubmit,
@@ -45,8 +43,7 @@ export default function SignInForm({
 
   const errorStatus = signInMutation.error?.response?.status;
   const errorData = signInMutation.error?.response?.data as
-    | { code?: string; message?: string }
-    | undefined;
+    { code?: string; message?: string } | undefined;
   const isUnverified =
     errorData?.code === "EMAIL_NOT_VERIFIED" ||
     (errorStatus === 403 &&
@@ -54,8 +51,8 @@ export default function SignInForm({
       errorData.message.toLowerCase().includes("verify"));
 
   return (
-    <div className="my-auto py-6 mx-auto w-full max-w-md">
-      <h1 className="font-serif text-4xl sm:text-[54px] font-normal leading-[1.05] tracking-tight text-[#1a1918]">
+    <div className="mx-auto my-auto w-full max-w-md py-4 sm:py-6">
+      <h1 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-[#1a1918] sm:text-5xl">
         Welcome back.
       </h1>
       <p className="mt-3 text-sm text-[#77736e]">
