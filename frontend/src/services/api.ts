@@ -3,8 +3,6 @@ import createAuthRefresh from "axios-auth-refresh";
 import type { AxiosAuthRefreshRequestConfig } from "axios-auth-refresh";
 import { useAuthStore } from "../stores/auth.store";
 
-
-
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/v1",
   withCredentials: true,
@@ -34,7 +32,7 @@ const refreshAuth = async () => {
     await api.post(
       "/sessions/refresh",
       {}, // empty body
-      { skipAuthRefresh: true } as AxiosAuthRefreshRequestConfig
+      { skipAuthRefresh: true } as AxiosAuthRefreshRequestConfig,
     );
   } catch (err) {
     useAuthStore.getState().clear();
@@ -45,12 +43,4 @@ const refreshAuth = async () => {
 createAuthRefresh(api, refreshAuth, {
   statusCodes: [401],
   deduplicateRefresh: true,
-});
-
-// clear the logged-in user when the session is invalid or revoked
-api.interceptors.response.use(undefined, (error) => {
-  if (error?.response?.status === 401) {
-    useAuthStore.getState().clear();
-  }
-  return Promise.reject(error);
 });

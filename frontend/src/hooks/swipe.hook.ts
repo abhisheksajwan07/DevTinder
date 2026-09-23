@@ -7,6 +7,7 @@ import {
 } from "../services/swipe.api";
 import type { SwipeInput, ConnectionActionInput } from "../types/swipe";
 import type { FeedProfile } from "../types/feed";
+import type { ConversationListItem } from "../types/chat";
 
 export function useSwipeProfile() {
   const queryClient = useQueryClient();
@@ -55,12 +56,13 @@ export function useRespondConnection() {
       await queryClient.cancelQueries({ queryKey: ["connection-requests"] });
 
       // Take a snapshot of the current list (so we can restore it on failure)
-      const previousRequests = queryClient.getQueryData(["connection-requests"]);
+      const previousRequests = queryClient.getQueryData([
+        "connection-requests",
+      ]);
 
       // Optimistically remove the card the user just acted on
-      queryClient.setQueryData(
-        ["connection-requests"],
-        (old: any[] = []) => old.filter((r) => r.profile.id !== targetProfileId)
+      queryClient.setQueryData(["connection-requests"], (old: any[] = []) =>
+        old.filter((r) => r.profile.id !== targetProfileId),
       );
 
       // Return the snapshot — React Query passes this to onError as `context`
@@ -69,14 +71,45 @@ export function useRespondConnection() {
     onError: (_error, _variables, context) => {
       // If the API call failed, put the removed card back
       if (context?.previousRequests) {
-        queryClient.setQueryData(["connection-requests"], context.previousRequests);
+        queryClient.setQueryData(
+          ["connection-requests"],
+          context.previousRequests,
+        );
       }
     },
-    
-    onSuccess: () => {
+
+    onSuccess: async (_data, variables) => {
       // Re-sync with server after success to ensure data is fresh
-      queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["connection-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["matches"] }),
+      ]);
+
+      if (variables.action !== "accept") return;
+
+      // Matching runs in a background worker, so the conversation may not
+      // exist yet when the accept request completes. Refresh briefly until
+      // the worker has created it so Chat shows the new profile immediately.
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        await queryClient.refetchQueries({
+          queryKey: ["user", "conversations"],
+        });
+
+        const conversations = queryClient.getQueryData<ConversationListItem[]>([
+          "user",
+          "conversations",
+        ]);
+        if (
+          conversations?.some(
+            (conversation) =>
+              conversation.otherProfileId === variables.targetProfileId,
+          )
+        ) {
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
     },
   });
 }
