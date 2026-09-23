@@ -13,14 +13,8 @@ interface ChatMessagesListProps {
 
 const ChatMessagesList = forwardRef<HTMLDivElement, ChatMessagesListProps>(
   (
-    {
-      messages,
-      isLoading,
-      activeConversation,
-      myProfileId,
-      isOtherUserTyping,
-    },
-    ref
+    { messages, isLoading, activeConversation, myProfileId, isOtherUserTyping },
+    ref,
   ) => {
     const participantName =
       activeConversation.firstName || activeConversation.username;
@@ -32,9 +26,11 @@ const ChatMessagesList = forwardRef<HTMLDivElement, ChatMessagesListProps>(
       <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-5 space-y-4">
         {/* Match Banner Announcement */}
         <div className="mx-auto max-w-sm rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-amber-50/50 p-3.5 text-center shadow-xs">
-          <div className="flex items-center justify-center gap-1 text-orange-600 font-bold text-xs mb-1">
+          <div className="flex flex-wrap items-center justify-center gap-1 text-orange-600 font-bold text-xs mb-1">
             <Sparkles className="size-3.5" />
-            <span>Connected with {participantName}</span>
+            <span className="min-w-0 break-words">
+              Connected with {participantName}
+            </span>
           </div>
           <p className="text-[11px] text-[#77736e]">
             Say hello and start collaborating on projects!
@@ -57,16 +53,18 @@ const ChatMessagesList = forwardRef<HTMLDivElement, ChatMessagesListProps>(
           </div>
         ) : messages.length > 0 ? (
           // Reversing so oldest is rendered at top, newest at bottom
-          [...messages].reverse().map((msg) => (
-            <ChatBubble
-              key={msg.id}
-              msg={msg}
-              isOwn={
-                msg.senderProfileId.trim().toLowerCase() ===
-                myProfileId.trim().toLowerCase()
-              }
-            />
-          ))
+          [...messages]
+            .reverse()
+            .map((msg) => (
+              <ChatBubble
+                key={msg.id}
+                msg={msg}
+                isOwn={
+                  msg.senderProfileId.trim().toLowerCase() ===
+                  myProfileId.trim().toLowerCase()
+                }
+              />
+            ))
         ) : (
           <div className="py-12 text-center text-xs text-[#88827c]">
             No messages yet. Send a message to start chatting!
@@ -90,7 +88,7 @@ const ChatMessagesList = forwardRef<HTMLDivElement, ChatMessagesListProps>(
         <div ref={ref} />
       </div>
     );
-  }
+  },
 );
 
 ChatMessagesList.displayName = "ChatMessagesList";

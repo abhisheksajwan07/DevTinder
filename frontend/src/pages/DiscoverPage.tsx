@@ -10,8 +10,7 @@ export default function DiscoverPage() {
   const [animationDone, setAnimationDone] = useState(() => Boolean(profiles));
   const swipeMutation = useSwipeProfile();
   const isPreparing = (error as any)?.response?.status === 503;
-  const errorCode = (error as any)?.response?.data?.code; 
-
+  const errorCode = (error as any)?.response?.data?.code;
 
   const isEmbeddingFailed = errorCode === "EMBEDDING_FAILED";
 
@@ -48,8 +47,8 @@ export default function DiscoverPage() {
             We couldn’t prepare your recommendations
           </h2>
           <p className="mt-2 text-sm text-[#77736e]">
-            Something went wrong while preparing your developer matches.
-            Please try again.
+            Something went wrong while preparing your developer matches. Please
+            try again.
           </p>
           <button
             type="button"
@@ -84,9 +83,9 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-2xl px-4 py-5 sm:py-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-[#242322]">
             Discover Developers
@@ -98,7 +97,7 @@ export default function DiscoverPage() {
       </div>
 
       {/* Feed content area */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="mx-auto py-1">
         {currentProfile ? (
           <ProfileCard
             key={currentProfile.id}

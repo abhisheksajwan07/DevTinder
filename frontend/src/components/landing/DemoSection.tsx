@@ -28,21 +28,21 @@ export default function DemoSection() {
             start: "top 85%",
             once: true,
           },
-        }
+        },
       );
     },
-    { scope: sectionRef }
+    { scope: sectionRef },
   );
 
   return (
     <section
       ref={sectionRef}
       id="demo"
-      className="mx-auto max-w-[1240px] px-6 pb-20 lg:px-0"
+      className="mx-auto max-w-[1240px] px-4 pb-16 sm:px-6 sm:pb-20 lg:px-0"
     >
       <div
         ref={cardRef}
-        className="relative overflow-hidden rounded-[28px] border border-[#e9e5df] bg-gradient-to-br from-white via-[#fcfbfa] to-[#f7f4ef] px-6 py-14 text-center shadow-sm"
+        className="relative overflow-hidden rounded-[28px] border border-[#e9e5df] bg-gradient-to-br from-white via-[#fcfbfa] to-[#f7f4ef] px-4 py-10 text-center shadow-sm sm:px-6 sm:py-14"
       >
         {/* Background Subtle Accent Orb */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-orange-200/30 to-amber-200/20 blur-2xl animate-pulse-soft" />
@@ -53,7 +53,7 @@ export default function DemoSection() {
             <span>Instant Developer Match</span>
           </div>
 
-          <h2 className="text-[30px] font-extrabold tracking-tight text-[#242322] sm:text-[36px] leading-tight">
+          <h2 className="text-[28px] font-extrabold leading-tight tracking-tight text-[#242322] sm:text-[36px]">
             Ready to find your next co-founder or pair programming partner?
           </h2>
 
@@ -66,15 +66,13 @@ export default function DemoSection() {
             <Link
               to="/signup"
               style={{ color: "#ffffff" }}
-              className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-[#24292f] px-8 py-4 text-sm font-bold text-white shadow-md shadow-black/20 transition-all duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95"
+              className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[#24292f] px-6 py-4 text-sm font-bold text-white shadow-md shadow-black/20 transition-all duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95 sm:w-auto sm:px-8"
             >
               <Github className="size-4.5" />
               <span>Continue with GitHub</span>
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
-
-
         </div>
       </div>
     </section>

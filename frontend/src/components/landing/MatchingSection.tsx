@@ -3,7 +3,14 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { matchCards } from "./landing-data";
-import { Sparkles, Github, MessageCircle, ShieldCheck, Code2, Star } from "lucide-react";
+import {
+  Sparkles,
+  Github,
+  MessageCircle,
+  ShieldCheck,
+  Code2,
+  Star,
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,7 +48,7 @@ export default function MatchingSection() {
           stagger: 0.12,
           ease: "power3.out",
           clearProps: "transform",
-        }
+        },
       );
 
       // Subtle pulse glow effect on the code box
@@ -56,24 +63,24 @@ export default function MatchingSection() {
             yoyo: true,
             ease: "sine.inOut",
           },
-          "-=0.4"
+          "-=0.4",
         );
       }
     },
-    { scope: sectionRef }
+    { scope: sectionRef },
   );
 
   return (
     <section
       ref={sectionRef}
       id="matching"
-      className="mx-auto max-w-[1240px] px-6 pb-20 lg:px-0"
+      className="mx-auto max-w-[1240px] px-4 pb-16 sm:px-6 sm:pb-20 lg:px-0"
     >
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <h2 className="text-[28px] font-bold tracking-tight text-[#242322] sm:text-[32px]">
           Everything you need to match & ship
         </h2>
-        <p className="mt-2 text-sm font-medium text-[#77736e]">
+        <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-[#77736e]">
           A developer-native platform engineered for authentic collaboration and
           high-signal matching.
         </p>
@@ -92,12 +99,12 @@ export default function MatchingSection() {
               codeSnippet,
               columnSpan = 2,
             },
-            index
+            index,
           ) => (
             <article
               key={title}
               className={[
-                "match-bento-card group relative rounded-[24px] border border-[#e9e5df] bg-white/90 p-6 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-300 hover:bg-white hover:shadow-lg hover:shadow-orange-500/10",
+                "match-bento-card group relative rounded-[24px] border border-[#e9e5df] bg-white/90 p-5 sm:p-6 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-300 hover:bg-white hover:shadow-lg hover:shadow-orange-500/10",
                 columnSpan === 3 ? "md:col-span-3" : "md:col-span-2",
               ].join(" ")}
             >
@@ -194,7 +201,7 @@ export default function MatchingSection() {
                 </div>
               ) : null}
             </article>
-          )
+          ),
         )}
       </div>
     </section>

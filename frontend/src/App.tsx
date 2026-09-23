@@ -35,12 +35,12 @@ export function LandingPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#fdfcfb] text-[#242322] font-sans">
       {/* Background Ambient Glow Orbs */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-125 w-200 -translate-x-1/2 rounded-full bg-gradient-to-tr from-amber-200/40 via-orange-100/30 to-transparent blur-3xl animate-pulse-soft" />
-      <div className="pointer-events-none absolute top-[35%] -left-40 -z-10 h-112.5 w-112.5 rounded-full bg-gradient-to-br from-orange-200/20 to-amber-100/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[15%] -right-40 -z-10 h-125 w-[500px] rounded-full bg-linear-to-bl from-amber-200/25 via-orange-100/20 to-transparent blur-3xl" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-125 w-200 -translate-x-1/2 rounded-full bg-linear-to-tr from-amber-200/40 via-orange-100/30 to-transparent blur-3xl animate-pulse-soft" />
+      <div className="pointer-events-none absolute top-[35%] -left-40 -z-10 h-112.5 w-112.5 rounded-full bg-linear-to-b from-orange-200/20 to-amber-100/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[15%] -right-40 -z-10 h-125 w-[w-125] rounded-full bg-linear-to-bl from-amber-200/25 via-orange-100/20 to-transparent blur-3xl" />
 
       {/* Subtle Dot Grid Overlay */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-grid-dots opacity-60 [mask-image:linear-gradient(to_bottom,white_10%,transparent_90%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-grid-dots opacity-60 mask-[linear-gradient(to_bottom,white_10%,transparent_90%)]" />
 
       <LandingNav />
       <HeroSection />

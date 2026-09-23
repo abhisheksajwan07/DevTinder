@@ -27,15 +27,19 @@ export default function FooterSection() {
             start: "top 90%",
             once: true,
           },
-        }
+        },
       );
     },
-    { scope: footerRef }
+    { scope: footerRef },
   );
 
   return (
-    <footer ref={footerRef} id="footer" className="mx-auto max-w-[1240px] px-6 pb-12 lg:px-0">
-      <div className="rounded-[28px] border border-[#e9e5df] bg-gradient-to-b from-[#f7f5f2] to-[#f0eee9] p-8 shadow-sm lg:p-10">
+    <footer
+      ref={footerRef}
+      id="footer"
+      className="mx-auto max-w-[1240px] px-4 pb-8 sm:px-6 sm:pb-12 lg:px-0"
+    >
+      <div className="rounded-[28px] border border-[#e9e5df] bg-gradient-to-b from-[#f7f5f2] to-[#f0eee9] p-5 shadow-sm sm:p-8 lg:p-10">
         <div className="grid gap-10 lg:grid-cols-12">
           {/* Brand Info */}
           <div className="lg:col-span-5 flex flex-col justify-between">
@@ -53,7 +57,9 @@ export default function FooterSection() {
                 </span>
               </div>
               <p className="mt-4 max-w-sm text-xs leading-relaxed text-[#77736e]">
-                Match with developers who build like you. Powered by Voyage AI vector embeddings, pgvector cosine similarity, and real-time pair chat.
+                Match with developers who build like you. Powered by Voyage AI
+                vector embeddings, pgvector cosine similarity, and real-time
+                pair chat.
               </p>
             </div>
 
@@ -105,9 +111,10 @@ export default function FooterSection() {
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#e2ded7] pt-6 sm:flex-row text-xs text-[#88827c]">
           <p>© 2026 DevTinder.</p>
 
-          <div className="flex items-center gap-4">
+          <div className="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row">
             <span className="flex items-center gap-1 font-mono text-[10px] text-[#9a948e]">
-              <Sparkles className="size-3 text-orange-500" /> Open Source Developer Matching
+              <Sparkles className="size-3 text-orange-500" /> Open Source
+              Developer Matching
             </span>
             <a
               href="#top"

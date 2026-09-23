@@ -4,7 +4,15 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { demoProfiles } from "./landing-data";
-import { Github, Sparkles, X, Heart, Star, Code2, CheckCircle2 } from "lucide-react";
+import {
+  Github,
+  Sparkles,
+  X,
+  Heart,
+  Star,
+  Code2,
+  CheckCircle2,
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,7 +48,7 @@ export default function HeroSection() {
           stagger: 0.12,
           ease: "power4.out",
           clearProps: "transform",
-        }
+        },
       ).fromTo(
         cardContainerRef.current,
         { opacity: 0, y: 40, scale: 0.95 },
@@ -52,7 +60,7 @@ export default function HeroSection() {
           ease: "back.out(1.2)",
           clearProps: "opacity",
         },
-        "-=0.5"
+        "-=0.5",
       );
 
       // 2. Smooth levitation float loop for card
@@ -69,7 +77,7 @@ export default function HeroSection() {
       // Ensure ScrollTrigger updates coordinates accurately
       ScrollTrigger.refresh();
     },
-    { scope: sectionRef }
+    { scope: sectionRef },
   );
 
   // Smooth Mouse 3D Tilt effect
@@ -149,7 +157,7 @@ export default function HeroSection() {
     <section
       ref={sectionRef}
       id="top"
-      className="mx-auto grid max-w-[1240px] gap-12 px-6 pb-20 pt-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:px-0 lg:pt-16"
+      className="mx-auto grid max-w-[1240px] gap-10 px-4 pb-16 pt-8 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:px-0 lg:pt-16"
     >
       <div className="lg:ml-4">
         {/* Hero Badge */}
@@ -159,7 +167,7 @@ export default function HeroSection() {
         </div>
 
         {/* Hero Title */}
-        <h1 className="hero-element mt-5 max-w-[620px] text-[44px] font-extrabold leading-[1.02] tracking-tight sm:text-[62px]">
+        <h1 className="hero-element mt-5 max-w-[620px] text-[38px] font-extrabold leading-[1.05] tracking-tight sm:text-[62px]">
           Match with{" "}
           <span className="bg-gradient-to-r from-[#ee7100] via-amber-600 to-orange-500 bg-clip-text text-transparent">
             Developers
@@ -175,9 +183,9 @@ export default function HeroSection() {
         </p>
 
         {/* Hero CTAs */}
-        <div className="hero-element mt-7 flex flex-wrap items-center gap-4 text-xs">
+        <div className="hero-element mt-7 flex flex-col items-stretch gap-3 text-xs sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
           <Link
-            className="group inline-flex items-center gap-2.5 rounded-full bg-[#24292f] px-6 py-3.5 font-bold text-white shadow-md shadow-black/20 transition-transform duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95"
+            className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-[#24292f] px-6 py-3.5 font-bold text-white shadow-md shadow-black/20 transition-transform duration-200 hover:bg-[#1a1e22] hover:shadow-lg hover:shadow-black/25 active:scale-95 sm:w-auto"
             to="/signup"
             style={{ color: "#ffffff" }}
           >
@@ -186,7 +194,7 @@ export default function HeroSection() {
           </Link>
           <a
             href="#matching"
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#e2ded7] bg-white px-5 py-3.5 font-semibold text-[#55504b] transition-colors hover:border-orange-300 hover:bg-orange-50/40 hover:text-orange-600"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-[#e2ded7] bg-white px-5 py-3.5 font-semibold text-[#55504b] transition-colors hover:border-orange-300 hover:bg-orange-50/40 hover:text-orange-600 sm:w-auto"
           >
             <span>Explore AI Matcher</span>
           </a>

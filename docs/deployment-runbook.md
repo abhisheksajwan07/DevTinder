@@ -198,7 +198,7 @@ newgrp docker
 - `usermod` — adds current user to the docker group (no `sudo` needed for Docker after this).
 - `newgrp` — applies the group change immediately without re-login.
 
-![Deployment setup](assets/images/Pasted%20image%2020260917135537.png)
+![Deployment setup](assets/images/vps-docker-group-setup.png)
 
 Clean up any test containers before deploying:
 
@@ -644,7 +644,7 @@ checkout → Node 26 → npm ci → PostgreSQL + Redis
    → migration → seed → typecheck → tests → build
 ```
 
-![Deployment verification](assets/images/Pasted%20image%2020260920192926.png)
+![Deployment verification](assets/images/github-actions-ci-build.png)
 ### 4.6 GitHub Actions permissions
 
 ```yaml
@@ -742,7 +742,7 @@ Test Git itself can use the new auth — `fetch` downloads remote info without c
 git fetch origin
 ```
 
-![Deployment rollback](assets/images/Pasted%20image%2020260920223511.png)
+![Deployment rollback](assets/images/vps-git-fetch-test.png)
 
 Once `fetch` passes, test the actual production update operation:
 
@@ -1010,7 +1010,7 @@ File: `.github/workflows/rollback.yml`
 
 Triggered manually: GitHub → Actions → Rollback → Run workflow → Enter SHA.
 
-![Rollback preparation](assets/images/Pasted%20image%2020260922000931.png)
+![Rollback preparation](assets/images/rollback-dispatch-input.png)
 
 ```yaml
 name: Rollback
@@ -1069,14 +1069,14 @@ jobs:
             echo "Rolled back to: ${IMAGE_TAG}"
 ```
 
-![GitHub Actions rollback job execution](assets/images/Pasted%20image%2020260922001007.png)
+![GitHub Actions rollback job execution](assets/images/rollback-action-run.png)
 
 ### 9.2 Why rollback is manual
 
 You explicitly choose a known-good SHA. The workflow pulls and deploys those exact images. No rebuild is required.
 
 
-![Rollback workflow](assets/images/Pasted%20image%2020260922001007.png)
+![Rollback workflow](assets/images/rollback-action-run.png)
 
 ### 9.3 Rollback does not change container names
 
@@ -1087,7 +1087,7 @@ After:   devtinder-frontend → frontend:0be96b
 
 The container name comes from Compose. The image tag determines the version.
 
-![Rollback verification](assets/images/Pasted%20image%2020260922001147.png)
+![Rollback verification](assets/images/rollback-vps-verification.png)
 
 
 ### 9.4 Database migrations during rollback
@@ -1129,7 +1129,7 @@ Migration starts → Migration succeeds → API starts
 Migration fails  → API does NOT start
 ```
 
-![Production deployment](assets/images/Pasted%20image%2020260921001317.png)
+![Production deployment](assets/images/migration-compose-order.png)
 
 ### 10.3 Run migrations manually
 This does **NOT** mean:
@@ -1291,7 +1291,7 @@ Data source: `http://prometheus:9090` (Docker internal — Grafana queries Prome
 
 Dashboard: **DevTinder API Monitoring** — panels for Request Rate and Request Latency (p95).
 
-![Deployment screenshot](assets/images/Screenshot%202026-09-19%20152811.png)
+![DevTinder API Monitoring request rate and latency panels](assets/images/grafana-request-rate.png)
 
 ### 13.4 Production monitoring access
 
@@ -1302,7 +1302,7 @@ ssh -i <pem-file> -L 3001:localhost:3001 <username>@<VPS_IP>
 ```
 
 Then open `localhost:3001` in your browser.
-![Deployment screenshot](assets/images/Screenshot%202026-09-19%20214908.png)
+![DevTinder API Monitoring dashboard](assets/images/grafana-api-dashboard.png)
 
 
 Production Compose override — bind to localhost only, not publicly:
@@ -1397,7 +1397,7 @@ devtinder-worker   → ghcr.io/.../devtinder-server:<SHA>
 ```
 
 
-![Deployment screenshot](assets/images/Screenshot%202026-09-22%20001332.png)
+![Deployment screenshot](assets/images/docker-compose-ps-containers.png)
 ### Container triage — if something is unhealthy or exited
 
 ```bash
@@ -1596,7 +1596,7 @@ After deployment, verify these end-to-end:
 - [x] 10-minute timeout
 
 
-![Deployment screenshot](assets/images/Screenshot%202026-09-22%20000353.png)
+![Deployment screenshot](assets/images/deployment-pipeline-checklist.png)
 ### Rollback
 
 - [x] Manual `workflow_dispatch`

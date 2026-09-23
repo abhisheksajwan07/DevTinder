@@ -201,14 +201,14 @@ Conversation access is verified in the API and again when joining a socket room.
 
 ## Tech Stack
 
-| Area | Implementation |
-| --- | --- |
-| Client | React 19, TypeScript, Vite, React Router, Tailwind CSS, React Query, Zustand, React Hook Form, Zod |
-| API | Node.js, TypeScript, Express 5, Zod, Pino |
-| Data | PostgreSQL 17, pgvector, Drizzle ORM and migrations |
-| Realtime and jobs | Socket.IO, Redis 8, BullMQ |
-| Integrations | Google OAuth, GitHub OAuth/API, Resend, Voyage AI embeddings |
-| Quality and operations | Vitest, Supertest, k6, Docker Compose, Nginx, Prometheus, Grafana, GitHub Actions, GHCR |
+| Area                   | Implementation                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| Client                 | React 19, TypeScript, Vite, React Router, Tailwind CSS, React Query, Zustand, React Hook Form, Zod |
+| API                    | Node.js, TypeScript, Express 5, Zod, Pino                                                          |
+| Data                   | PostgreSQL 17, pgvector, Drizzle ORM and migrations                                                |
+| Realtime and jobs      | Socket.IO, Redis 8, BullMQ                                                                         |
+| Integrations           | Google OAuth, GitHub OAuth/API, Resend, Voyage AI embeddings                                       |
+| Quality and operations | Vitest, Supertest, k6, Docker Compose, Nginx, Prometheus, Grafana, GitHub Actions, GHCR            |
 
 ## Screenshots
 
@@ -216,7 +216,8 @@ The repository currently contains operational and performance captures rather th
 
 ### Monitoring
 
-![Grafana API dashboard showing request rate and p95 latency](docs/assets/deployment/grafana-api-monitoring-dashboard.png)
+![Grafana API dashboard showing request rate and p95 latency](docs/assets/images/grafana-request-rate.png)
+![Grafana API monitoring overview dashboard](docs/assets/images/grafana-api-dashboard.png)
 
 ### Performance
 
@@ -234,7 +235,7 @@ Those figures are reproducible local baselines, not a production capacity promis
 
 Production runs the frontend, API, worker, migration job, PostgreSQL, Redis, Prometheus, and Grafana with Docker Compose. Nginx serves the client, terminates TLS, proxies `/v1/` and `/socket.io/`, and handles the ACME challenge path. The API exposes `/health` for process liveness and `/ready` for PostgreSQL/Redis readiness; Prometheus scrapes `/metrics`, and Grafana visualizes request rate and latency.
 
-For VPS provisioning, environment setup, certificates, deployment, rollback, and troubleshooting, see [the deployment runbook](docs/DEPLOYMENT.md). Keep environment files and credentials out of version control.
+For VPS provisioning, environment setup, certificates, deployment, rollback, and troubleshooting, see [the deployment runbook](docs/deployment-runbook.md). Keep environment files and credentials out of version control.
 
 ## Run Locally
 
@@ -312,7 +313,7 @@ server/
   docker-compose*.yml             Local, development, k6, and production services
 docs/
   performance/                    Reproducible feed and login test reports
-  DEPLOYMENT.md                   Deployment and rollback runbook
+  deployment-runbook.md           Deployment and rollback runbook
 ```
 
 ## Lessons Learned
@@ -329,10 +330,3 @@ docs/
 - Extend monitoring with alerting, queue-depth and worker-failure dashboards, and centralized logs.
 - Evolve recommendation quality with explicit feedback signals and offline relevance evaluation.
 - Add curated, happy-path product screenshots and a public demo when those assets are available.
-
-## Documentation
-
-- [Deployment runbook](docs/DEPLOYMENT.md)
-- [Feed performance report](docs/performance/feed.md)
-- [Login performance report](docs/performance/login.md)
-- [GHCR notes](docs/GHCR.md)

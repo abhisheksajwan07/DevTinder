@@ -33,6 +33,7 @@ html {
 
 body {
     margin: 0;
+    overflow-x: hidden;
     min-width: 320px;
     background-color: #fdfcfb;
     color: #242322;

@@ -29,7 +29,7 @@ export default function ProfilePanel({
     "U"
   ).toUpperCase();
   return (
-    <aside className="flex flex-col w-full sm:w-[300px] xl:w-[320px] shrink-0 border-l border-[#e9e5df] bg-white overflow-y-auto z-20">
+    <aside className="absolute inset-0 z-20 flex w-full flex-col overflow-y-auto border-l border-[#e9e5df] bg-white sm:relative sm:inset-auto sm:w-[300px] sm:shrink-0 xl:w-[320px]">
       <div className="flex items-center justify-between p-4 border-b border-[#f0ece6]">
         <span className="font-bold text-xs text-[#242322]">
           Developer Profile

@@ -17,17 +17,19 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-[24px] border border-[#e9e5df] bg-white shadow-2xl p-7">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-[24px] border border-[#e9e5df] bg-white p-5 shadow-2xl sm:p-7">
         <div className="flex items-start gap-3 mb-4">
           <div className="grid size-10 place-items-center rounded-2xl bg-red-50 border border-red-100 shrink-0">
             <AlertTriangle className="size-5 text-red-500" />
           </div>
           <div>
             <h3 className="text-base font-bold text-[#242322]">{title}</h3>
-            <p className="mt-1 text-xs text-[#77736e] leading-relaxed">{description}</p>
+            <p className="mt-1 text-xs text-[#77736e] leading-relaxed">
+              {description}
+            </p>
           </div>
         </div>
-        <div className="flex gap-2.5 mt-6">
+        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
           <button
             type="button"
             onClick={onCancel}

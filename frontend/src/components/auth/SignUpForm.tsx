@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Check, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { signUpSchema, type SignUpFormValues } from "../../schemas/auth.schema";
 import { type SignUpCredentials, useSignUp } from "../../services/auth.api";
+import {
+  UnverifiedAccountDialog,
+  UnverifiedAccountBanner,
+} from "./UnverifiedAccountDialog";
 
 interface SignUpFormProps {
   onSwitchToSignIn: () => void;
@@ -17,6 +21,8 @@ export default function SignUpForm({
   onSocialAuth,
 }: SignUpFormProps) {
   const [agreed, setAgreed] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const [showUnverifiedModal, setShowUnverifiedModal] = useState(false);
 
   const {
     handleSubmit,
@@ -62,10 +68,18 @@ export default function SignUpForm({
       typeof errorData?.message === "string" &&
       errorData.message.toLowerCase().includes("verifi"));
 
+  useEffect(() => {
+    if (isUnverified) {
+      setShowUnverifiedModal(true);
+    }
+  }, [isUnverified]);
+
   const onSubmit = (formData: SignUpCredentials) => {
     if (!agreed) {
-      return alert("Agree to the Terms and Privacy Policy");
+      setTermsError(true);
+      return;
     }
+    setTermsError(false);
 
     signUpMutation.mutate(formData, {
       onSuccess: () => {
@@ -188,42 +202,53 @@ export default function SignUpForm({
           </div>
         </div>
 
-        <div className="pt-1 flex items-start gap-2 text-xs text-[#66615c]">
-          <button
-            type="button"
-            role="checkbox"
-            aria-checked={agreed}
-            onClick={() => setAgreed(!agreed)}
-            className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded border transition ${
-              agreed
-                ? "border-orange-500 bg-orange-500 text-white"
-                : "border-[#c8c2b8] bg-white"
-            }`}
-          >
-            {agreed && <Check className="size-3 stroke-3" />}
-          </button>
-          <span>
-            I agree to the{" "}
-            <a
-              href="#terms"
-              className="font-semibold text-orange-600 hover:underline"
+        <div>
+          <div className="pt-1 flex items-start gap-2 text-xs text-[#66615c]">
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={agreed}
+              onClick={() => {
+                const next = !agreed;
+                setAgreed(next);
+                if (next) setTermsError(false);
+              }}
+              className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded border transition cursor-pointer ${
+                agreed
+                  ? "border-orange-500 bg-orange-500 text-white"
+                  : "border-[#c8c2b8] bg-white hover:border-orange-400"
+              }`}
             >
-              Terms
-            </a>{" "}
-            and{" "}
-            <a
-              href="#privacy"
-              className="font-semibold text-orange-600 hover:underline"
-            >
-              Privacy Policy
-            </a>
-          </span>
+              {agreed && <Check className="size-3 stroke-3" />}
+            </button>
+            <span>
+              I agree to the{" "}
+              <a
+                href="#terms"
+                className="font-semibold text-orange-600 hover:underline"
+              >
+                Terms
+              </a>{" "}
+              and{" "}
+              <a
+                href="#privacy"
+                className="font-semibold text-orange-600 hover:underline"
+              >
+                Privacy Policy
+              </a>
+            </span>
+          </div>
+          {termsError && (
+            <p className="mt-1.5 pl-6 text-xs text-red-600 font-medium">
+              Please agree to the Terms and Privacy Policy to continue.
+            </p>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={signUpMutation.isPending}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1a1918] py-3.5 px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-600 active:scale-[0.99] disabled:opacity-70 mt-2"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1a1918] py-3.5 px-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-600 active:scale-[0.99] disabled:opacity-70 mt-2 cursor-pointer"
         >
           <span>Create Account</span>
           {signUpMutation.isPending ? (
@@ -235,38 +260,15 @@ export default function SignUpForm({
 
         {signUpMutation.isError &&
           (isUnverified ? (
-            <div className="mt-2 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left">
-              <p className="text-xs font-semibold text-amber-900">
-                Your account already exists but isn't verified yet.
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                Enter the verification code sent to your email to activate your
-                account.
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate("/verify-email", { state: { email } })}
-                className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer"
-              >
-                <span>Verify email now</span>
-                <ArrowRight className="size-3.5" />
-              </button>
-            </div>
+            <UnverifiedAccountBanner
+              email={email}
+              onOpenDialog={() => setShowUnverifiedModal(true)}
+            />
           ) : (
-            <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
-              <svg
-                className="w-4 h-4 text-red-500 shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-sm text-red-600">
-                {errorData?.message || "Something went wrong"}
+            <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-red-50 border border-red-200 p-3.5 text-xs text-red-700">
+              <AlertCircle className="size-4 shrink-0 text-red-500" />
+              <p>
+                {errorData?.message || "Something went wrong. Please try again."}
               </p>
             </div>
           ))}
@@ -278,12 +280,18 @@ export default function SignUpForm({
           <button
             type="button"
             onClick={onSwitchToSignIn}
-            className="font-semibold text-orange-600 hover:underline"
+            className="font-semibold text-orange-600 hover:underline cursor-pointer"
           >
             Sign in &rarr;
           </button>
         </p>
       </div>
+
+      <UnverifiedAccountDialog
+        isOpen={isUnverified && showUnverifiedModal}
+        onClose={() => setShowUnverifiedModal(false)}
+        email={email}
+      />
     </div>
   );
 }

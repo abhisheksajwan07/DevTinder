@@ -5,7 +5,9 @@ import ChatHeader from "../components/chat/ChatHeader";
 import ChatMessagesList from "../components/chat/ChatMessagesList";
 import ChatComposer from "../components/chat/ChatComposer";
 import ChatEmptyState from "../components/chat/ChatEmptyState";
-import ProfilePanel, { type ChatParticipantInfo } from "../components/chat/ProfilePanel";
+import ProfilePanel, {
+  type ChatParticipantInfo,
+} from "../components/chat/ProfilePanel";
 import { useConversations, useConversationMessages } from "../hooks/chat.hooks";
 import { useAuthStore } from "../stores/auth.store";
 import { useChatSocket } from "../hooks/useChatSocket";
@@ -17,30 +19,22 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  
   const authUser = useAuthStore((state) => state.user);
   const { data: myProfile } = useMyProfile();
   // Prefer the live profile returned by the backend over a possibly stale
   // persisted auth-store value. Message alignment depends on this ID.
   const myProfileId = myProfile?.id ?? authUser?.profileId;
 
+  const { data: conversations = [], isLoading: isConversationsLoading } =
+    useConversations();
 
-  const {
-    data: conversations = [],
-    isLoading: isConversationsLoading,
-  } = useConversations();
+  const { data: serverMessages = [], isLoading: isMessagesLoading } =
+    useConversationMessages(conversationId);
 
-  const {
-    data: serverMessages = [],
-    isLoading: isMessagesLoading,
-  } = useConversationMessages(conversationId);
-
- 
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
   const [showProfilePanel, setShowProfilePanel] = useState(false);
 
-  
   const { isOtherUserTyping, handleSendMessage, handleInputChange } =
     useChatSocket({
       conversationId,
@@ -49,11 +43,10 @@ export default function ChatPage() {
       setInputText,
     });
 
- 
   const activeConversation: ConversationListItem | null =
     conversations.find((c) => c.conversationId === conversationId) ?? null;
 
-  // 
+  //
   const filteredConversations = conversations.filter((c) => {
     const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
     const query = searchQuery.toLowerCase();
@@ -63,7 +56,6 @@ export default function ChatPage() {
       (c.lastMessage?.content?.toLowerCase().includes(query) ?? false)
     );
   });
- 
 
   // Scroll to bottom helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -72,9 +64,13 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom(serverMessages.length === 0 ? "auto" : "smooth");
-  }, [serverMessages.length, isOtherUserTyping, conversationId, scrollToBottom]);
+  }, [
+    serverMessages.length,
+    isOtherUserTyping,
+    conversationId,
+    scrollToBottom,
+  ]);
 
-  
   const participantInfo: ChatParticipantInfo | null = activeConversation
     ? {
         profileId: activeConversation.otherProfileId,
@@ -87,7 +83,7 @@ export default function ChatPage() {
     : null;
 
   return (
-    <div className="flex h-[calc(100dvh-56px-64px)] lg:h-screen overflow-hidden bg-[#f7f5f2]">
+    <div className="relative flex h-[calc(100dvh-56px-64px)] min-w-0 overflow-hidden bg-[#f7f5f2] lg:h-screen">
       {/* -- 1. Left Sidebar: Conversations List─ */}
       <ConversationList
         conversations={filteredConversations}
@@ -103,7 +99,7 @@ export default function ChatPage() {
       {conversationId && activeConversation ? (
         <main
           className={`
-            ${conversationId ? "flex" : "hidden"} 
+            ${conversationId ? "flex" : "hidden"}
             lg:flex flex-col flex-1 min-w-0 bg-[#f7f5f2] relative
           `}
         >

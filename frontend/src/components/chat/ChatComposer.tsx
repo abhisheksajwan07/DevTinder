@@ -12,7 +12,7 @@ export default function ChatComposer({
   handleSend,
 }: ChatComposerProps) {
   return (
-    <div className="shrink-0 border-t border-[#e9e5df] bg-white px-4 lg:px-6 py-4">
+    <div className="shrink-0 border-t border-[#e9e5df] bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:px-6 lg:py-4">
       <div className="flex items-end gap-3">
         <div className="flex-1 rounded-2xl border border-[#e2ded6] bg-[#f7f5f2] px-4 py-3 transition focus-within:border-orange-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-500/20">
           <textarea
@@ -26,7 +26,7 @@ export default function ChatComposer({
             }}
             placeholder="Type a message..."
             rows={1}
-            className="w-full bg-transparent text-sm text-[#242322] outline-none resize-none placeholder:text-[#88827c]"
+            className="max-h-32 w-full resize-none overflow-y-auto bg-transparent text-sm text-[#242322] outline-none placeholder:text-[#88827c]"
           />
         </div>
         <button

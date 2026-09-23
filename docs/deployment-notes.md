@@ -74,7 +74,7 @@ Windows doesn't use POSIX file permissions. `icacls` must be used to restrict ac
 
 After first deployment, the API failed to connect to PostgreSQL — password mismatch.
 
-![Database password mismatch](assets/images/Pasted%20image%2020260917195954.png)
+![Database password mismatch](assets/images/db-password-mismatch.png)
 
 ### Cause
 
@@ -123,7 +123,7 @@ Always run the seed file as part of the initial deployment. Don't rely on rememb
 
 Revoking the active session invalidated the session on the server, but the frontend remained visible with the authenticated app shell. The browser retained stale HttpOnly cookies.
 
-![Stale authenticated app shell after session revocation](assets/images/Screenshot%202026-09-18%20073658.png)
+![Stale authenticated app shell after session revocation](assets/images/stale-session-revocation.png)
 
 ### Cause
 
@@ -156,7 +156,7 @@ Revoke session
 
 `GET /v1/onboarding/me` returned `429 Too Many Requests` during normal page loading. TanStack Query also retried `429` responses, making it worse.
 
-![Onboarding rate limit response](assets/images/Screenshot%202026-09-17%20225040.png)
+![Onboarding rate limit response](assets/images/onboarding-rate-limit.png)
 
 ### Cause
 
@@ -169,7 +169,7 @@ Several unrelated read routes shared one production Redis rate-limit bucket:
 
 The original production limit was 5 requests per 15 minutes for the shared bucket. A request to one route consumed capacity for another.
 
-![Shared rate-limit bucket](assets/images/Screenshot%202026-09-17%20225135.png)
+![Shared rate-limit bucket](assets/images/shared-rate-limit-bucket.png)
 
 ### Fix
 
@@ -197,7 +197,7 @@ The profile query uses the shared key `['profile', 'me']` in `AppShell` and `Pro
 
 Production logs contained large one-line request/response dumps including headers, cookies, and access tokens — hard to read and a security risk.
 
-![Sensitive production logs](assets/images/Screenshot%202026-09-17%20225354.png)
+![Sensitive production logs](assets/images/sensitive-production-logs.png)
 
 ### Cause
 
@@ -259,7 +259,7 @@ The health endpoint is a separate infrastructure endpoint, not part of the versi
 
 After deployment, the feed API returned `503 FEED_NOT_READY`.
 
-![Feed not ready response](assets/images/Pasted%20image%2020260918175424.png)
+![Feed not ready response](assets/images/feed-not-ready-503.png)
 
 ### Cause
 
@@ -318,7 +318,7 @@ local changes would be overwritten
 
 The VPS was also discovered to be 12 commits behind `origin/main` after the `ci-cd` branch was finally merged.
 
-![VPS behind origin main](assets/images/Pasted%20image%2020260921132208.png)
+![VPS behind origin main](assets/images/vps-behind-origin-main.png)
 
 ### Cause
 
@@ -338,7 +338,7 @@ Check how far behind the VPS is before pulling:
 git log HEAD..origin/main --oneline
 ```
 
-![Commits missing from the VPS](assets/images/Pasted%20image%2020260921151420.png)
+![Commits missing from the VPS](assets/images/vps-missing-commits-log.png)
 
 ### Lesson
 
@@ -696,7 +696,7 @@ Docker Compose set a 128 MB container memory limit. Redis was using ~91% of it. 
 
 `docker system df` showed many unused images and build cache consuming several GB.
 
-![Docker disk usage](assets/images/Pasted%20image%2020260919224046.png)
+![Docker disk usage](assets/images/docker-system-df-usage.png)
 
 ### Cause
 
@@ -709,7 +709,7 @@ docker builder prune    # build cache only
 docker image prune      # dangling images only
 ```
 
-![Docker cleanup](assets/images/Pasted%20image%2020260919224416.png)
+![Docker cleanup](assets/images/docker-builder-prune.png)
 
 ---
 

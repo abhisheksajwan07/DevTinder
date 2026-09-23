@@ -17,7 +17,7 @@ export default function LandingNav() {
       gsap.fromTo(
         navRef.current,
         { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
       );
 
       // Scroll progress bar indicator
@@ -34,7 +34,7 @@ export default function LandingNav() {
         });
       }
     },
-    { scope: navRef }
+    { scope: navRef },
   );
 
   return (
@@ -48,7 +48,7 @@ export default function LandingNav() {
         className="h-0.5 w-full origin-left bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 scale-x-0"
       />
 
-      <nav className="mx-auto flex h-[62px] max-w-[1240px] items-center justify-between px-6 lg:px-0">
+      <nav className="mx-auto flex h-[62px] max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-0">
         <a
           href="#top"
           className="group flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-base font-bold tracking-tight text-[#242322] transition hover:border-orange-200 hover:bg-orange-50/50"
@@ -64,22 +64,13 @@ export default function LandingNav() {
         </a>
 
         <div className="hidden items-center gap-8 text-xs font-medium text-[#77736e] md:flex">
-          <a
-            className="transition hover:text-orange-600"
-            href="#features"
-          >
+          <a className="transition hover:text-orange-600" href="#features">
             Features
           </a>
-          <a
-            className="transition hover:text-orange-600"
-            href="#matching"
-          >
+          <a className="transition hover:text-orange-600" href="#matching">
             AI Matching
           </a>
-          <a
-            className="transition hover:text-orange-600"
-            href="#demo"
-          >
+          <a className="transition hover:text-orange-600" href="#demo">
             Get Started
           </a>
           <a
@@ -101,7 +92,7 @@ export default function LandingNav() {
             Sign In
           </Link>
           <Link
-            className="inline-flex items-center gap-2 rounded-full bg-[#24292f] px-4 py-2.5 font-semibold text-white shadow-sm shadow-black/20 transition hover:bg-[#1a1e22] hover:shadow-md hover:shadow-black/25 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-full bg-[#24292f] px-3.5 py-2.5 font-semibold text-white shadow-sm shadow-black/20 transition hover:bg-[#1a1e22] hover:shadow-md hover:shadow-black/25 active:scale-95 sm:px-4"
             to="/signup"
             style={{ color: "#ffffff" }}
           >

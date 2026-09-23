@@ -1,10 +1,15 @@
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { signInSchema, type SignInFormValues } from "../../schemas/auth.schema";
 import { type SignInCredentials, useSignIn } from "../../services/auth.api";
+import {
+  UnverifiedAccountDialog,
+  UnverifiedAccountBanner,
+} from "./UnverifiedAccountDialog";
 
 interface SignInFormProps {
   onSwitchToSignUp: () => void;
@@ -15,6 +20,8 @@ export default function SignInForm({
   onSwitchToSignUp,
   onSocialAuth,
 }: SignInFormProps) {
+  const [showUnverifiedModal, setShowUnverifiedModal] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -49,6 +56,12 @@ export default function SignInForm({
     (errorStatus === 403 &&
       typeof errorData?.message === "string" &&
       errorData.message.toLowerCase().includes("verify"));
+
+  useEffect(() => {
+    if (isUnverified) {
+      setShowUnverifiedModal(true);
+    }
+  }, [isUnverified]);
 
   return (
     <div className="mx-auto my-auto w-full max-w-md py-4 sm:py-6">
@@ -171,30 +184,19 @@ export default function SignInForm({
 
         {signInMutation.isError &&
           (isUnverified ? (
-            <div className="mt-3 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left">
-              <p className="text-xs font-semibold text-amber-900">
-                Your email address is not verified yet.
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                Please enter the verification code to activate your account.
-              </p>
-              <button
-                type="button"
-                onClick={() =>
-                  navigate("/verify-email", { state: { email: emailValue } })
-                }
-                className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 hover:underline cursor-pointer"
-              >
-                <span>Verify email now</span>
-                <ArrowRight className="size-3.5" />
-              </button>
-            </div>
+            <UnverifiedAccountBanner
+              email={emailValue}
+              onOpenDialog={() => setShowUnverifiedModal(true)}
+            />
           ) : (
-            <p className="text-sm text-red-600 text-center mt-2">
-              {errorStatus && errorStatus < 500
-                ? errorData?.message
-                : "Unable to sign in right now. Please try again later."}
-            </p>
+            <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-red-50 border border-red-200 p-3.5 text-xs text-red-700 text-left">
+              <AlertCircle className="size-4 shrink-0 text-red-500" />
+              <p>
+                {errorStatus && errorStatus < 500
+                  ? errorData?.message
+                  : "Unable to sign in right now. Please try again later."}
+              </p>
+            </div>
           ))}
       </form>
 
@@ -204,12 +206,18 @@ export default function SignInForm({
           <button
             type="button"
             onClick={onSwitchToSignUp}
-            className="font-semibold text-orange-600 hover:underline"
+            className="font-semibold text-orange-600 hover:underline cursor-pointer"
           >
             Create one for free &rarr;
           </button>
         </p>
       </div>
+
+      <UnverifiedAccountDialog
+        isOpen={isUnverified && showUnverifiedModal}
+        onClose={() => setShowUnverifiedModal(false)}
+        email={emailValue}
+      />
     </div>
   );
 }

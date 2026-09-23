@@ -145,19 +145,19 @@ export default function OnboardingPage() {
     <div className="grid min-h-screen w-full grid-cols-1 bg-[#121212] lg:h-screen lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <AuthShowcase />
       <div className="flex min-h-screen min-w-0 flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-5 text-[#242322] sm:p-8 lg:h-screen lg:min-h-0 lg:p-10 xl:p-12">
-        <div className="flex items-center justify-between border-b border-[#e4dfd6] pb-4 shrink-0">
+        <div className="flex flex-col items-start gap-2 border-b border-[#e4dfd6] pb-4 shrink-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <div className="size-3 animate-pulse rounded-full bg-orange-500" />
             <span className="font-mono text-xs font-bold uppercase tracking-wider">
               DevTinder Onboarding
             </span>
           </div>
-          <span className="font-mono text-[11px] text-[#77736e]">
+          <span className="font-mono text-[11px] text-[#77736e] sm:text-right">
             Step {step} of {TOTAL_STEPS} • Profile setup
           </span>
         </div>
         <div className="mx-auto my-auto w-full max-w-lg py-6">
-          <div className="rounded-[28px] border border-[#e9e5df] bg-white p-6 shadow-xs sm:p-8">
+          <div className="rounded-[28px] border border-[#e9e5df] bg-white p-4 shadow-xs sm:p-8">
             <ProgressBar step={step} totalSteps={TOTAL_STEPS} />
             <FormProvider {...form}>
               <div className="mt-6">
@@ -177,12 +177,12 @@ export default function OnboardingPage() {
                 )}
               </div>
             </FormProvider>
-            <div className="mt-8 flex items-center justify-between gap-3">
+            <div className="mt-8 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={() => setStep((current) => current - 1)}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-[#e2ded6] bg-white px-5 py-3 text-sm font-semibold text-[#55504b]"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#e2ded6] bg-white px-5 py-3 text-sm font-semibold text-[#55504b] sm:w-auto"
                 >
                   <ArrowLeft className="size-4" />
                   Back
@@ -194,7 +194,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={next}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[#1a1918] px-6 py-3 text-sm font-bold text-white hover:bg-orange-600"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1a1918] px-6 py-3 text-sm font-bold text-white hover:bg-orange-600 sm:w-auto"
                 >
                   Continue
                   <ArrowRight className="size-4" />
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={complete}
                   disabled={createProfile.isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-[#ee7100] px-6 py-3 text-sm font-bold text-white shadow-md disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#ee7100] px-6 py-3 text-sm font-bold text-white shadow-md disabled:opacity-50 sm:w-auto"
                 >
                   <Sparkles className="size-4" />
                   {createProfile.isPending
