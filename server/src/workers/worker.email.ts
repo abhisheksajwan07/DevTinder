@@ -10,7 +10,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 const getOtpTemplate = (otp: string) => `
   <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; max-width: 500px; border-radius: 10px;">
-    <h2 style="color: #E94057;">Welcome to DevTinder! 🔥</h2>
+    <h2 style="color: #E94057;">Welcome to DevTinder! </h2>
     <p>Please use the following One-Time Password (OTP) to complete your verification process. This code is valid for 10 minutes.</p>
     <div style="background: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #333;">
       ${otp}

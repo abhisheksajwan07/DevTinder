@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { footerSections } from "./landing-data";
 import { Github, ArrowUp, Sparkles } from "lucide-react";
+import BrandLogo from "../BrandLogo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,18 +45,7 @@ export default function FooterSection() {
           {/* Brand Info */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2.5">
-                <div className="grid size-9 place-items-center rounded-xl bg-orange-500 text-white shadow-sm shadow-orange-500/30">
-                  <img
-                    src="/dev-tinder.svg"
-                    alt="DevTinder logo"
-                    className="size-5"
-                  />
-                </div>
-                <span className="text-xl font-bold tracking-tight text-[#242322]">
-                  DevTinder
-                </span>
-              </div>
+              <BrandLogo textClassName="text-2xl font-bold text-[#242322]" />
               <p className="mt-4 max-w-sm text-xs leading-relaxed text-[#77736e]">
                 Match with developers who build like you. Powered by Voyage AI
                 vector embeddings, pgvector cosine similarity, and real-time

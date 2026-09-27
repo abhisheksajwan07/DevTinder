@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import BrandLogo from "../BrandLogo";
 
 interface AuthShowcaseProps {
   className?: string;
@@ -14,12 +15,8 @@ export default function AuthShowcase({ className = "" }: AuthShowcaseProps) {
 
       <div className="auth-showcase-content relative z-10 grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]">
         {/* Logo */}
-        <Link to="/" className="inline-flex w-fit items-center gap-2.5">
-          <img src="/dev-tinder.svg" alt="DevTinder logo" className="size-6" />
-
-          <span className="text-xl font-bold tracking-tight">
-            Dev<span className="text-orange-500">Tinder</span>
-          </span>
+        <Link to="/" aria-label="DevTinder home" className="inline-flex w-fit">
+          <BrandLogo textClassName="text-2xl font-bold text-white" />
         </Link>
 
         {/* Showcase */}

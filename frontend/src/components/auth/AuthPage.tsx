@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AuthShowcase from "./AuthShowcase";
+import BrandLogo from "../BrandLogo";
 import AuthToggle, { AuthMode } from "./AuthToggle";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
@@ -27,6 +28,7 @@ export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
 
       {/* RIGHT COLUMN: Light Cream Auth Section */}
       <div className="flex min-h-screen min-w-0 flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-5 text-[#242322] sm:p-8 lg:h-screen lg:min-h-0 lg:p-10 xl:p-12">
+        <BrandLogo className="mb-4 lg:hidden" textClassName="text-xl font-bold text-[#242322]" />
         {/* Top Header with Step Indicator */}
         <div className="flex min-w-0 flex-col justify-between gap-3 border-b border-[#e4dfd6] pb-4 sm:flex-row sm:items-center">
           {mode === "signup" ? (
@@ -64,7 +66,8 @@ export default function AuthPage({ initialMode = "signin" }: AuthPageProps) {
 
         {/* Footer info */}
         <div className="text-center font-mono text-[10px] text-[#9c958e] shrink-0">
-          DevTinder &bull; Voyage AI Matcher Enabled
+          Dev<span className="text-orange-500">Tinder</span> &bull; Voyage AI
+          Matcher Enabled
         </div>
       </div>
     </div>

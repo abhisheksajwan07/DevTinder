@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, LoaderCircle, Sparkles } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import AuthShowcase from "../components/auth/AuthShowcase";
+import BrandLogo from "../components/BrandLogo";
 import ProgressBar from "../components/onboarding/ProgressBar";
 import Step1BasicProfile from "../components/onboarding/Step1BasicProfile";
 import Step2DeveloperIdentity from "../components/onboarding/Step2DeveloperIdentity";
@@ -146,10 +147,10 @@ export default function OnboardingPage() {
       <AuthShowcase />
       <div className="flex min-h-screen min-w-0 flex-col justify-between overflow-y-auto bg-[#f5f2eb] p-5 text-[#242322] sm:p-8 lg:h-screen lg:min-h-0 lg:p-10 xl:p-12">
         <div className="flex flex-col items-start gap-2 border-b border-[#e4dfd6] pb-4 shrink-0 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <div className="size-3 animate-pulse rounded-full bg-orange-500" />
-            <span className="font-mono text-xs font-bold uppercase tracking-wider">
-              DevTinder Onboarding
+          <div className="flex items-center gap-2.5">
+            <BrandLogo textClassName="text-base font-bold text-[#242322]" />
+            <span className="border-l border-[#e4dfd6] pl-2 font-mono text-[10px] font-bold uppercase tracking-wider text-[#77736e]">
+              Onboarding
             </span>
           </div>
           <span className="font-mono text-[11px] text-[#77736e] sm:text-right">
@@ -226,7 +227,8 @@ export default function OnboardingPage() {
           </div>
         </div>
         <p className="pt-4 text-center font-mono text-[10px] text-[#9c958e] shrink-0">
-          DevTinder • Voyage AI Matcher • Your data is always under your control
+          Dev<span className="text-orange-500">Tinder</span> • Voyage AI Matcher
+          • Your data is always under your control
         </p>
       </div>
     </div>

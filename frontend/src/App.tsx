@@ -58,8 +58,8 @@ function App() {
     if (user) {
       useAuthStore.getState().setUser(user);
     }
-  
-    // revoked session is an errro reported by /auth/me, clear state of the client so that 
+
+    // revoked session is an errro reported by /auth/me, clear state of the client so that
     // protected shell can't remain visible with dead sesison
     if (isError) {
       useAuthStore.getState().clear();
@@ -71,19 +71,13 @@ function App() {
         <div className="pointer-events-none absolute inset-0 bg-grid-dots opacity-60 [mask-image:radial-gradient(circle_at_center,black_20%,transparent_80%)]" />
 
         <div className="relative flex flex-col items-center gap-5 rounded-[30px] border border-[#f1e9e3] bg-white/80 px-8 py-8 shadow-[0_24px_80px_rgba(38,24,14,0.08)] backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#ee7100] shadow-lg shadow-orange-200">
-              <img src="/dev-tinder.svg" alt="DevTinder" className="h-7 w-7 object-contain" />
-            </div>
-
-            <div className="text-left">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-orange-500">
-                devtinder
-              </p>
-              <h1 className="text-xl font-bold text-[#242322]">
-                Finding your match
-              </h1>
-            </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="text-2xl font-bold tracking-tight text-[#242322]">
+              Dev<span className="text-orange-500">Tinder</span>
+            </span>
+            <h1 className="mt-1 text-sm font-medium text-[#77736e]">
+              Finding your match…
+            </h1>
           </div>
 
           <div className="flex h-10 items-center gap-3 rounded-full border border-orange-100 bg-orange-50/70 px-4 py-2 text-sm text-[#5f514b]">
@@ -115,7 +109,7 @@ function App() {
       <Route element={<OnboardingRoute />}>
         <Route path="/onboarding" element={<OnboardingPage />} />
       </Route>
-     
+
       {/* -- App Routes (authenticated ) -- */}
       <Route element={<ProtectedRoute />}>
         <Route path="/app" element={<AppShell />}>

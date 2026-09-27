@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Github } from "lucide-react";
+import BrandLogo from "../BrandLogo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,16 +52,10 @@ export default function LandingNav() {
       <nav className="mx-auto flex h-[62px] max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-0">
         <a
           href="#top"
-          className="group flex items-center gap-2 rounded-full border border-transparent px-3 py-1.5 text-base font-bold tracking-tight text-[#242322] transition hover:border-orange-200 hover:bg-orange-50/50"
+          aria-label="DevTinder home"
+          className="group inline-flex items-center rounded-full px-2 py-1.5 transition hover:bg-orange-50/50"
         >
-          <div className="grid size-7 place-items-center rounded-lg bg-orange-500 text-white shadow-xs transition-transform group-hover:scale-105">
-            <img
-              src="/dev-tinder.svg"
-              alt="DevTinder logo"
-              className="size-4"
-            />
-          </div>
-          <span>DevTinder</span>
+          <BrandLogo textClassName="text-xl font-bold tracking-tight text-[#242322]" />
         </a>
 
         <div className="hidden items-center gap-8 text-xs font-medium text-[#77736e] md:flex">

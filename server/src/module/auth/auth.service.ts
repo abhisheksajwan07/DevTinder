@@ -54,7 +54,7 @@ export class AuthService {
         email,
         otp,
       },
-      { jobId: `send-welcome-otp-${email}` },
+      { jobId: `send-welcome-otp-${email}-${crypto.randomUUID()}` },
     );
   }
 
@@ -185,17 +185,6 @@ export class AuthService {
 
   async resendVerificationOtp(email: string) {
     const cooldownKey = `otp_resend_cooldown:${email}`;
-
-    const isCoolingDown = await redis.exists(cooldownKey);
-
-    if (isCoolingDown) {
-      throw new AppError(
-        "Please  wait 60s before requesting another OTP.",
-        429,
-        "OTP_RESEND_RATE_LIMITED",
-      );
-    }
-
     const user = await this.authRepository.findUserByEmail(email);
 
     if (!user) {
@@ -210,11 +199,22 @@ export class AuthService {
       );
     }
 
-    await this.sendVerificationOtp(email);
+    const cooldownReserved = await redis.set(cooldownKey, "1", "EX", 60, "NX");
 
-    await redis.set(cooldownKey, "1", "EX", 60);
+    if (cooldownReserved !== "OK") {
+      throw new AppError(
+        "Please wait 60s before requesting another OTP.",
+        429,
+        "OTP_RESEND_RATE_LIMITED",
+      );
+    }
 
-    return;
+    try {
+      await this.sendVerificationOtp(email);
+    } catch (error) {
+      await redis.del(cooldownKey);
+      throw error;
+    }
   }
 
   async login(
@@ -279,7 +279,7 @@ export class AuthService {
     if (isCoolingDown) {
       throw new AppError("Please wait 5 minutes before requesting again.", 429);
     }
-    
+
     const user = await this.authRepository.findUserByEmail(email);
 
     if (!user) {

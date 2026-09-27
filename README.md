@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/abhisheksajwan07/DevTinder/actions/workflows/ci.yml/badge.svg)](https://github.com/abhisheksajwan07/DevTinder/actions/workflows/ci.yml)
 
+<p align="center">
+  <img src="docs/assets/images/DevTinder.png" alt="DevTinder Preview" width="100%" />
+</p>
+
 DevTinder is a full-stack networking application for developers. It combines a swipe-style discovery experience with developer profiles, optional GitHub data, semantic recommendations, connection requests, and private real-time conversations.
 
 ## Highlights
