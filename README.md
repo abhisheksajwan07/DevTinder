@@ -9,7 +9,7 @@ DevTinder is a full-stack networking application for developers. It combines a s
 - Guided onboarding captures role, experience, availability, skills, interests, collaboration goals, avatar, and an optional GitHub connection.
 - A personalized feed uses stored profile embeddings to rank completed profiles by similarity and excludes profiles either participant has already acted on.
 - Connection requests can be accepted or rejected. Acceptance is processed asynchronously into a match and private conversation.
-- Real-time messaging includes presence, typing indicators, read receipts, persisted history, and membership checks.
+- Real-time messaging includes presence, typing indicators, read receipts, keyset cursor pagination for message history, offline email notifications, and membership checks.
 - Authentication supports email/password plus Google and GitHub OAuth, with email verification, password reset, session management, and selective or global session revocation.
 - GitHub profile and repository data can be synchronized in the background; users can feature up to three repositories.
 
@@ -77,7 +77,7 @@ flowchart LR
     Q --> VW[Embedding worker]
     Q --> MW[Matching worker]
 
-    EW --> RS[Resend<br/>verification OTP + password reset]
+    EW --> RS[Resend<br/>verification OTP · password reset<br/>offline message alert]
     GW --> GA[GitHub API]
     GW --> PG[(PostgreSQL)]
     GW --> VW
@@ -89,7 +89,7 @@ flowchart LR
 
 - **Embeddings:** onboarding/profile changes enqueue a job. The worker builds a profile corpus, requests a 1,024-dimensional Voyage embedding, and stores it in pgvector. An embedding version check prevents an older job from replacing newer profile data.
 - **GitHub sync:** the worker fetches the GitHub profile and repositories, stores the result, then queues a fresh embedding. Manual sync has a Redis per-profile cooldown to prevent duplicate external calls.
-- **Email:** verification OTP and password-reset delivery run through Resend. Reset jobs carry an idempotency key so retries represent the same send attempt.
+- **Email:** verification OTP, password-reset delivery, and offline chat message alerts run through Resend. Offline alerts check recipient presence in Redis and use a deduplicated job ID to prevent notification spam. Reset jobs carry an idempotency key so retries represent the same send attempt.
 - **Matching:** accepting a pending connection queues match and conversation creation, with exponential retry configuration on the queue.
 
 ### Production and CI/CD Architecture
@@ -168,6 +168,7 @@ sequenceDiagram
     participant S as Socket.IO / API
     participant R as Redis
     participant P as PostgreSQL
+    participant Q as BullMQ
     C->>N: Socket.IO connection with access cookie
     N->>S: WebSocket upgrade
     S->>P: Validate session and resolve profile
@@ -176,10 +177,14 @@ sequenceDiagram
     S->>P: Verify conversation membership
     C->>S: Send message / read / typing
     S->>P: Persist message or read state
-    S-->>C: Emit room and participant updates
+    S-->>C: Emit to conversation room & recipient profile
+    S->>R: Check recipient online status
+    opt Recipient is offline
+        S->>Q: Enqueue deduplicated email alert
+    end
 ```
 
-Each socket authenticates from the access-token cookie. A client must pass membership validation before it can join a conversation; send, read, and typing events require that joined room. Redis tracks multiple socket IDs per profile so presence remains accurate across tabs.
+Each socket authenticates from the access-token cookie. A client must pass membership validation before it can join a conversation; send, read, and typing events require that joined room. Redis tracks multiple socket IDs per profile so presence remains accurate across tabs. When a new message arrives for an offline participant, the socket handler triggers a background BullMQ job to notify the recipient via email without blocking the socket acknowledgment.
 
 ## Core Engineering Decisions
 
@@ -195,9 +200,13 @@ Jobs handle email, GitHub synchronization, embeddings, and match/conversation cr
 
 The project layers cookie-based access control, hashed and rotating refresh tokens, revocation blocklists, CSRF checks, CORS origin allowlisting, Helmet, rate limits, account lockout, and encrypted OAuth token storage. The same session validity is checked when a Socket.IO connection is established.
 
-### Chat authorization is not just a UI concern
+### Chat authorization and resilient delivery
 
-Conversation access is verified in the API and again when joining a socket room. Messages are persisted before broadcast; participants not currently in the conversation room still receive a profile-room event so their global conversation list can update unread state.
+Conversation access is verified in the API and again when joining a socket room. Messages are persisted before broadcast; participants not currently in the active conversation room still receive a targeted profile-room event so their global conversation list can update unread counters, while avoiding redundant emissions to the sender. When a message is sent to an offline recipient, an out-of-band notification job is enqueued in BullMQ with a stable job ID (`notify-{profileId}`) to prevent email flooding while keeping socket acknowledgments sub-millisecond.
+
+### Keyset cursor pagination and scroll stabilization
+
+Both conversation lists and message histories use keyset cursor pagination (`cursor`, `limit`) backed by composite indexes rather than offset-based queries, preventing performance degradation on high-volume conversations. The React client pairs `useInfiniteQuery` with a top-sentinel `IntersectionObserver` and scroll-height delta compensation, prepending older message chunks without layout shifts or viewport jumpiness.
 
 ## Tech Stack
 

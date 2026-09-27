@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { socket } from "../services/socket";
-import type { ChatMessage, ConversationListItem } from "../types/chat";
+import type {
+  ChatMessage,
+  ConversationListItem,
+  PaginatedConversations,
+  PaginatedMessages,
+} from "../types/chat";
 
 interface UseChatSocketOptions {
   conversationId?: string;
@@ -19,7 +24,9 @@ export function useChatSocket({
   const queryClient = useQueryClient();
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
 
-  const otherUserTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const otherUserTypingTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const myTypingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isEmittingTypingRef = useRef(false);
 
@@ -37,31 +44,59 @@ export function useChatSocket({
             return;
           }
           socket.emit("message:read", { conversationId });
-        }
+        },
       );
 
       // reset unread count after attempt to join
-      queryClient.setQueryData<ConversationListItem[]>(
+      queryClient.setQueryData<InfiniteData<PaginatedConversations>>(
         ["user", "conversations"],
         (old) => {
           if (!old) return old;
-          return old.map((c) =>
-            c.conversationId === conversationId ? { ...c, unreadCount: 0 } : c
-          );
-        }
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((c) =>
+                c.conversationId === conversationId
+                  ? { ...c, unreadCount: 0 }
+                  : c,
+              ),
+            })),
+          };
+        },
       );
     }
 
     // Handle new incoming message for the ACTIVE conversation (messages cache)
     const onNewMessage = (newMsg: ChatMessage) => {
       if (newMsg.conversationId === conversationId) {
-        queryClient.setQueryData<ChatMessage[]>(
+        queryClient.setQueryData<InfiniteData<PaginatedMessages>>(
           ["chat", "messages", conversationId],
           (old) => {
-            if (!old) return [newMsg];
-            if (old.some((m) => m.id === newMsg.id)) return old;
-            return [newMsg, ...old];
-          }
+            if (!old) {
+              return {
+                pages: [{ messages: [newMsg], nextCursor: null }],
+                pageParams: [undefined],
+              };
+            }
+
+            if (
+              old.pages.some((page) =>
+                page.messages.some((message) => message.id === newMsg.id),
+              )
+            ) {
+              return old;
+            }
+
+            return {
+              ...old,
+              pages: old.pages.map((page, index) =>
+                index === 0
+                  ? { ...page, messages: [newMsg, ...page.messages] }
+                  : page,
+              ),
+            };
+          },
         );
 
         // If we received a message from someone else, immediately mark as read
@@ -73,8 +108,14 @@ export function useChatSocket({
     };
 
     // Handle typing start
-    const onTypingStart = (data: { conversationId: string; profileId: string }) => {
-      if (data.conversationId === conversationId && data.profileId !== myProfileId) {
+    const onTypingStart = (data: {
+      conversationId: string;
+      profileId: string;
+    }) => {
+      if (
+        data.conversationId === conversationId &&
+        data.profileId !== myProfileId
+      ) {
         setIsOtherUserTyping(true);
         if (otherUserTypingTimeoutRef.current) {
           clearTimeout(otherUserTypingTimeoutRef.current);
@@ -86,8 +127,14 @@ export function useChatSocket({
     };
 
     // Handle typing stop
-    const onTypingStop = (data: { conversationId: string; profileId: string }) => {
-      if (data.conversationId === conversationId && data.profileId !== myProfileId) {
+    const onTypingStop = (data: {
+      conversationId: string;
+      profileId: string;
+    }) => {
+      if (
+        data.conversationId === conversationId &&
+        data.profileId !== myProfileId
+      ) {
         setIsOtherUserTyping(false);
         if (otherUserTypingTimeoutRef.current) {
           clearTimeout(otherUserTypingTimeoutRef.current);
@@ -98,13 +145,21 @@ export function useChatSocket({
     // Handle read receipt
     const onMessageRead = (data: { conversationId: string }) => {
       if (data.conversationId === conversationId) {
-        queryClient.setQueryData<ChatMessage[]>(
+        queryClient.setQueryData<InfiniteData<PaginatedMessages>>(
           ["chat", "messages", conversationId],
           (old) => {
             if (!old) return old;
             const now = new Date().toISOString();
-            return old.map((m) => (m.readAt ? m : { ...m, readAt: now }));
-          }
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                messages: page.messages.map((message) =>
+                  message.readAt ? message : { ...message, readAt: now },
+                ),
+              })),
+            };
+          },
         );
       }
     };
@@ -152,12 +207,89 @@ export function useChatSocket({
       (ack: { success: boolean; data?: ChatMessage; message?: string }) => {
         if (!ack?.success) {
           console.error("Failed to send message:", ack?.message);
+          return;
         }
-      }
+
+        const confirmed = ack.data;
+        if (!confirmed) return;
+
+       
+        queryClient.setQueryData<InfiniteData<PaginatedMessages>>(
+          ["chat", "messages", conversationId],
+          (old) => {
+            if (!old) return old;
+        
+            const alreadyExists = old.pages.some((p) =>
+              p.messages.some((m) => m.id === confirmed.id),
+            );
+            if (alreadyExists) return old;
+        
+            return {
+              ...old,
+              pages: old.pages.map((page, i) =>
+                i === 0
+                  ? { ...page, messages: [confirmed, ...page.messages] }
+                  : page,
+              ),
+            };
+          },
+        );
+
+        
+        queryClient.setQueryData<InfiniteData<PaginatedConversations>>(
+          ["user", "conversations"],
+          (old) => {
+            if (!old) return old;
+
+            // Find the target across pages
+            let target: ConversationListItem | undefined;
+            for (const page of old.pages) {
+              target = page.items.find(
+                (c) => c.conversationId === conversationId,
+              );
+              if (target) break;
+            }
+            if (!target) return old;
+      
+            if (target.lastMessage?.messageId === confirmed.id) return old;
+
+            const updated: ConversationListItem = {
+              ...target,
+              lastMessageAt: confirmed.createdAt,
+              lastMessage: {
+                messageId: confirmed.id,
+                senderProfileId: confirmed.senderProfileId,
+                type: confirmed.type,
+                content: confirmed.content,
+                createdAt: confirmed.createdAt,
+              },
+              unreadCount: 0, 
+            };
+
+            
+            const newPages = old.pages.map((page, pageIdx) => ({
+              ...page,
+              items:
+                pageIdx === 0
+                  ? [
+                      updated,
+                      ...page.items.filter(
+                        (c) => c.conversationId !== conversationId,
+                      ),
+                    ]
+                  : page.items.filter(
+                      (c) => c.conversationId !== conversationId,
+                    ),
+            }));
+
+            return { ...old, pages: newPages };
+          },
+        );
+      },
     );
 
     setInputText("");
-  }, [conversationId, inputText, setInputText]);
+  }, [conversationId, inputText, setInputText, queryClient]);
 
   // ── 3. Input Change with Typing Debounce ─────────────────────
   const handleInputChange = useCallback(
@@ -178,7 +310,7 @@ export function useChatSocket({
         isEmittingTypingRef.current = false;
       }, 1500);
     },
-    [conversationId, setInputText]
+    [conversationId, setInputText],
   );
 
   return {

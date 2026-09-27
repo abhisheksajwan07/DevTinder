@@ -48,6 +48,28 @@ export type ConversationListItem = {
   unreadCount: number;
 };
 
+
+export type ConversationCursor = {
+  lastMessageAt: string | null; 
+  createdAt: string;            
+};
+
+export type PaginatedConversations = {
+  items: ConversationListItem[];
+  nextCursor: string | null; 
+};
+
+
+export type MessageCursor = {
+  createdAt: string; 
+  messageId: string; 
+};
+
+export type PaginatedMessages = {
+  messages: Message[];
+  nextCursor: string | null; 
+};
+
 export interface IChatRepository {
   createMessage(input: CreateMessageInput): Promise<Message>;
 
@@ -58,12 +80,15 @@ export interface IChatRepository {
 
   getConversationMessages(
     conversationId: string,
+    cursor?: string,
     limit?: number,
-  ): Promise<Message[]>;
+  ): Promise<PaginatedMessages>;
 
   getUserConversations(
     profileId: string,
-  ): Promise<ConversationListItem[] | undefined>;
+    cursor?: string,
+    limit?: number,
+  ): Promise<PaginatedConversations | undefined>;
 
   markMessagesAsRead(
     conversationId: string,
@@ -73,4 +98,8 @@ export interface IChatRepository {
   getConversationMembersProfileIds(profileId: string): Promise<string[]>;
 
   getConversationParticipantProfileIds(conversationId: string): Promise<string[]>;
+
+  getRecipientEmail(
+    profileId: string,
+  ): Promise<{ email: string; firstName: string } | null>;
 }

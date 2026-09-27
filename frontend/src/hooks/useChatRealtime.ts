@@ -1,7 +1,11 @@
 import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { socket } from "../services/socket";
-import type { ChatMessage, ConversationListItem } from "../types/chat";
+import type {
+  ChatMessage,
+  ConversationListItem,
+  PaginatedConversations,
+} from "../types/chat";
 import { toast } from "../components/ui/use-toast";
 
 export function useChatRealtime(
@@ -12,14 +16,19 @@ export function useChatRealtime(
 
   useEffect(() => {
     const onNewMessage = (newMsg: ChatMessage) => {
-      queryClient.setQueryData<ConversationListItem[]>(
+      queryClient.setQueryData<InfiniteData<PaginatedConversations>>(
         ["user", "conversations"],
         (old) => {
           if (!old) return old;
-          // convo that received the new message
-          const target = old.find(
-            (conversation) => conversation.conversationId === newMsg.conversationId,
-          );
+
+          let target: ConversationListItem | undefined;
+          for (const page of old.pages) {
+            target = page.items.find(
+              (c) => c.conversationId === newMsg.conversationId,
+            );
+            if (target) break;
+          }
+
           if (!target) {
             void queryClient.invalidateQueries({
               queryKey: ["user", "conversations"],
@@ -27,8 +36,6 @@ export function useChatRealtime(
             return old;
           }
 
-          // The recipient can receive the same event from both the
-          // conversation room and their private profile room.
           if (target.lastMessage?.messageId === newMsg.id) return old;
 
           const isOwnMessage = newMsg.senderProfileId === myProfileId;
@@ -51,17 +58,29 @@ export function useChatRealtime(
               content: newMsg.content,
               createdAt: newMsg.createdAt,
             },
-            unreadCount:
-              isOwnMessage || isOpen ? 0 : target.unreadCount + 1,
+            unreadCount: isOwnMessage || isOpen ? 0 : target.unreadCount + 1,
           };
-          // place the new message conversation at the top
-          return [
-            updated,
-            ...old.filter(
-              (conversation) =>
-                conversation.conversationId !== newMsg.conversationId,
+
+          // Rebuild pages: move the updated conversation to the top of page 0,
+          // removing it from wherever it currently lives.
+          const newPages = old.pages.map((page, pageIdx) => ({
+            ...page,
+            items: page.items.filter(
+              (c) => c.conversationId !== newMsg.conversationId,
             ),
-          ];
+            ...(pageIdx === 0
+              ? {
+                  items: [
+                    updated,
+                    ...page.items.filter(
+                      (c) => c.conversationId !== newMsg.conversationId,
+                    ),
+                  ],
+                }
+              : {}),
+          }));
+
+          return { ...old, pages: newPages };
         },
       );
     };
@@ -74,22 +93,38 @@ export function useChatRealtime(
       profileId: string;
       isOnline: boolean;
     }) => {
-      // this profileId is user profileId sent from the backend
-      queryClient.setQueryData<ConversationListItem[]>(
+      queryClient.setQueryData<InfiniteData<PaginatedConversations>>(
         ["user", "conversations"],
-        (old) =>
-          old?.map((conversation) =>
-            conversation.otherProfileId === data.profileId
-              ? { ...conversation, isOnline: data.isOnline }
-              : conversation,
-          ),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((c) =>
+                c.otherProfileId === data.profileId
+                  ? { ...c, isOnline: data.isOnline }
+                  : c,
+              ),
+            })),
+          };
+        },
       );
     };
 
     const onSocketDisconnect = () => {
-      queryClient.setQueryData<ConversationListItem[]>(
+      queryClient.setQueryData<InfiniteData<PaginatedConversations>>(
         ["user", "conversations"],
-        (old) => old?.map((conversation) => ({ ...conversation, isOnline: false })),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((c) => ({ ...c, isOnline: false })),
+            })),
+          };
+        },
       );
     };
 

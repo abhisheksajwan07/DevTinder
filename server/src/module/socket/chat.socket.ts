@@ -6,7 +6,10 @@ import {
 } from "../chat/chat.validator.js";
 import { chatService } from "../chat/chat.dependencies.js";
 import { chatRepository } from "../chat/chat.dependencies.js";
-
+import { presenceService } from "../chat/presence/presence.dependencies.js";
+import { emailQueue } from "../../queues/email.queue.js";
+import { notifyOfflineRecipient } from "./notify-offline.js";
+import { logger } from "../../config/logger.js";
 import { AppError } from "../../utils/AppError.js";
 
 export function registerChatEvents(io: Server, socket: Socket) {
@@ -100,11 +103,33 @@ export function registerChatEvents(io: Server, socket: Socket) {
         await chatRepository.getConversationParticipantProfileIds(
           result.data.conversationId,
         );
-      participantProfileIds.forEach((profileId) => {
-        io.to(`profile:${profileId}`).emit("message:new", message);
-      });
+      // Only notify the recipient's profile room.
+      // The sender already has the message via the conversation room emit above
+      // and the ack payload — no need to double-emit to their profile room.
+      participantProfileIds
+        .filter((profileId) => profileId !== socket.data.profileId)
+        .forEach((profileId) => {
+          io.to(`profile:${profileId}`).emit("message:new", message);
+        });
 
       // console.log("EMIT DONE");
+
+      
+      // notify recipient by email, if offline
+      // fire-and-forget, never block socket ack
+      const recipientProfileId = participantProfileIds.find(
+        (id) => id !== socket.data.profileId,
+      );
+      if (recipientProfileId) {
+        notifyOfflineRecipient(
+          recipientProfileId,
+          chatRepository,
+          presenceService,
+          emailQueue,
+        ).catch((err) =>
+          logger.error({ err }, "[Chat] Failed to send offline notification"),
+        );
+      }
 
       return ack({
         success: true,

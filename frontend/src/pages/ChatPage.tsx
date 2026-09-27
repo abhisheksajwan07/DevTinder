@@ -25,11 +25,21 @@ export default function ChatPage() {
   // persisted auth-store value. Message alignment depends on this ID.
   const myProfileId = myProfile?.id ?? authUser?.profileId;
 
-  const { data: conversations = [], isLoading: isConversationsLoading } =
-    useConversations();
+  const {
+    conversations,
+    isLoading: isConversationsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useConversations();
 
-  const { data: serverMessages = [], isLoading: isMessagesLoading } =
-    useConversationMessages(conversationId);
+  const {
+    serverMessages,
+    isLoading: isMessagesLoading,
+    fetchNextPage: fetchOlderMessages,
+    hasNextPage: hasOlderMessages,
+    isFetchingNextPage: isFetchingOlderMessages,
+  } = useConversationMessages(conversationId);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
@@ -44,22 +54,27 @@ export default function ChatPage() {
     });
 
   const activeConversation: ConversationListItem | null =
-    conversations.find((c) => c.conversationId === conversationId) ?? null;
+    conversations.find((c) => c && c.conversationId === conversationId) ?? null;
 
   //
   const filteredConversations = conversations.filter((c) => {
-    const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
+    if (!c) return false;
+    const fullName = `${c.firstName || ""} ${c.lastName || ""}`.toLowerCase();
     const query = searchQuery.toLowerCase();
     return (
       fullName.includes(query) ||
-      c.username.toLowerCase().includes(query) ||
+      (c.username?.toLowerCase().includes(query) ?? false) ||
       (c.lastMessage?.content?.toLowerCase().includes(query) ?? false)
     );
   });
 
   // Scroll to bottom helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
+    messagesEndRef.current?.scrollIntoView({
+      behavior,
+      block: "nearest",
+      inline: "nearest",
+    });
   }, []);
 
   useEffect(() => {
@@ -93,6 +108,9 @@ export default function ChatPage() {
         onSearchChange={setSearchQuery}
         onSelectConversation={(id) => navigate(`/app/chat/${id}`)}
         isMobileChatOpen={Boolean(conversationId)}
+        onLoadMore={fetchNextPage}
+        hasMore={!!hasNextPage}
+        isLoadingMore={isFetchingNextPage}
       />
 
       {/* -- 2. Center: Active Chat Window---- */}
@@ -100,7 +118,7 @@ export default function ChatPage() {
         <main
           className={`
             ${conversationId ? "flex" : "hidden"}
-            lg:flex flex-col flex-1 min-w-0 bg-[#f7f5f2] relative
+            lg:flex flex-col flex-1 min-w-0 overflow-hidden bg-[#f7f5f2] relative
           `}
         >
           {/* Header */}
@@ -119,6 +137,9 @@ export default function ChatPage() {
             activeConversation={activeConversation}
             myProfileId={myProfileId}
             isOtherUserTyping={isOtherUserTyping}
+            onLoadOlder={fetchOlderMessages}
+            hasOlderMessages={!!hasOlderMessages}
+            isLoadingOlder={isFetchingOlderMessages}
           />
 
           {/* Composer */}

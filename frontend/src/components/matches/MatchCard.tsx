@@ -6,7 +6,7 @@ import { useConversations } from "../../hooks/chat.hooks";
 
 export default function MatchCard({ match }: { match: Match }) {
   const navigate = useNavigate();
-  const { data: conversations = [] } = useConversations();
+  const { conversations = [] } = useConversations();
 
   const handleMessageClick = () => {
     const existingConv = conversations.find(

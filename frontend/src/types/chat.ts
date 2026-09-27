@@ -29,3 +29,13 @@ export interface ConversationListItem {
   isOnline: boolean;
   unreadCount: number;
 }
+
+export interface PaginatedConversations {
+  items: ConversationListItem[];
+  nextCursor: string | null;
+}
+
+export interface PaginatedMessages {
+  messages: ChatMessage[];
+  nextCursor: string | null; // null = no older messages
+}

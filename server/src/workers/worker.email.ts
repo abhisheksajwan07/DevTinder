@@ -30,6 +30,18 @@ const getResetPasswordTemplate = (resetUrl: string) => `
   </div>
 `;
 
+const getOfflineMessageTemplate = (firstName: string) => `
+  <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; max-width: 500px; border-radius: 10px;">
+    <h2 style="color: #E94057;">You have a new message on DevTinder 💬</h2>
+    <p>Hey ${firstName}, someone sent you a message while you were away!</p>
+    <p>Log back in to continue the conversation and find your next dev collaborator.</p>
+    <a href="https://devtinder.abhishekbytes.space/chat" style="display: inline-block; background: #E94057; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+      View Message
+    </a>
+    <p style="font-size: 12px; color: #777; margin-top: 20px;">You are receiving this because you have notifications enabled on DevTinder.</p>
+  </div>
+`;
+
 export const emailWorker = new Worker(
   QUEUE_NAME,
   async (job) => {
@@ -61,6 +73,19 @@ export const emailWorker = new Worker(
         },
       );
       logger.info(`[Email Worker]: reset password email delivered to ${email}`);
+    }
+
+    if (job.name === "offline-message-notify") {
+      const { email, firstName } = job.data;
+      await resend.emails.send({
+        from: "DevTinder <noreply@devtinder.abhishekbytes.space>",
+        to: email,
+        subject: "You have a new message on DevTinder ",
+        html: getOfflineMessageTemplate(firstName),
+      });
+      logger.info(
+        `[Email Worker]: offline message notification delivered to ${email}`,
+      );
     }
   },
   {

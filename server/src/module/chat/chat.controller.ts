@@ -12,10 +12,16 @@ export const getUserConversationsController = async (
     throw new AppError("Unauthorized", 401);
   }
 
-  const conversations = await chatService.getUserConversations(
+  const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
+  const limitRaw = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : undefined;
+  const limit = limitRaw && !isNaN(limitRaw) ? Math.min(limitRaw, 50) : undefined;
+
+  const result = await chatService.getUserConversations(
     req.user.profileId,
+    cursor,
+    limit,
   );
-  sendResponse(res, 200, "Conversations fetched successfully", conversations);
+  sendResponse(res, 200, "Conversations fetched successfully", result);
 };
 
 export const getConversationMessagesController = async (
@@ -27,9 +33,12 @@ export const getConversationMessagesController = async (
   }
 
   const { conversationId } = req.params;
-  const messages = await chatService.getConversationMessage(
+  const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
+
+  const result = await chatService.getConversationMessage(
     conversationId,
     req.user.profileId,
+    cursor,
   );
-  sendResponse(res, 200, "Messages fetched successfully", messages);
+  sendResponse(res, 200, "Messages fetched successfully", result);
 };

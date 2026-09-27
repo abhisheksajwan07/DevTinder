@@ -26,26 +26,38 @@ export class ChatService {
     }
   }
 
-  async getUserConversations(profileId: string) {
-    const conversations =
-      await this.chatRepository.getUserConversations(profileId);
-    if (!conversations || conversations.length === 0) {
-      return conversations;
-    }
+  async getUserConversations(
+    profileId: string,
+    cursor?: string,
+    limit?: number,
+  ) {
+    const paginated = await this.chatRepository.getUserConversations(
+      profileId,
+      cursor,
+      limit,
+    );
+    if (!paginated || paginated.items.length === 0) return paginated;
 
-    const otherProfileIds = conversations.map((c) => c.otherProfileId);
+    const otherProfileIds = paginated.items.map((c) => c.otherProfileId);
     const onlineStatuses =
       await this.presenceService.getOnlineStatuses(otherProfileIds);
 
-    return conversations.map((c) => ({
-      ...c,
-      isOnline: !!onlineStatuses[c.otherProfileId],
-    }));
+    return {
+      ...paginated,
+      items: paginated.items.map((c) => ({
+        ...c,
+        isOnline: !!onlineStatuses[c.otherProfileId],
+      })),
+    };
   }
 
-  async getConversationMessage(conversationId: string, profileId: string) {
+  async getConversationMessage(
+    conversationId: string,
+    profileId: string,
+    cursor?: string,
+  ) {
     await this.ensureConversationMember(conversationId, profileId);
-    return this.chatRepository.getConversationMessages(conversationId);
+    return this.chatRepository.getConversationMessages(conversationId, cursor);
   }
 
   async sendMessage(

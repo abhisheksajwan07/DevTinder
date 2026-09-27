@@ -20,6 +20,7 @@ const envSchema = z.object({
   SALT_ROUNDS: z.coerce.number(),
 
   RESEND_API_KEY: z.string().min(1),
+  NOTIFY_FROM_EMAIL: z.string().email().default("noreply@devtinder.abhishekbytes.space"),
 
   REDIS_URL: z.string().min(1),
 

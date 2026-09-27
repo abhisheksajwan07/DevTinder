@@ -40,7 +40,7 @@ export default function AppShell() {
   const { data: myProfile } = useMyProfile();
   const activeConversationId =
     location.pathname.match(/\/app\/chat\/([^/]+)/)?.[1];
-  const { data: conversations = [] } = useConversations();
+  const { conversations = [] } = useConversations();
   const totalUnread = conversations.reduce(
     (total, conversation) => total + conversation.unreadCount,
     0,
@@ -174,7 +174,7 @@ export default function AppShell() {
       </aside>
 
       {/* --Main Content --*/}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen min-w-0 max-w-full overflow-x-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[#e9e5df] bg-white/90 backdrop-blur-md px-4">
           <Link to="/app/discover" className="flex items-center gap-2">

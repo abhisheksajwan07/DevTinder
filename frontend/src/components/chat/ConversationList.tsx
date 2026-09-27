@@ -1,4 +1,5 @@
-import { Search, MessageSquare } from "lucide-react";
+import { Search, MessageSquare, Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import ConversationItem from "./ConversationItem";
 import type { ConversationListItem } from "../../types/chat";
 
@@ -10,6 +11,9 @@ interface ConversationListProps {
   onSearchChange: (query: string) => void;
   onSelectConversation: (id: string) => void;
   isMobileChatOpen: boolean;
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isLoadingMore: boolean;
 }
 
 export default function ConversationList({
@@ -20,12 +24,33 @@ export default function ConversationList({
   onSearchChange,
   onSelectConversation,
   isMobileChatOpen,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
 }: ConversationListProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Trigger next page fetch when the sentinel scrolls into view
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMore && !isLoadingMore) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, onLoadMore]);
+
   return (
     <aside
       className={`
         ${isMobileChatOpen ? "hidden" : "flex"} 
-        lg:flex flex-col w-full lg:w-[320px] xl:w-[360px] shrink-0 bg-white border-r border-[#e9e5df] transition-all
+        lg:flex flex-col w-full lg:w-[260px] xl:w-[300px] shrink-0 bg-white border-r border-[#e9e5df] transition-all
       `}
     >
       {/* Header & Search */}
@@ -60,14 +85,25 @@ export default function ConversationList({
             Loading conversations...
           </div>
         ) : conversations.length > 0 ? (
-          conversations.map((conv) => (
-            <ConversationItem
-              key={conv.conversationId}
-              conv={conv}
-              isActive={conv.conversationId === activeConversationId}
-              onClick={() => onSelectConversation(conv.conversationId)}
-            />
-          ))
+          <>
+            {conversations.map((conv) => (
+              <ConversationItem
+                key={conv.conversationId}
+                conv={conv}
+                isActive={conv.conversationId === activeConversationId}
+                onClick={() => onSelectConversation(conv.conversationId)}
+              />
+            ))}
+
+            {/* Scroll sentinel — triggers onLoadMore when visible */}
+            <div ref={sentinelRef} className="h-1" />
+
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-3">
+                <Loader2 className="size-4 animate-spin text-[#88827c]" />
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center text-[#88827c]">
             <MessageSquare className="size-8 text-[#ccc6be] mb-2" />
