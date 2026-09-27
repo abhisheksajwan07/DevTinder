@@ -26,17 +26,28 @@ export const getSessionController = async (req: Request, res: Response) => {
 export const refreshController = async (req: Request, res: Response) => {
   const rawRefreshToken = req.cookies?.["refreshToken"];
   if (!rawRefreshToken) {
+    // no refresh token-clear cookies
+    clearAuthCookies(res);
+    clearCsrfCookie(res);
     throw new AppError("Refresh token missing", 401);
   }
 
-  const { accessToken, rawRefreshToken: newRawRefreshToken } =
-    await sessionService.refreshSession(rawRefreshToken);
+  try {
+    const { accessToken, rawRefreshToken: newRawRefreshToken } =
+      await sessionService.refreshSession(rawRefreshToken);
 
-  setAccessTokenCookie(res, accessToken);
-  setRefreshTokenCookie(res, newRawRefreshToken);
-  setCsrfCookie(res);
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, newRawRefreshToken);
+    setCsrfCookie(res);
 
-  sendResponse(res, 200, "token refreshed");
+    sendResponse(res, 200, "token refreshed");
+  } catch (err) {
+ 
+    // refresh failed(expired,revoked or invalid), clear the dead cookies
+    clearAuthCookies(res);
+    clearCsrfCookie(res);
+    throw err;
+  }
 };
 
 export const logoutController = async (req: Request, res: Response) => {

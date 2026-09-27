@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { logger } from "../config/logger.js";
 import { getPostgresError } from "../errors/postgres-error.js";
 import { AppError } from "../utils/AppError.js";
-import { clearAuthCookies, clearCsrfCookie } from "../utils/cookie.js";
 
 export const globalErrorHandler = (
   err: unknown,
@@ -42,12 +41,6 @@ export const globalErrorHandler = (
   logger.error(errorLog);
 
 
-  // clear the cookies when the auth req. failed with 401
-  // httponly cant be deleted by the browser
-  if (statusCode === 401) {
-    clearAuthCookies(res);
-    clearCsrfCookie(res);
-  }
 
   if (isAppError) {
     return res.status(statusCode).json({
