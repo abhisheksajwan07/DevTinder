@@ -134,13 +134,26 @@ export function useChatRealtime(
       });
     };
 
+    // When a match & conversation is created in the background worker,
+    // invalidate conversations and matches once exactly when the data is ready.
+    const onMatchCreated = () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["user", "conversations"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["matches"],
+      });
+    };
+
     socket.on("message:new", onNewMessage);
     socket.on("presence:update", onPresenceUpdate);
+    socket.on("match:created", onMatchCreated);
     socket.on("disconnect", onSocketDisconnect);
     socket.on("connect", onSocketConnect);
     return () => {
       socket.off("message:new", onNewMessage);
       socket.off("presence:update", onPresenceUpdate);
+      socket.off("match:created", onMatchCreated);
       socket.off("disconnect", onSocketDisconnect);
       socket.off("connect", onSocketConnect);
     };

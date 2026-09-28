@@ -5,7 +5,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 
 export const refreshLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isDevelopment ? 100 : 10,
+  max: isDevelopment ? 100 : 60,
   store: createRedisStore(
     isDevelopment ? "rl:dev:refresh-limiter" : "rl:refresh-limiter",
   ),

@@ -5,7 +5,7 @@ import {
   matches,
   profileActions,
 } from "../../db/drizzle.js";
-import { IMatchingRepository } from "./match.types.js";
+import { IMatchingRepository, CreatedMatchResult } from "./match.types.js";
 import { AppError } from "../../utils/AppError.js";
 
 export class MatchRepository implements IMatchingRepository {
@@ -56,9 +56,9 @@ export class MatchRepository implements IMatchingRepository {
     }));
   }
 
-  async createMatchAndConversation(connectionId: string): Promise<void> {
+  async createMatchAndConversation(connectionId: string): Promise<CreatedMatchResult | null> {
     
-    await db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
 
       const [connection] = await tx
         .select({
@@ -99,11 +99,16 @@ export class MatchRepository implements IMatchingRepository {
         .onConflictDoNothing()
         .returning({ id: matches.id });
 
-      if (!match) return;
+      if (!match) return null;
 
-      await tx.insert(conversations).values({
+      const [convo] = await tx.insert(conversations).values({
         matchId:match.id,
-      });
+      }).returning({ id: conversations.id });
+      return {
+        profileOneId,
+        profileTwoId,
+        conversationId: convo!.id,
+      };
     });
   }
 }

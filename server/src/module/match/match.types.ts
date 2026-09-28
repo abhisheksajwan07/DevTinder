@@ -4,8 +4,16 @@ export interface MatchingJobPayload {
 
 
 
-export  interface IMatchingRepository {
-  createMatchAndConversation(connectionId: string): Promise<void>;
+export interface CreatedMatchResult {
+  profileOneId: string;
+  profileTwoId: string;
+  conversationId: string;
+}
+
+export interface IMatchingRepository {
+  createMatchAndConversation(
+    connectionId: string,
+  ): Promise<CreatedMatchResult | null>;
   getMatches(profileId: string): Promise<MatchListItem[]>;
 }
 

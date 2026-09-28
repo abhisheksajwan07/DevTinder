@@ -78,38 +78,14 @@ export function useRespondConnection() {
       }
     },
 
-    onSuccess: async (_data, variables) => {
-      // Re-sync with server after success to ensure data is fresh
+    onSuccess: async () => {
+      // Re-sync requests and matches list immediately
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["connection-requests"] }),
         queryClient.invalidateQueries({ queryKey: ["matches"] }),
       ]);
-
-      if (variables.action !== "accept") return;
-
-      // Matching runs in a background worker, so the conversation may not
-      // exist yet when the accept request completes. Refresh briefly until
-      // the worker has created it so Chat shows the new profile immediately.
-      for (let attempt = 0; attempt < 10; attempt += 1) {
-        await queryClient.refetchQueries({
-          queryKey: ["user", "conversations"],
-        });
-
-        const conversations = queryClient.getQueryData<ConversationListItem[]>([
-          "user",
-          "conversations",
-        ]);
-        if (
-          conversations?.some(
-            (conversation) =>
-              conversation.otherProfileId === variables.targetProfileId,
-          )
-        ) {
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
+      // Note: "user, conversations" is invalidated precisely via the
+      // "match:created" WebSocket event when the BullMQ worker creates it.
     },
   });
 }

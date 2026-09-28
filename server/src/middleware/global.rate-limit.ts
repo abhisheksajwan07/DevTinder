@@ -7,7 +7,7 @@ export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   // Development includes browser reloads, React Query polling, and OAuth
   // retries. Keep production strict while making local testing practical.
-  max: isDevelopment ? 5000 : 100,
+  max: isDevelopment ? 5000 : 1500,
   skip: () => process.env.ENABLE_LOAD_TEST === "true",
   standardHeaders: true,
   legacyHeaders: false,

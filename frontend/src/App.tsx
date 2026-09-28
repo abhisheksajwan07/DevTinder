@@ -53,18 +53,21 @@ export function LandingPage() {
 }
 
 function App() {
-  const { data: user, isLoading, isError } = useMe();
+  const { data: user, isLoading, isError, error } = useMe();
   useEffect(() => {
     if (user) {
       useAuthStore.getState().setUser(user);
     }
 
-    // revoked session is an errro reported by /auth/me, clear state of the client so that
-    // protected shell can't remain visible with dead sesison
+    // Only clear client auth state if the session is genuinely invalid or revoked (401).
+    // Do NOT log out the user on rate-limits (429), 5xx server issues, or network glitches.
     if (isError) {
-      useAuthStore.getState().clear();
+      const status = (error as any)?.response?.status;
+      if (status === 401) {
+        useAuthStore.getState().clear();
+      }
     }
-  }, [user, isError]);
+  }, [user, isError, error]);
   if (isLoading) {
     return (
       <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fdfcfb] text-[#242322]">
